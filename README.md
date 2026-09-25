@@ -6,7 +6,7 @@
 
 A responsive one-to-one messenger built with React, Express, MongoDB and
 Socket.IO. Friend requests, message requests, read receipts and reactions share
-a Turkish dark interface that works on desktop and mobile.
+a Turkish interface with light, dark and system themes on desktop and mobile.
 
 Started in 2025 as a hands-on MERN learning project; revisited in 2026 with a focus
 on reliable realtime behavior, security regression tests and reproducible Docker
@@ -27,9 +27,24 @@ packaging. The original explanatory comments are kept in the source.
 - Find people by username or friend code; send, accept, reject and cancel requests.
 - Persistent direct messages, typing, online presence, read receipts and unread counts.
 - Edit/delete your messages, add emoji reactions and clear your own history.
+- Use a theme-aware Frimousse emoji picker in messages and reactions, with English
+  search, categories and skin tones. Emoji data is served locally; no external CDN is required.
 - Load older messages in pages; search the loaded conversation.
 - Recover state after reconnecting and keep your draft when a send fails.
 - Keyboard-accessible account settings and responsive desktop/mobile layouts.
+
+<details>
+<summary>Emoji picker and reactions</summary>
+
+![Desktop emoji picker, light theme](docs/screenshots/emoji-desktop-light.png)
+
+<img src="docs/screenshots/emoji-mobile-dark.png" width="300" alt="Mobile emoji picker, dark theme" />
+<img src="docs/screenshots/emoji-reaction-mobile-dark.png" width="300" alt="Search the full emoji catalog for a message reaction" />
+
+The shared picker uses native Unicode emoji; available glyphs depend on the
+browser and operating system. [Implementation and verification](docs/contracts/atlassian-overhaul/emoji.md).
+
+</details>
 
 ## Run locally with Docker
 
@@ -116,7 +131,9 @@ npm run test:all
 | `npm run test:realtime` | Real Socket.IO delivery between authenticated clients |
 | `npm run test:security` | Impersonation, revocation, origin/ownership/input checks, pagination |
 | `npm run test:ui` | Real Chromium: desktop/mobile chat, settings, failed sends and logout |
-| `npm run test:all` | Build and all four test suites |
+| `npm run test:emoji` | Unicode insertion, reaction state, catalog validation and concurrent updates |
+| `npm run test:emoji-ui` | Desktop/mobile picker, themes, accessibility, retries and synchronized reactions |
+| `npm run test:all` | Build and all automated test suites |
 
 The browser suite saves screenshots and traces under `test-results/`. Inspect a
 trace with `npx --no-install playwright show-trace test-results/desktop-trace.zip`.

@@ -88,8 +88,13 @@ only when both participants have cleared them.
 account's sessions. Clients apply the boundary to messages, previews and pending
 requests, refresh pagination/unread counts, and ignore older out-of-order boundaries.
 
-`POST /messages/react/:id` accepts `{ emoji }` from either participant, limited to
-`👍 ❤️ 😂 😮 😢 🙏`. Repeating your current emoji removes it; choosing another
+`POST /messages/react/:id` accepts `{ emoji: string }` from either participant.
+The allowed values come from the vendored Emojibase 17.0.0 catalog, including
+skin-tone variants and ZWJ sequences. Standalone components/modifiers, empty or
+non-string values, plain text and multiple emojis return 400. Catalog aliases
+without the emoji presentation selector are accepted; the original six reaction
+spellings remain compatible with existing records (for example, `👍️` toggles `👍`).
+Repeating your current emoji removes it; choosing another
 replaces only your reaction. Updates are atomic, including concurrent toggles.
 Invalid/deleted messages return 400, missing messages 404, nonparticipants 403.
 The response is `{ message, reactions, reactionVersion }`; the monotonically

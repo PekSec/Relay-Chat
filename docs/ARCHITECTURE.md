@@ -46,6 +46,14 @@ Clearing history affects only the person who cleared it. Editing and deleting a
 message require ownership. Read receipts, reactions and typing are supplemental
 state; they do not replace the stored conversation history.
 
+The composer and message reactions share a lazy Frimousse picker inside the
+existing desktop popup/mobile modal. Its English Emojibase 17.0.0 JSON files are
+vendored under `frontend/public/emoji/17.0.0/` and served from the same origin.
+The backend reads those same files to validate reactions; Docker includes both
+the source catalog and its static frontend copy. Theme colors come from existing
+Relay/ADS tokens, and emojis remain native Unicode text. See the
+[emoji contract](contracts/atlassian-overhaul/emoji.md) for behavior and data updates.
+
 ## Deliberate limits
 
 - One application instance. Presence and rate-limit counters are process-local;

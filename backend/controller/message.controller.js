@@ -4,6 +4,7 @@ import Conversation from "../models/conversation.model.js";
 import Message from "../models/message.model.js";
 import { getReceiverSocketId, io } from "../socket/socket.js";
 import User from "../models/user.model.js";
+import { reactionEmoji } from '../utils/emoji.js';
 
 // mesaj gönderme fonksiyonu
 export const sendMessage = async (req, res) => {
@@ -312,18 +313,16 @@ export const getUnreadCounts = async (req, res) => {
 // Aynı emoji tekrar gönderilirse tepki kaldırılır (toggle davranışı).
 // Her kullanıcının bir mesajda yalnızca bir tepkisi olur.
 // ═══════════════════════════════════════════════════════════════
-const ALLOWED_REACTIONS = ["👍", "❤️", "😂", "😮", "😢", "🙏"];
-
 export const reactToMessage = async (req, res) => {
     try {
         const { id: messageId } = req.params;
-        const { emoji } = req.body;
+        const emoji = reactionEmoji(req.body?.emoji);
         const userId = req.userId;
 
         if (!mongoose.Types.ObjectId.isValid(messageId)) {
             return res.status(400).json({ error: "Invalid message id" });
         }
-        if (!ALLOWED_REACTIONS.includes(emoji)) {
+        if (!emoji) {
             return res.status(400).json({ error: "Unsupported reaction" });
         }
 

@@ -10,7 +10,6 @@ import useReactToMessage from "../../hooks/messages/useReactToMessage";
 import Button from '@atlaskit/button/default/button';
 import SectionMessage from '@atlaskit/section-message';
 import EmojiPicker from '../emoji/EmojiPicker';
-import { emojiName } from '../../utils/emoji';
 
 // Arama terimini mesaj metni içinde vurgula.
 // Kullanıcı girdisi regex'e gömüldüğü için özel karakterler kaçırılıyor.
@@ -198,7 +197,7 @@ const Message = ({ message, searchTerm = "", showAvatar = true, onRequestDelete 
                                 <Button appearance="subtle" isSelected={mine} aria-pressed={mine} isDisabled={reactionLoading}
                                     key={emoji}
                                     onClick={() => react(message._id, emoji)}
-                                    aria-label={`${emojiName(emoji)} tepkisi, ${count} kişi`}
+                                    aria-label={`${emoji} tepkisi, ${count} kişi`}
                                 >
                                     <span>{emoji}</span>
                                     {count > 1 && <span>{count}</span>}

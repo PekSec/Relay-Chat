@@ -28,7 +28,7 @@ Paketler kullanılacakları adımda eklenir; React 19 peer aralığı ve portal/
 
 04b bu kuralları kişi adı/avatarı olan modalda doğrular; işlem yalnız kendi hesaptan geçmiş gizleme olarak açıklanır. Temizleme sonrası boş durumdaki slogan kaldırıldı. HTTP/socket'te paylaşılan temizleme sınırı geç yanıtları filtreler; diğer kişinin verisi veya daha yeni mesajlar başarı temizliğine dahil edilmez.
 
-04c iki yerde kullanılan tek emoji panelini paylaşır: masaüstü Popup, mobil Modal; geçici 13 Unicode seçenek ve altı tepki. Kaynak yaklaşımı kullanıcı tarafından onaylıdır. Klavye dolaşımı, kısa Türkçe hata, grapheme güvenli imlece ekleme ve focus dönüşü doğrulandı. Tepki rozetleri seçili durum/sayı adı taşır; HTTP ve socket aynı sürümlü state güncellemesini kullanır. Ürün metninde altyapı adı yoktur.
+04c iki yerde aynı Frimousse panelini kullanır: masaüstü Popup, mobil Modal; mesaj alanı ve tepkilerde tam İngilizce katalog/arama ve ten rengi seçimi. Türkçe arayüz metinleri, Relay/ADS tema tokenları, yerel Emojibase 17.0.0 verisi ve Unicode gösterimi kullanıcı tarafından onaylıdır. Klavye dolaşımı, kısa Türkçe hata/yeniden deneme, grapheme güvenli imlece ekleme ve odak dönüşü doğrulandı. Tepki grid'i geçerli `aria-selected`, rozetler seçili durum/sayı adı taşır; HTTP ve socket aynı sürümlü state güncellemesini kullanır. Ürün metninde altyapı adı yoktur.
 
 ## Tercih API'si
 

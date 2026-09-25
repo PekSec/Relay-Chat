@@ -23,6 +23,7 @@
     "@atlaskit/textfield": "^10.2.6",
     "@atlaskit/toggle": "^17.3.4",
     "@atlaskit/tokens": "^20.0.0",
+    "frimousse": "0.4.0",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "react-hot-toast": "^2.6.1",

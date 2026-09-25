@@ -15,7 +15,7 @@ Kullanıcı 25 Eylül 2026 tarihinde önceki plan için **“Implement the plan.
 | 02 | [Giriş ve oturum](./02-login.md) | A — Ortalanmış kart onaylandı, uygulandı; giriş UI 48 kontrol geçti |
 | 03 | [Kayıt](./03-signup.md) | A — Tek sütun kart uygulandı; signup UI 38, API 29 kontrol geçti |
 | 04 | [Ana sohbet](./04-chat.md) | Tasarım seçimi bekliyor |
-| 04a–c | [Mesaj silme, geçmiş temizleme, emoji popup](./04-dialogs.md) | 04a B ve 04b B uygulandı; ayrı ayrı 47 UI kontrolü geçti. 04c B + geçici Unicode uygulandı; 50 UI kontrolü geçti, resmî görsel set açık |
+| 04a–c | [Mesaj silme, geçmiş temizleme, emoji popup](./04-dialogs.md) | 04a B ve 04b B uygulandı; ayrı ayrı 47 UI kontrolü geçti. 04c B + Frimousse tam katalog uygulandı; 69 UI kontrolü geçti |
 | 05 | [Arkadaşlar](./05-friends.md) | Tasarım seçimi bekliyor |
 | 06 | [Yeni sohbet / kişi bulma](./06-new-chat.md) | Tasarım seçimi bekliyor |
 | 07 | [Mesaj istekleri](./07-requests.md) | Tasarım seçimi bekliyor |
@@ -44,4 +44,4 @@ Her adımda `npm run build`, `npm run lint` ve ilgili mevcut testler çalıştı
 
 Kullanıcı 04-dialogs ile devam etmeyi istedi; 04a için **B — Mesaj önizlemeli modal** seçti ve uygulama planını onayladı. Bu adımın kanıtı [04-dialogs](./04-dialogs.md) içinde. Ana sohbet için tasarım onayı verilmiş değildir.
 
-04b'de kullanıcı soru aracında **B — Kişi adı ve avatarı olan modal** seçti; uygulama ve backend görünürlük/yarış düzeltmeleri tamamlandı. Sonraki oturum önce bu belgeyi, shared/emoji/icons kontratlarını ve 04 kanıtını okur. 04c için kullanıcı B yerleşim ve geçici Unicode önerisini kabul etti; uygulama ve testler 26 Eylül'de tamamlandı. Resmî görsel kaynak/lisans ve React uyumluluğu emoji kontratında açık kalır. Sonraki tasarım kararı ana sohbet (04) için ayrı alınmalıdır. Lucide ihtiyacı henüz yok.
+04b'de kullanıcı soru aracında **B — Kişi adı ve avatarı olan modal** seçti; uygulama ve backend görünürlük/yarış düzeltmeleri tamamlandı. Sonraki oturum önce bu belgeyi, shared/emoji/icons kontratlarını ve 04 kanıtını okur. 04c'nin geçici Unicode seçicisi, kullanıcının yeni kararıyla 26 Eylül'de Frimousse'a taşındı: her iki alanda tam İngilizce katalog/arama ve ten rengi; Türkçe arayüz, yerel veri, tema uyumu ve genişletilmiş sunucu doğrulaması. 69 UI kontrolü, build/lint, emoji backend/store ve Docker doğrulaması geçti; güncel kapsam [emoji kontratındadır](./emoji.md). Sonraki tasarım kararı ana sohbet (04) için ayrı alınmalıdır. Lucide ihtiyacı henüz yok.

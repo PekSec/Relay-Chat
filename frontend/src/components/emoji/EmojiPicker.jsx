@@ -27,7 +27,7 @@ export default function EmojiPicker({ isOpen, onOpen, onClose, onSelect, error, 
     </Suspense>;
     return <>
         <Popup isOpen={isOpen && !mobile.current} onClose={close} role="dialog" label={label}
-            placement="top-start" shouldFitViewport shouldReturnFocus={false} content={() => panel}
+            placement="top-start" shouldFitViewport shouldReturnFocus={false} autoFocus={false} content={() => panel}
             trigger={props => <IconButton {...props} ref={element => { props.ref(element); triggerRef.current = element; }}
                 icon={EmojiIcon} label={label} title={label} appearance="subtle" isDisabled={loading}
                 aria-haspopup="dialog" aria-expanded={isOpen} onClick={() => {

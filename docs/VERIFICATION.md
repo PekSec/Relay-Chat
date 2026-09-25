@@ -1,45 +1,54 @@
 # Verification record
 
-## Emoji selectors / contract step 04c — 26 September 2026
+The newest entry describes the current implementation. Older entries record the
+scope and checks performed at the time; their pending-work notes are historical.
 
-User approved B (desktop Popup/mobile Modal) and temporary Unicode after the
-official artwork source/license and React 19 support could not be verified.
-This delivers that temporary scope: 13 searchable composer choices, six existing
-reactions, shared lazy panel, grapheme-safe caret/selection insertion, keyboard
-navigation, focus return, inline errors and pending protection. Official artwork
-and the full catalog are **not integrated**. Native Unicode remains message data
-and display; there are no external emoji asset requests.
+## Frimousse emoji picker / contract step 04c — 26 September 2026
+
+The user approved replacing the temporary 13-choice/six-reaction selectors with
+Frimousse 0.4.0 in both the composer and message reactions. Both use the full
+English catalog/search, skin tones and Turkish UI messages, within the existing
+desktop Popup/mobile Modal. Emojibase 17.0.0 JSON and its MIT license are vendored
+locally; the picker and backend validation share the same catalog. Native Unicode
+is retained; the browser's glyph support determines which choices Frimousse shows.
 
 | Check | Observed result |
 | --- | --- |
-| New emoji Chromium | 50 desktop/mobile checks passed |
-| New insertion/state checks | Caret, selection, UTF-16 limit, ZWJ/skin tone/combining, late history, out-of-order events, deletion and reset passed |
-| Reaction backend | Six toggles, ownership/invalid/missing/deleted cases, 20 rounds of concurrent participants, duplicate toggles and reaction/deletion races passed |
-| Existing smoke / security / realtime | 41 / 37 / 8 passed |
-| Existing UI / settings | 56 / 106 passed |
-| Previous delete / clear dialogs | 47 / 47 passed |
-| Conversation query regression | At most two reads, correct previews/status filtering |
-| Build / lint | Passed; existing Vite >500 kB advisory remains |
+| Emoji Chromium | **69 desktop/mobile checks passed** |
+| Insertion and state | Caret/selection, UTF-16 limit, ZWJ/skin tones/combining marks, late history, out-of-order events, deletion and reset passed |
+| Reaction backend | Catalog examples, skin tones/ZWJ/flags/keycaps, invalid values, original-six presentation aliases, ownership and 20 concurrent participant/toggle/deletion rounds passed |
+| Themes and layout | Light/dark surfaces, live account accent, large text and 320 px mobile layout with 44 px targets passed |
+| Loading and recovery | Lazy same-origin data requests, failed data fetch/retry with draft preservation, API 404/500/offline errors and duplicate-request protection passed |
+| Accessibility | Keyboard selection, focus return and valid saved-selection semantics on reaction gridcells passed |
+| Build / lint | Passed; Vite's existing >500 kB main-chunk advisory remains |
+| Docker | Image build passed; Node 22 runtime validated reactions and confirmed identical backend/static catalog files |
 
-The backend race check reproduced VersionError failures before the fix. Atomic
-reaction updates now preserve both participants and increment `reactionVersion`.
-Events go to both account rooms; HTTP/socket share a version-aware store update.
-The independent read-only review found no additional actionable regression.
+The expanded tests first failed against the old catalog. Browser checks also
+exposed Popup autofocus overriding the search focus; that conflict was corrected.
+A read-only review found saved reactions marked with unsupported aria-pressed on
+gridcells; the implementation now uses aria-selected and a separate styling
+attribute, verified by a test that failed before the correction.
 
-`@atlaskit/popup@6.3.10` installed with strict peer checks, without React downgrade
-or force. The emoji package/react-intl were not installed. Lazy EmojiPanel JS is
-2.22 kB / 1.14 kB gzip; shared Modal JS is 72.11 / 23.31 kB. Home JS is
-92.10 / 29.27 kB. Main JS is 620.84 / 189.71 kB, compared with the recorded 04b
-619.85 / 189.38 kB (+0.99 / +0.33 kB). These chunk figures are not the full cost
-of opening the picker: shared chunks and CSS can also load on first use.
+Lazy EmojiPanel JS is **27.49 kB / 9.92 kB gzip** (previous temporary panel:
+2.22 / 1.14 kB). Main JS is 620.75 / 189.67 kB; Home is 91.49 / 28.89 kB;
+shared Modal is 72.11 / 23.31 kB. These figures exclude other shared chunks/CSS.
+The separately loaded JSON files are 775,157 bytes (data) and 6,499 bytes
+(messages), before transport compression; they are not bundled into the main JS.
 
-Reproduce with `test:emoji` and `test:emoji-ui` (included in `test:all` and CI),
-an explicit disposable MONGO_URI, and a production build for browser checks.
-Tests used local MongoDB 7 on port 27018 and Chromium; no remote CI or deployment.
-Inspected [desktop light](screenshots/emoji-desktop-light.png) and
-[mobile dark](screenshots/emoji-mobile-dark.png) captures include the length-limit
-error state. Current scope and remaining artwork acceptance are in the
-[emoji contract](contracts/atlassian-overhaul/emoji.md).
+Reproduce with `npm run build`, `npm run lint`, `npm run test:emoji` and
+`npm run test:emoji-ui`, using an explicit disposable MONGO_URI. Local checks used
+MongoDB 7 on port 27018 and Chromium. No deployment or remote CI result is claimed.
+
+The browser test regenerates composer and reaction captures in both themes and
+devices under `test-results/`; representative captures are checked into
+`docs/screenshots/`. Length-limit captures remain separate test artifacts.
+
+| Flow | Desktop light | Desktop dark | Mobile light | Mobile dark |
+| --- | --- | --- | --- | --- |
+| Composer | [View](screenshots/emoji-desktop-light.png) | [View](screenshots/emoji-desktop-dark.png) | [View](screenshots/emoji-mobile-light.png) | [View](screenshots/emoji-mobile-dark.png) |
+| Reaction search | [View](screenshots/emoji-reaction-desktop-light.png) | [View](screenshots/emoji-reaction-desktop-dark.png) | [View](screenshots/emoji-reaction-mobile-light.png) | [View](screenshots/emoji-reaction-mobile-dark.png) |
+
+Behavior, data provenance and update instructions: [emoji contract](contracts/atlassian-overhaul/emoji.md).
 
 ## History clearing / contract step 04b — 25 September 2026
 

@@ -1,6 +1,6 @@
 # 04 alt kararları — Onay modalları ve emoji popup
 
-**04a B, 04b B ve 04c B (geçici Unicode) onaylandı ve uygulandı.** Birini sor → uygula → test et → diğerini sor. Kullanıcının isteğiyle bu alt kararlar ana sohbet tasarımından önce ele alınıyor; ana sohbet hâlâ onaysız.
+**04a B, 04b B ve 04c B + Frimousse onaylandı ve uygulandı.** Birini sor → uygula → test et → diğerini sor. Kullanıcının isteğiyle bu alt kararlar ana sohbet tasarımından önce ele alınıyor; ana sohbet hâlâ onaysız.
 
 ## 04a — Mesaj silme
 
@@ -53,26 +53,22 @@ Başlangıç MessageContainer `window.confirm`; `DELETE /api/messages/clear/:use
 
 ## 04c — Emoji seçimi / tepki popup
 
-- **A (onaysız):** composer düğmesine bağlı Atlaskit Popup içinde Emoji picker; mesaj tepkisi için aynı provider ile yalnız altı tepki.
-- **B (onaylandı ve uygulandı):** masaüstünde aynı popup, mobilde Atlaskit modal içinde picker; küçük ekran için daha geniş alan.
+**Güncel karar — 26 Eylül 2026:** B yerleşimi (masaüstü Popup, mobil Modal) korunarak Frimousse uygulandı. Kullanıcı mesaj alanı ve tepkilerde tam katalog, İngilizce arama/adlar ve Türkçe arayüz metinlerini seçti. Önceki geçici 13 emoji / 6 tepki sınırı kaldırıldı. Kaynak ve lisans bilgileri [emoji kontratında](./emoji.md).
 
-25 Eylül araştırmasında paket API/kod lisansı doğrulandı; React 19 peer desteği ve yeniden dağıtılabilir resmî görsel kaynak henüz doğrulanmadı. Ayrıntılar [emoji araştırma kaydında](./emoji.md#04c-araştırması--25-eylül-2026). Tasarım ve kaynak kararı ayrı alınır; onaylı alternatif yokken resmî set sessizce değiştirilmez.
+### Uygulama ve kanıt
 
-Soru aracında önerilen **B yerleşim + geçici Unicode** yaklaşımı kullanıcı tarafından “tamam o zaman öyle yapalım” ile onaylandı. Geçici aşama mevcut 12 hızlı emoji ile altı tepkinin birleşimi olan 13 seçenekten oluşur; Türkçe adla arama, klavye/odak, imlece/seçime grapheme güvenli ekleme uygulanır. Resmî görsel set ve tam katalog entegrasyonu tamamlanmış sayılmaz. React 18 peer aralıklı `@atlaskit/emoji` kurulmaz; React 19 destekleyen Popup, mevcut Modal/Textfield/Button ile geçici Unicode içeriği kullanılır.
+İki alan aynı lazy `EmojiPanel` ve `frimousse@0.4.0` parçalarını kullanır. Emojibase 17.0.0 İngilizce verisi uygulamayla birlikte sunulur; aynı katalog sunucuda tepki doğrulamasında kullanılır. Docker bu veriyi runtime'a taşır. Unicode görseller işletim sistemi fontundandır; Frimousse tarayıcının desteklemediği sürüm/bayrakları filtreler. Mesaj ve kopyalanan metin özgün Unicode olarak kalır.
 
-[Emoji veri/lisans kontratı](./emoji.md) tamamlanmadan gerçek set tamamlandı denmez. Picker'ın onayı tepki API listesini genişletmez. Hızlı seçenekler/Unicode UI aynı renderer'a taşınır; mevcut metin verisi korunur. Escape/dış tıklama kapatma, roving/arama klavyesi, imlece ekleme, focus dönüşü ve mobile taşma test edilir. Asset yükleme hatası sohbeti engellemez. Silinen özel emoji popup CSS'si ve doküman event listener'ları son kullanım bittiğinde kaldırılır.
+Arama, kategoriler, sanallaştırılmış liste ve ten rengi seçimi Frimousse'a aittir. Panel Relay/ADS tema ve vurgu renklerini izler. Açılış odağı aramada; seçimden sonra composer veya tepki tetikleyicisindedir. Popup'ın otomatik odağı kapatılarak Frimousse aramasıyla çakışması giderildi. Tepki grid'inde kayıtlı seçim geçerli `aria-selected` ile, aktif klavye/hover öğesi ayrı görselle bildirilir.
 
-### Uygulama ve kanıt — 26 Eylül 2026
+Grapheme güvenli imlece/seçime ekleme ve 2000 UTF-16 sınırı korunur. Veri yüklenemezse taslak kaybolmadan yeniden denenir. Tepki API hatasında panel açık kalır; pending sırasında çift istek/kapanış engellenir. Eski altı tepkinin kayıt biçimi uyumluluk dönüşümüyle korunur; izin verilen seçenekler bu altılıyla sınırlı değildir.
 
-İki seçici aynı `EmojiPicker` ve lazy `EmojiPanel` bileşenlerini kullanır. `@atlaskit/popup@6.3.10` React 19 peer desteğiyle strict kuruldu; panel mevcut Modal, Textfield, Button, SectionMessage ve Spinner kullanır. Unicode görseller sistem fontundandır; görsel sağlayıcı veya ek renderer katmanı kurulmadı. Mesaj, silme önizlemesi ve kopyalanan metin özgün Unicode olarak kalır. Geçici katalog 13 öğe, tepki listesi mevcut altı öğedir.
+Atomik tepki güncellemesi, artan `reactionVersion`, iki hesabın tüm sekmelerine Socket.IO olayı, geciken history/HTTP/socket yanıtları ve silme baskınlığı korunur.
 
-Arama Türkçe adlar üzerinden; ok/Home/End tuşları seçimleri dolaşır. Escape/dış tıklama ve mobil Vazgeç iptal eder. Başarılı ekleme grapheme sınırında imlece veya seçime yapılır; 2.000 UTF-16 sınırını aşarsa taslak korunur. Odak composer'a, iptalde tetikleyiciye döner. Tepki hataları içeride yeniden denemeye izin verir; pending sırasında kapatma ve çift istek engellenir. Rozetler kişi sayısı ve seçili durumunu erişilebilir adla bildirir.
+- `test:emoji`: Unicode imleç/seçim/sınır, ters olay/geç history/reset, tam katalog örnekleri/ten rengi/ZWJ, geçersiz girdiler, eski kayıt uyumluluğu ve 20 tur eşzamanlı katılımcı/toggle/silme geçti.
+- `test:emoji-ui`: **69 kontrol** geçti; masaüstü/mobil arama, klavye/odak, ten rengi, API/veri hataları ve retry, seçili grid erişilebilirliği, açık/koyu tema, canlı vurgu rengi, 320 px ekranda 44 px hedefler, iki hesap/ikinci sekme ve aynı origin veri istekleri.
+- Build/lint, Docker build ve Node 22 runtime içinde katalog doğrulaması geçti. Ayrıntı: [VERIFICATION](../../VERIFICATION.md).
+- Composer: [masaüstü açık](../../screenshots/emoji-desktop-light.png), [masaüstü koyu](../../screenshots/emoji-desktop-dark.png), [mobil açık](../../screenshots/emoji-mobile-light.png), [mobil koyu](../../screenshots/emoji-mobile-dark.png).
+- Tepki araması: [masaüstü açık](../../screenshots/emoji-reaction-desktop-light.png), [masaüstü koyu](../../screenshots/emoji-reaction-desktop-dark.png), [mobil açık](../../screenshots/emoji-reaction-mobile-light.png), [mobil koyu](../../screenshots/emoji-reaction-mobile-dark.png).
 
-Backend read-modify-save yarışında VersionError doğrulandı. Tepkiler atomik MongoDB güncellemesine taşındı; aynı kullanıcının toggle işlemi diğer katılımcıyı ezmez. Artan `reactionVersion` HTTP/socket sıralamasını korur; iki hesabın tüm sekmeleri olayı alır. Store henüz yüklenmeyen mesaja gelen tepkiyi gecikmiş history'ye uygular; silme baskındır, hesap reset'i kayıtları temizler.
-
-- `test:emoji`: imleç/seçim/ZWJ/sınır, ters olay/geç history/reset, altı tepki, sahiplik ve 20 tur eşzamanlı katılımcı/toggle/silme geçti.
-- `test:emoji-ui`: masaüstü/mobil 50 kontrol; arama/boş, klavye/odak, açık-koyu/büyük yazı, limit/ZWJ, gerçek gönderme, 404/500/offline/retry, pending/çift istek, iki hesap/ikinci sekme, toggle/değiştirme, açık seçicide silme ve sohbetten ayrılma geçti.
-- Eski özel popup'lar ve `IoHappyOutline` kaldırıldı; tetikleyiciler core `emoji` kullanır. Mesaj boş durumundaki işlevsiz 🔍/👋 dekorasyonu kaldırıldı. Lucide gerekmedi.
-- Gerçek görüntüler: [masaüstü açık](../../screenshots/emoji-desktop-light.png), [mobil koyu](../../screenshots/emoji-mobile-dark.png). Bundle/regresyon: [VERIFICATION](../../VERIFICATION.md).
-
-Resmî setin kaynak/lisans ve React uyumluluk adımları [emoji kontratında](./emoji.md) açık kalır; bu teslimat o entegrasyonun tamamlandığı anlamına gelmez.
+Ana sohbet (04) tasarım seçimi ayrı kalır. Favoriler, son kullanılanlar, özel emoji yükleme ve kalıcı ten rengi tercihi bu kapsamda değildir.

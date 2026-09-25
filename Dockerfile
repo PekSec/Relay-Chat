@@ -16,6 +16,7 @@ RUN --mount=type=cache,target=/root/.npm npm ci --omit=dev --ignore-scripts \
     && rm -rf /usr/local/lib/node_modules/npm /usr/local/lib/node_modules/corepack /opt/yarn-* \
     && rm -f /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack /usr/local/bin/yarn /usr/local/bin/yarnpkg
 COPY --chown=node:node backend/ ./backend/
+COPY --chown=node:node frontend/public/emoji/ ./frontend/public/emoji/
 COPY --chown=node:node --from=client-build /app/frontend/dist ./frontend/dist
 USER node
 EXPOSE 5000

@@ -18,11 +18,19 @@ try {
     assert.equal((await invoke(msg._id, new mongoose.Types.ObjectId())).status, 403);
     assert.equal((await invoke('invalid')).status, 400);
     assert.equal((await invoke(new mongoose.Types.ObjectId())).status, 404);
-    assert.equal((await invoke(msg._id, a, '🔥')).status, 400);
-    for (const emoji of ['👍', '❤️', '😂', '😮', '😢', '🙏']) {
-        assert.equal((await invoke(msg._id, a, emoji)).body.reactions[0].emoji, emoji);
+    for (const emoji of ['', null, 1, {}, [], 'hello', '👍👍', '🔥text', '🏽']) {
+        assert.equal((await invoke(msg._id, a, emoji)).status, 400);
+    }
+    for (const emoji of ['👍', '❤️', '😂', '😮', '😢', '🙏', '🔥', '👩🏽‍💻', '👍🏽', '🇹🇷', '1️⃣']) {
+        const result = await invoke(msg._id, a, emoji);
+        assert.equal(result.status, 200, `${emoji} is a supported reaction`);
+        assert.equal(result.body.reactions[0].emoji, emoji);
         assert.equal((await invoke(msg._id, a, emoji)).body.reactions.length, 0);
     }
+    await invoke(msg._id, a, '👍');
+    assert.equal((await invoke(msg._id, a, '👍️')).body.reactions.length, 0, 'catalog presentation selector toggles legacy thumbs up');
+    await invoke(msg._id, a, '❤');
+    assert.equal((await invoke(msg._id, a, '❤️')).body.reactions.length, 0, 'heart aliases use the existing stored reaction');
     for (let i = 0; i < 20; i++) {
         const message = await Message.create({ senderId: a, receiverId: b, message: 'Race' });
         const results = await Promise.all([invoke(message._id), invoke(message._id, b, '❤️')]);
@@ -40,5 +48,5 @@ try {
         assert.equal((await Message.findById(message._id)).isDeleted, true);
         assert.equal((await invoke(message._id)).status, 400);
     }
-    console.log('PASS six reactions/toggle, ownership, invalid/missing/deleted messages, 20 concurrent-user and duplicate-toggle races');
+    console.log('PASS full-catalog reactions/toggle, invalid input, ownership, invalid/missing/deleted messages, 20 concurrent-user and duplicate-toggle races');
 } finally { await mongoose.disconnect(); }
