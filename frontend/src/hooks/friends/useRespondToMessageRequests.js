@@ -3,7 +3,7 @@ import toast from 'react-hot-toast';
 import apiFetch from '../../utils/apiFetch';
 import useConversation from '../../zustand/useConversation';
 import useFriendStore from '../../zustand/useFriend';
-import useUnread from '../../zustand/useUnread';
+import clearConversationHistory from '../../utils/clearConversationHistory';
 
 const useRespondToMessageRequests = () => {
     const [loading, setLoading] = useState(false);
@@ -34,12 +34,10 @@ const useRespondToMessageRequests = () => {
         try {
             const response = await apiFetch(`/api/messages/clear/${userId}`, { method: 'DELETE' });
             if (!response.ok) throw new Error('Mesaj isteği reddedilemedi.');
+            const data = await response.json();
+            clearConversationHistory({ peerId: userId, clearedThrough: data.clearedThrough });
             const state = useConversation.getState();
-            state.setConversations(items => items.filter(item => item._id !== userId));
-            if (state.selectedConversation?._id === userId) state.setSelectedConversation(null);
-            const friendStore = useFriendStore.getState();
-            friendStore.setMessageRequests(friendStore.messageRequests.filter(item => item._id !== userId));
-            useUnread.getState().clear(userId);
+            if (state.selectedConversation?._id === userId && !state.selectedConversation.lastMessage) state.setSelectedConversation(null);
             toast.success('Mesaj isteği gizlendi');
         } catch (error) {
             if (error.name !== 'AbortError') toast.error(error.message);

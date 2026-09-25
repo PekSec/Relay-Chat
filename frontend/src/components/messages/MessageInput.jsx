@@ -2,10 +2,11 @@ import { useEffect, useRef, useState } from 'react';
 import useSendMessage from '../../hooks/messages/useSendMessage';
 import useSocket from '../../zustand/useSocket';
 import useConversation from '../../zustand/useConversation';
-import { IoSend, IoHappyOutline } from 'react-icons/io5';
+import { IoSend } from 'react-icons/io5';
+import EmojiPicker from '../emoji/EmojiPicker';
+import { insertEmoji } from '../../utils/emoji';
 import useTheme from '../../zustand/useTheme';
 
-const QUICK_EMOJIS = ['😀', '😂', '🥰', '😎', '🤔', '👍', '🙏', '🎉', '❤️', '🔥', '✅', '😢'];
 const MAX_LENGTH = 2000;
 
 const MessageInput = () => {
@@ -18,7 +19,8 @@ const MessageInput = () => {
     const timeoutRef = useRef(null);
     const lastTypingRef = useRef(0);
     const inputRef = useRef(null);
-    const emojiRef = useRef(null);
+    const selectionRef = useRef({ start: 0, end: 0 });
+    const [emojiError, setEmojiError] = useState('');
 
     useEffect(() => {
         return () => {
@@ -34,17 +36,8 @@ const MessageInput = () => {
     }, [message]);
 
     useEffect(() => {
-        if (!showEmoji) return;
-        const close = event => {
-            if (event.key === 'Escape' || (event.type === 'pointerdown' && !emojiRef.current?.contains(event.target))) setShowEmoji(false);
-        };
-        document.addEventListener('pointerdown', close);
-        document.addEventListener('keydown', close);
-        return () => {
-            document.removeEventListener('pointerdown', close);
-            document.removeEventListener('keydown', close);
-        };
-    }, [showEmoji]);
+        setShowEmoji(false); setEmojiError('');
+    }, [receiverId]);
 
     const handleSubmit = async event => {
         event.preventDefault();
@@ -70,18 +63,18 @@ const MessageInput = () => {
     return (
         <form className="composer flex-shrink-0 px-3 sm:px-4 py-3" onSubmit={handleSubmit} style={{ borderTop: '1px solid var(--border-subtle)' }}>
             <div className="flex items-end gap-2">
-                <div className="relative" ref={emojiRef}>
-                    <button type="button" onClick={() => setShowEmoji(value => !value)} className="w-10 h-10 icon-btn text-lg" title="Emoji ekle" aria-expanded={showEmoji} aria-label="Emoji ekle"><IoHappyOutline /></button>
-                    {showEmoji && (
-                        <div className="absolute bottom-full left-0 mb-2 z-30 grid grid-cols-6 gap-1 p-2 rounded-xl shadow-xl" aria-label="Emojiler" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', width: '15rem' }}>
-                            {QUICK_EMOJIS.map(emoji => <button key={emoji} type="button" onClick={() => {
-                                setMessage(value => (value + emoji).slice(0, MAX_LENGTH));
-                                setShowEmoji(false);
-                                inputRef.current?.focus();
-                            }} className="w-9 h-9 rounded-lg text-lg" aria-label={`Ekle: ${emoji}`}>{emoji}</button>)}
-                        </div>
-                    )}
-                </div>
+                <EmojiPicker isOpen={showEmoji} loading={loading} error={emojiError} selectionFocusRef={inputRef}
+                    onOpen={() => {
+                        selectionRef.current = { start: inputRef.current.selectionStart, end: inputRef.current.selectionEnd };
+                        setEmojiError(''); setShowEmoji(true);
+                    }} onClose={() => setShowEmoji(false)} onSelect={emoji => {
+                        const { start, end } = selectionRef.current;
+                        const result = insertEmoji(message, start, end, emoji);
+                        if (!result) { setEmojiError('Mesaj en fazla 2000 karakter olabilir.'); return false; }
+                        setMessage(result.text);
+                        setTimeout(() => inputRef.current?.setSelectionRange(result.caret, result.caret), 0);
+                        return true;
+                    }} />
                 <textarea ref={inputRef} rows={1} placeholder="Bir mesaj yaz..." aria-label="Mesaj" maxLength={MAX_LENGTH}
                     className="field min-w-0 flex-1 resize-none max-h-32 scroll-slim" value={message} onChange={handleTyping}
                     onKeyDown={event => {

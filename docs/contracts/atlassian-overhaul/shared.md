@@ -24,6 +24,12 @@ React, Zustand, Express ve MongoDB korunur. Önce mevcut endpoint, store ve tüm
 
 Paketler kullanılacakları adımda eklenir; React 19 peer aralığı ve portal/focus davranışı kurulu sürümden doğrulanır. Kurulu button paketinde `/new` hâlâ çalışır ancak deprecated olarak işaretlidir; yeniden ele alınan modülde yukarıdaki doğrudan giriş noktaları tercih edilir. Atlaskit bileşeni kullanmak tek başına göçü tamamlamaz: klavye, mobil, yükleme/hata/boş durumları da kapsanır.
 
+04a'da yıkıcı eylem modalı aynı bileşenleri kullanır: ilk odak iptalde, işlem sürerken tekrar gönderme/kapatma engelli, hata içeride ve hedef sabit. Ekran/hesap değişimi isteği iptal eder. Odak dönüşünde silinen tetikleyici yerine kalan mesaj veya composer kullanılır. Danger/hata renkleri accent seçimine çevrilmez. Bu kurallar sonraki onaylı modallarda yeniden doğrulanır; yeni ortak modal sarmalayıcısı kurulmaz.
+
+04b bu kuralları kişi adı/avatarı olan modalda doğrular; işlem yalnız kendi hesaptan geçmiş gizleme olarak açıklanır. Temizleme sonrası boş durumdaki slogan kaldırıldı. HTTP/socket'te paylaşılan temizleme sınırı geç yanıtları filtreler; diğer kişinin verisi veya daha yeni mesajlar başarı temizliğine dahil edilmez.
+
+04c iki yerde kullanılan tek emoji panelini paylaşır: masaüstü Popup, mobil Modal; geçici 13 Unicode seçenek ve altı tepki. Kaynak yaklaşımı kullanıcı tarafından onaylıdır. Klavye dolaşımı, kısa Türkçe hata, grapheme güvenli imlece ekleme ve focus dönüşü doğrulandı. Tepki rozetleri seçili durum/sayı adı taşır; HTTP ve socket aynı sürümlü state güncellemesini kullanır. Ürün metninde altyapı adı yoktur.
+
 ## Tercih API'si
 
 `PATCH /api/auth/preferences` oturum cookie'si ile çalışır. Düz, kısmi bir tercih nesnesi alır; `{ preferences: <tam normalize edilmiş tercihler> }` döndürür. Kimlik body'den alınmaz. Enum/boolean tipleri sunucuda doğrulanır; bilinmeyen alanlar ve geçersiz değerler reddedilir. Mevcut auth user yanıtlarına `preferences` eklenir; endpointlerin mevcut dış zarfı korunur.

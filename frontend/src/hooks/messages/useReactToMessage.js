@@ -1,39 +1,42 @@
 import apiFetch from '../../utils/apiFetch';
-import { useState } from 'react';
-import toast from 'react-hot-toast';
+import { useEffect, useRef, useState } from 'react';
 import useConversation from '../../zustand/useConversation';
 
-// Mesaja emoji tepkisi. Aynı emojiye tekrar basmak tepkiyi kaldırır (toggle).
-const useReactToMessage = () => {
+export default function useReactToMessage() {
     const [loading, setLoading] = useState(false);
-    const { setMessages } = useConversation();
-
+    const [error, setError] = useState('');
+    const pending = useRef(null);
+    useEffect(() => () => pending.current?.abort(), []);
     const react = async (messageId, emoji) => {
-        if (loading) return false;
-        setLoading(true);
+        if (pending.current) return false;
+        const controller = new AbortController();
+        pending.current = controller;
+        setLoading(true); setError('');
         try {
-            const res = await apiFetch(`/api/messages/react/${messageId}`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ emoji }),
+            const response = await apiFetch(`/api/messages/react/${messageId}`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ emoji }), signal: controller.signal,
             });
-
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.error || "Tepki eklenemedi");
-
-            setMessages(messages => messages.map(msg =>
-                msg._id === messageId ? { ...msg, reactions: data.reactions } : msg
-            ));
+            if (!response.ok) {
+                setError(response.status === 400 || response.status === 404 ?
+                    'Bu mesaja tepki verilemiyor.' : 'Tepki kaydedilemedi. Tekrar dene.');
+                return false;
+            }
+            const data = await response.json();
+            if (!Array.isArray(data.reactions) || !Number.isInteger(data.reactionVersion)) {
+                setError('Tepki kaydedilemedi. Tekrar dene.'); return false;
+            }
+            if (controller.signal.aborted) return false;
+            useConversation.getState().setMessageReactions({ messageId, ...data });
             return true;
-        } catch (error) {
-            if (error.name !== 'AbortError') toast.error(error.message);
+        } catch (err) {
+            if (err.name !== 'AbortError') setError(err instanceof SyntaxError ?
+                'Tepki kaydedilemedi. Tekrar dene.' : 'Bağlantı kurulamadı. Tekrar dene.');
             return false;
         } finally {
-            setLoading(false);
+            pending.current = null;
+            if (!controller.signal.aborted) setLoading(false);
         }
     };
-
-    return { react, loading };
-};
-
-export default useReactToMessage;
+    return { react, loading, error, clearError: () => setError('') };
+}

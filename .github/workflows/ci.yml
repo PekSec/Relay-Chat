@@ -146,6 +146,39 @@ jobs:
           MONGO_URI: mongodb://127.0.0.1:27017/ci_signup
           PORT: 5020
 
+      - name: Check message deletion ownership and races
+        run: npm run test:delete-message 2>&1 | tee test-results/delete-message.log
+        env:
+          MONGO_URI: mongodb://127.0.0.1:27017/ci_delete_message
+
+      - name: Check deletion dialog on desktop and mobile
+        run: npm run test:delete-dialog 2>&1 | tee test-results/delete-dialog.log
+        env:
+          MONGO_URI: mongodb://127.0.0.1:27017/ci_delete_dialog
+          PORT: 5027
+
+      - name: Check history clearing isolation and races
+        run: npm run test:clear-history 2>&1 | tee test-results/clear-history.log
+        env:
+          MONGO_URI: mongodb://127.0.0.1:27017/ci_clear_history
+
+      - name: Check history clearing on desktop and mobile
+        run: npm run test:clear-dialog 2>&1 | tee test-results/clear-dialog.log
+        env:
+          MONGO_URI: mongodb://127.0.0.1:27017/ci_clear_dialog
+          PORT: 5028
+
+      - name: Check emoji insertion and concurrent reactions
+        run: npm run test:emoji 2>&1 | tee test-results/emoji.log
+        env:
+          MONGO_URI: mongodb://127.0.0.1:27017/ci_emoji
+
+      - name: Check emoji selectors on desktop and mobile
+        run: npm run test:emoji-ui 2>&1 | tee test-results/emoji-ui.log
+        env:
+          MONGO_URI: mongodb://127.0.0.1:27017/ci_emoji_ui
+          PORT: 5029
+
       - name: Save test evidence
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

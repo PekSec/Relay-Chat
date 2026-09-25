@@ -1,43 +1,40 @@
+import { useEffect, useRef, useState } from 'react';
 import apiFetch from '../../utils/apiFetch';
-import { useState } from 'react';
-import toast from 'react-hot-toast';
 import useConversation from '../../zustand/useConversation';
 
-// Mesaj silme: backend kaydı silmez, içeriğini gizler (isDeleted).
-// Bu sayede sohbet akışındaki sıra bozulmaz ve karşı taraf da silindiğini görür.
-const useDeleteMessage = () => {
+export default function useDeleteMessage() {
     const [loading, setLoading] = useState(false);
-    const { setMessages } = useConversation();
-
-    const deleteMessage = async (messageId) => {
+    const [error, setError] = useState('');
+    const pending = useRef(null);
+    useEffect(() => () => pending.current?.abort(), []);
+    const deleteMessage = async (id) => {
+        if (pending.current) return false;
+        const controller = new AbortController();
+        pending.current = controller;
         setLoading(true);
+        setError('');
         try {
-            const res = await apiFetch(`/api/messages/${messageId}`, {
-                method: "DELETE",
-            });
-
-            const data = await res.json();
-            if (!res.ok) {
-                throw new Error(data.error || "Mesaj silinemedi");
+            const response = await apiFetch(`/api/messages/${id}`, { method: 'DELETE', signal: controller.signal });
+            if (!response.ok) {
+                setError(response.status === 403 ? 'Bu mesajı silme yetkin yok.' : response.status === 404 ?
+                    'Mesaj bulunamadı.' : 'Mesaj silinemedi. Tekrar dene.');
+                return false;
             }
-
-            // Silinen mesajı listede yerinde bırakıp içeriğini güncelliyoruz
-            setMessages(messages => messages.map(msg =>
-                msg._id === messageId
-                    ? { ...msg, message: data.deletedMessage.message, isDeleted: true }
-                    : msg
-            ));
-            toast.success("Mesaj silindi");
+            const data = await response.json();
+            if (data.deletedMessage?._id !== id || !data.deletedMessage.isDeleted) {
+                setError('Mesaj silinemedi. Tekrar dene.');
+                return false;
+            }
+            useConversation.getState().markMessageDeleted(id);
             return true;
-        } catch (error) {
-            if (error.name !== 'AbortError') toast.error(error.message);
+        } catch (err) {
+            if (err.name !== 'AbortError') setError(err instanceof SyntaxError ?
+                'Mesaj silinemedi. Tekrar dene.' : 'Bağlantı kurulamadı. Tekrar dene.');
             return false;
         } finally {
-            setLoading(false);
+            pending.current = null;
+            if (!controller.signal.aborted) setLoading(false);
         }
     };
-
-    return { deleteMessage, loading };
-};
-
-export default useDeleteMessage;
+    return { deleteMessage, loading, error };
+}

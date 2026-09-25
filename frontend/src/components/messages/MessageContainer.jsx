@@ -1,5 +1,7 @@
 import Avatar from '../Avatar';
-import Button from '@atlaskit/button/new';
+import Button from '@atlaskit/button/default/button';
+import IconButton from '@atlaskit/button/icon/button';
+import DeleteIcon from '@atlaskit/icon/core/delete';
 import Messages from "./Messages";
 import MessageInput from "./MessageInput";
 import { TiMessages } from "react-icons/ti";
@@ -7,15 +9,14 @@ import useConversation from "../../zustand/useConversation";
 import useSocket from "../../zustand/useSocket";
 import useListenTyping from "../../hooks/socket/useListenTyping";
 import useListenMessagesRead from "../../hooks/socket/useListenMessagesRead";
-import useClearConversation from "../../hooks/messages/useClearConversation";
 import useListenEditedMessages from "../../hooks/socket/useListenEditedMessages";
 import useListenDeletedMessages from "../../hooks/socket/useListenDeletedMessages";
 import useListenReactions from "../../hooks/socket/useListenReactions";
 import useUnread from "../../zustand/useUnread";
 import useAuth from "../../zustand/useAuth";
 import useRespondToMessageRequests from "../../hooks/friends/useRespondToMessageRequests";
-import { useEffect, useState } from "react";
-import { IoClose, IoSearch, IoArrowBack, IoTrashOutline } from "react-icons/io5";
+import { lazy, Suspense, useEffect, useState } from "react";
+import { IoClose, IoSearch, IoArrowBack } from "react-icons/io5";
 import useFriendStore from "../../zustand/useFriend";
 import useSendFriendRequest from "../../hooks/friends/useSendFriendRequest";
 import useRespondToFriendRequests from "../../hooks/friends/useRespondToFriendRequests";
@@ -27,13 +28,15 @@ import useRespondToFriendRequests from "../../hooks/friends/useRespondToFriendRe
 // 3. Online/offline durumu → sadece seçili sohbetin kişisi için gösterilir
 // 4. chatOpened event → sadece gerçek conversation'lar için emit edilir (draft'lar için değil)
 
+const DeleteMessageModal = lazy(() => import('../modals/DeleteMessageModal'));
+const ClearHistoryModal = lazy(() => import('../modals/ClearHistoryModal'));
+
 const MessageContainer = () => {
 
     const { selectedConversation, setSelectedConversation, conversations } = useConversation();
     const { onlineUsers, socket, isConnected, connectionVersion } = useSocket();
     const clearUnread = useUnread((s) => s.clear);
     const { isTyping } = useListenTyping();
-    const { clearConversation, loading } = useClearConversation();
 
     const { authUser } = useAuth();
     const { acceptRequest, declineRequest, loading: actionLoading } = useRespondToMessageRequests();
@@ -47,6 +50,8 @@ const MessageContainer = () => {
 
     // ═══════════ ARKADAŞLIK DURUMU BANNER LOGIC ═══════════
     const [isBannerDismissed, setIsBannerDismissed] = useState(false);
+    const [deleteTarget, setDeleteTarget] = useState(null);
+    const [clearTarget, setClearTarget] = useState(null);
     const [searchTerm, setSearchTerm] = useState("");   // sohbet içi mesaj arama
     const [showSearch, setShowSearch] = useState(false);
     const { friends, incomingFriendRequests, sentFriendRequests } = useFriendStore();
@@ -56,6 +61,8 @@ const MessageContainer = () => {
     // Sohbet değişince banner görünürlüğünü sıfırla (her kişi için yeni şans)
     useEffect(() => {
         setIsBannerDismissed(false);
+        setDeleteTarget(null);
+        setClearTarget(null);
         setSearchTerm("");      // sohbet değişince arama sıfırlansın
         setShowSearch(false);
     }, [selectedConversation?._id]);
@@ -100,17 +107,16 @@ const MessageContainer = () => {
     }, [selectedConversation, socket, conversations, clearUnread, connectionVersion]);
 
     // Sohbeti temizle butonuna tıklanınca
-    const handleClearChat = () => {
-        if (selectedConversation && window.confirm("Bu sohbetin geçmişi yalnızca senden gizlenecek. Devam edilsin mi?")) {
-            clearConversation(selectedConversation._id);
-        }
-    };
-
     const noChatSelected = !selectedConversation;
     const isOnline = selectedConversation && onlineUsers.includes(selectedConversation._id);
 
     return (
         <div className="flex flex-col h-full w-full min-w-0 panel-chat">
+            {deleteTarget?.conversationId === selectedConversation?._id && deleteTarget?.userId === authUser?._id && deleteTarget &&
+                <Suspense fallback={null}><DeleteMessageModal target={deleteTarget} onClose={() => setDeleteTarget(null)} /></Suspense>}
+            {clearTarget?.peerId === selectedConversation?._id && clearTarget?.userId === authUser?._id && clearTarget &&
+                <Suspense fallback={null}><ClearHistoryModal target={clearTarget} onClose={() => setClearTarget(null)}
+                    onCleared={() => { setClearTarget(null); setSearchTerm(''); setShowSearch(false); }} /></Suspense>}
             {!isConnected && <div role="status" className="px-4 py-2 text-xs text-center flex-shrink-0" style={{ color: 'var(--ds-text-warning)', background: 'var(--ds-background-warning)' }}>Bağlantı yeniden kuruluyor… <button className="underline ml-2" onClick={() => socket?.connect()}>Tekrar bağlan</button></div>}
             {noChatSelected ? <NoChatSelected /> : (<> {/* Sohbet seçilmemişse NoChatSelected, seçilmişse mesaj alanı */}
 
@@ -181,14 +187,10 @@ const MessageContainer = () => {
                         <IoSearch />
                     </button>
 
-                    <button
-                        onClick={handleClearChat}
-                        disabled={loading}
-                        className='w-9 h-9 icon-btn flex-shrink-0 text-sm'
-                        title='Sohbeti temizle'
-                    >
-                        {loading ? '…' : <IoTrashOutline />}
-                    </button>
+                    <IconButton icon={DeleteIcon} label="Sohbeti temizle" appearance="subtle"
+                        onClick={event => setClearTarget({ peerId: selectedConversation._id, userId: authUser._id,
+                            fullName: selectedConversation.fullName, profilePic: selectedConversation.profilePic,
+                            trigger: event.currentTarget })} />
                 </div>
 
                 {/* Sohbet içi arama çubuğu */}
@@ -231,7 +233,7 @@ const MessageContainer = () => {
                             >
                                 {actionLoading ? 'İşleniyor…' : "Kabul et ve sohbet et"}
                             </Button>
-                            {/* Reddet → declineRequest(userId) → conversation ve mesajlar silinir */}
+                            {/* İsteği yalnız kendi hesabından gizle. */}
                             <Button
                                 onClick={() => declineRequest(selectedConversation._id)}
                                 isDisabled={actionLoading}
@@ -307,7 +309,8 @@ const MessageContainer = () => {
 
                 {/* ═══════════ MESAJLAR ═══════════ */}
                 <div className="flex-1 min-h-0 flex flex-col">
-                    <Messages key={selectedConversation._id} searchTerm={searchTerm} />
+                    <Messages key={selectedConversation._id} searchTerm={searchTerm}
+                        onRequestDelete={target => setDeleteTarget({ ...target, conversationId: selectedConversation._id, userId: authUser._id })} />
                 </div>
 
                 {/* ═══════════ MESAJ GİRİŞ ALANI ═══════════ */}

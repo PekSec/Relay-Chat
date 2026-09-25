@@ -7,6 +7,7 @@ const useGetMessages = () => {
     const { messages, setMessages, selectedConversation } = useConversation();
     const connectionVersion = useSocket(state => state.connectionVersion);
     const id = selectedConversation?._id;
+    const clearedThrough = useConversation(state => state.clearedThrough[id]);
     const [loading, setLoading] = useState(true);
     const [loadingOlder, setLoadingOlder] = useState(false);
     const [hasMore, setHasMore] = useState(false);
@@ -34,7 +35,7 @@ const useGetMessages = () => {
                 // Preserve messages arriving over the socket while the history is in flight.
                 setMessages(current => {
                     const byId = new Map(data.map(message => [message._id, message]));
-                    for (const message of current) if (!byId.has(message._id)) byId.set(message._id, message);
+                    for (const message of current) if (!byId.has(message._id) || message.isDeleted) byId.set(message._id, message);
                     return [...byId.values()].sort((a, b) => a._id.localeCompare(b._id));
                 });
                 setHasMore(response.headers.get('X-Has-More') === 'true');
@@ -45,7 +46,7 @@ const useGetMessages = () => {
             }
         })();
         return () => controller.abort();
-    }, [id, connectionVersion, attempt, setMessages]);
+    }, [id, connectionVersion, attempt, setMessages, clearedThrough]);
 
     const loadOlder = async () => {
         const first = useConversation.getState().messages[0]?._id;

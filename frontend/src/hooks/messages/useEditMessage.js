@@ -25,7 +25,7 @@ const useEditMessage = () =>{
 
             //burada map ile mesajları dolaşıp düzenlenen mesajı bulup güncelliyoruz. güncelleme kısmında spreading var
             setMessages(messages => messages.map(msg =>
-                msg._id === messageId ? {...msg, message: data.updatedMessage.message,
+                msg._id === messageId && !msg.isDeleted ? {...msg, message: data.updatedMessage.message,
                      isEdited: data.updatedMessage.isEdited, 
                      editedAt: data.updatedMessage.editedAt} 
                      : msg

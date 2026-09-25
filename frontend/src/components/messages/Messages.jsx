@@ -13,7 +13,7 @@ const dayLabel = date => {
     return date.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
 };
 
-const Messages = ({ searchTerm = '' }) => {
+const Messages = ({ searchTerm = '', onRequestDelete }) => {
     const { loading, messages, hasMore, loadingOlder, error, retry, loadOlder } = useGetMessages();
     const userId = useAuth(state => state.authUser?._id);
     const listRef = useRef(null);
@@ -56,8 +56,7 @@ const Messages = ({ searchTerm = '' }) => {
                 {searchTerm && <p className="text-xs text-center mb-3 text-[color:var(--text-muted)]" role="status">{visible.length} sonuç · Yüklenen mesajlarda aranıyor</p>}
                 {visible.length === 0 ? (
                     <div className="flex-1 flex flex-col items-center justify-center gap-2 px-6 text-center">
-                        <div className="text-4xl opacity-60" aria-hidden="true">{searchTerm ? '🔍' : '👋'}</div>
-                        <p className="text-sm text-[color:var(--text-secondary)]">{searchTerm ? 'Bu aramayla eşleşen mesaj yok' : 'Henüz mesaj yok. İlk mesajı sen gönder!'}</p>
+                        <p className="text-sm text-[color:var(--text-secondary)]">{searchTerm ? 'Bu aramayla eşleşen mesaj yok' : 'Henüz mesaj yok.'}</p>
                     </div>
                 ) : <div className="mt-auto">
                     {visible.map((message, i) => {
@@ -72,7 +71,7 @@ const Messages = ({ searchTerm = '' }) => {
                                 <span className="text-[11px] px-2.5 py-1 rounded-full bg-[color:var(--bg-elevated)] text-[color:var(--text-muted)]">{dayLabel(date)}</span>
                                 <div className="flex-1 h-px bg-[color:var(--border-subtle)]" />
                             </div>}
-                            <Message message={message} searchTerm={searchTerm} showAvatar={showAvatar} />
+                            <Message message={message} searchTerm={searchTerm} showAvatar={showAvatar} onRequestDelete={onRequestDelete} />
                         </div>;
                     })}
                 </div>}

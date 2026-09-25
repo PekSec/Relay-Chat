@@ -14,7 +14,7 @@ Başlangıç `react-icons` import envanteri aşağıdadır. Hedefler kurulu `@at
 | `IoArrowDown` | Messages | `arrow-down` | Yok |
 | `IoArrowBack` | MessageContainer | `arrow-left` | Yok |
 | `IoSend` | MessageInput | `send` | Yok |
-| `IoHappyOutline` | MessageInput, Message | `emoji` | Yok |
+| `IoHappyOutline` | MessageInput, Message (04c'de kaldırıldı) | `emoji` (uygulandı) | Yok |
 | `IoPencilOutline` | Message | `edit` | Yok |
 | `IoTrashOutline` | Message, MessageContainer | `delete` | Yok |
 | `IoClose` | SettingsModal, MessageContainer | `cross` | Yok |
@@ -25,6 +25,10 @@ Başlangıç `react-icons` import envanteri aşağıdadır. Hedefler kurulu `@at
 | `TiMessages` | MessageContainer | `comment` | Yok |
 
 `TiMessages` için birebir çift baloncuk şekli yerine aynı anlamı taşıyan resmî `comment` kullanılır; yalnız şekil farkı yeni ikon bağımlılığı gerekçesi değildir. İlk adımda ayarlar içindeki `IoClose`, `IoCopyOutline`, `IoCheckmark` kullanımları taşındı; yeni bölüm simgeleri de Atlaskit'ten gelir. Diğer satırlar ilgili ekranın onaylı adımında taşınır; `react-icons` bu nedenle henüz kaldırılmadı.
+
+04a'da Message silme düğmesi `IconButton` + `@atlaskit/icon/core/delete` ile taşındı: standart 16 px ikon, butonda “Sil” erişilebilir adı. MessageContainer geçmiş temizleme simgesi 04b onayına kadar bekler. Mesaj düzenleme/tepki ve diğer ana sohbet ikonları bu adımda topluca taşınmadı; yeni Lucide ihtiyacı bulunmadı.
+
+04b'de MessageContainer geçmiş temizleme düğmesi de aynı core `delete` + IconButton'a taşındı; erişilebilir adı “Sohbeti temizle”. Yeni modalın Avatar bileşeni kurulu `@atlaskit/avatar` kullanır. Böylece envanterdeki iki `IoTrashOutline` kullanımı kaldırıldı. Kalan ikonlar için sıra değişmedi; Lucide eklenmedi.
 
 ## Boyut, isim ve fallback
 

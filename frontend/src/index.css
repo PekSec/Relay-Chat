@@ -44,6 +44,11 @@ button:focus:not(:focus-visible) { outline:none; }
 .auth-progress { display:flex; align-items:center; justify-content:center; gap:8px; }
 .auth-signup { display:block; width:fit-content; margin:20px auto 0; color:var(--ds-link); }
 .auth-signup:hover { text-decoration:underline; }
+.delete-message-preview { margin-block:16px; padding:12px; border-left:3px solid var(--ds-border); background:var(--bg-sunken); white-space:pre-wrap; overflow-wrap:anywhere; max-height:12rem; overflow-y:auto; }
+.emoji-panel { width:320px; max-width:100%; padding:12px; color:var(--text-primary); }
+.emoji-options { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:4px; margin-block:12px; }
+.emoji-options button { min-width:0; min-height:40px; padding:0; }
+.emoji-glyph { font-size:24px; line-height:1; }
 .auth-theme { position:absolute; top:20px; right:24px; }
 .relay-workspace { display:flex; width:100%; height:100%; min-height:0; overflow:hidden; background:var(--bg-panel); }
 .relay-sidebar { height:100%; min-height:0; display:flex; flex-direction:column; background:var(--bg-sunken); }

@@ -1,0 +1,18 @@
+import assert from 'node:assert/strict';
+import useConversation from '../frontend/src/zustand/useConversation.js';
+const state = () => useConversation.getState();
+const message = { _id: 'msg', message: 'Text', reactions: [], reactionVersion: 0 };
+const first = { messageId: 'msg', reactions: [{ userId: 'one', emoji: '👍' }], reactionVersion: 1 };
+const latest = { messageId: 'msg', reactions: [{ userId: 'two', emoji: '❤️' }], reactionVersion: 2 };
+state().reset();
+state().setMessageReactions(latest);
+state().setMessageReactions(first);
+state().setMessages([message]);
+assert.deepEqual(state().messages[0].reactions, latest.reactions, 'late history and events cannot revert newer reactions');
+state().markMessageDeleted('msg');
+state().setMessageReactions({ ...latest, reactionVersion: 3 });
+assert.equal(state().messages[0].isDeleted, true);
+state().reset(); state().setMessages([message]);
+assert.deepEqual(state().messages[0].reactions, []);
+state().reset();
+console.log('PASS reaction event before history, out-of-order HTTP/socket, deletion, account reset');

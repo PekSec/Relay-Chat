@@ -1,45 +1,39 @@
+import { useEffect, useRef, useState } from 'react';
 import apiFetch from '../../utils/apiFetch';
-import {useState} from "react";
-import toast from "react-hot-toast";
-import useConversation from "../../zustand/useConversation";
+import clearConversationHistory from '../../utils/clearConversationHistory';
 
-const useClearConversation = () => {
-    const [loading, setLoading] = useState(false); //yükleniyor durumu
-    const {setMessages} = useConversation();
-
-    const clearConversation = async (userToChatId) => {
-        if (loading) return; // eğer zaten loading ise fonksiyonu çalıştırma
-        setLoading(true);
-
-        try{
-            const res = await apiFetch(`/api/messages/clear/${userToChatId}`, { //backenddeki route a istek atıyoruz
-                method: 'DELETE', //crud işleminden silme işlemi
-                headers: {
-                    'Content-Type': 'application/json' 
-                }
-            });
-
-            const data = await res.json(); //response dan json formatında data alıyoruz onu js objesine çeviriyoruz
-            // artık data bir js objesi! ✅
-
-            if(res.ok) {
-                toast.success("Sohbet geçmişi temizlendi");
-                if (useConversation.getState().selectedConversation?._id === userToChatId) setMessages([]);
-                useConversation.getState().setConversations(items => items.map(item => item._id === userToChatId ? { ...item, lastMessage: null } : item)); // mesajları temizle, boş array yap
-            } else {
-                throw new Error(data.error || "Sohbet temizlenemedi");
+export default function useClearConversation() {
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
+    const pending = useRef(null);
+    useEffect(() => () => pending.current?.abort(), []);
+    const clearConversation = async peerId => {
+        if (pending.current) return false;
+        const controller = new AbortController();
+        pending.current = controller;
+        setLoading(true); setError('');
+        try {
+            const response = await apiFetch(`/api/messages/clear/${peerId}`, { method: 'DELETE', signal: controller.signal });
+            if (!response.ok) {
+                setError(response.status === 404 ? 'Sohbet bulunamadı.' : 'Geçmiş temizlenemedi. Tekrar dene.');
+                return false;
             }
-
-            //error handling
-        } catch (error) {
-            toast.error(error.message || "An error occurred");
+            const data = await response.json();
+            if (data.clearedThrough !== null && !/^[a-f\d]{24}$/.test(data.clearedThrough)) {
+                setError('Geçmiş temizlenemedi. Tekrar dene.');
+                return false;
+            }
+            if (controller.signal.aborted) return false;
+            clearConversationHistory({ peerId, clearedThrough: data.clearedThrough });
+            return true;
+        } catch (err) {
+            if (err.name !== 'AbortError') setError(err instanceof SyntaxError ?
+                'Geçmiş temizlenemedi. Tekrar dene.' : 'Bağlantı kurulamadı. Tekrar dene.');
+            return false;
         } finally {
-            setLoading(false);
+            pending.current = null;
+            if (!controller.signal.aborted) setLoading(false);
         }
-
     };
-    return { clearConversation, loading };
-
-};
-
-export default useClearConversation;
+    return { clearConversation, loading, error };
+}

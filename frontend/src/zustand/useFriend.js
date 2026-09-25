@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import useConversation from './useConversation.js';
 
 // Arkadaşlık Sistemi Global State Yönetimi (Zustand Store)
 // Bu store, arkadaşlık sistemiyle ilgili tüm verileri merkezi olarak tutar.
@@ -61,7 +62,13 @@ const useFriendStore = create((set) => ({
 
     // Mesaj isteklerini ayarla (useGetMessageRequests hook'u çağırır)
     // Bunlar arkadaş olunmadan gönderilen mesajlar, pending conversation'dan gelir
-    setMessageRequests: (requests) => set({ messageRequests: requests }),
+    setMessageRequests: (requests) => set(state => {
+        const boundaries = useConversation.getState().clearedThrough;
+        const previous = new Map(state.messageRequests.map(item => [item._id, item]));
+        return { messageRequests: requests.map(item => boundaries[item._id] && !(item.lastMessage?._id > boundaries[item._id]) ?
+            previous.get(item._id) || item : item).filter(item =>
+            !boundaries[item._id] || item.lastMessage?._id > boundaries[item._id]) };
+    }),
     reset: () => set({ friends: [], incomingFriendRequests: [], sentFriendRequests: [], messageRequests: [] })
 }));
 export default useFriendStore;

@@ -5,6 +5,7 @@ import useFriendStore from '../../zustand/useFriend';
 import useAuth from '../../zustand/useAuth';
 import useUnread from '../../zustand/useUnread';
 import playSound from '../../utils/playSound';
+import clearConversationHistory from '../../utils/clearConversationHistory';
 
 const useListenMessages = () => {
     const socket = useSocket(state => state.socket);
@@ -16,6 +17,7 @@ const useListenMessages = () => {
             const state = useConversation.getState();
             const incoming = message.senderId !== userId;
             const otherId = incoming ? message.senderId : message.receiverId;
+            if (message._id <= (state.clearedThrough[otherId] || '')) return;
             const selected = state.selectedConversation?._id === otherId;
             const visible = selected && document.visibilityState === 'visible';
             if (selected) state.setMessages(items => items.some(item => item._id === message._id) ? items : [...items, message]);
@@ -44,7 +46,11 @@ const useListenMessages = () => {
             }
         };
         socket.on('newMessage', onMessage);
-        return () => socket.off('newMessage', onMessage);
+        socket.on('conversationCleared', clearConversationHistory);
+        return () => {
+            socket.off('newMessage', onMessage);
+            socket.off('conversationCleared', clearConversationHistory);
+        };
     }, [socket, userId]);
 };
 export default useListenMessages;

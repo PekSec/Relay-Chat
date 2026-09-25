@@ -63,6 +63,41 @@ username conflicts.
 | GET    | `/messages/unread/counts` | Unread count per sender |
 | DELETE | `/messages/clear/:id`| Clear conversation history   |
 
+Message deletion is owner-only: invalid IDs return **400**, missing messages
+**404**, and another user's message **403**. Deleting your already deleted message
+returns **200**, with the same `{ message, deletedMessage }` response as the first
+deletion. The atomic update stores the deletion marker; concurrent edits cannot
+restore the content. Editing a deleted message returns **400**.
+
+Successful deletion emits `messageDeleted` with `{ messageId }` to all connected
+sessions of both sender and receiver, including the requesting session. Consumers
+must tolerate repeated events and update any matching conversation preview.
+
+`DELETE /messages/clear/:id` hides history only for the authenticated account,
+including pending message requests. It does not decline/delete a conversation for
+the peer or change its status. The successful response is
+`{ message, deletedCount, clearedThrough }`. `clearedThrough` is the highest existing
+message ID captured before the update (or a retained conversation reference when
+both users already cleared the records); it can be null for an empty conversation.
+Only IDs at or below that boundary are cleared, using the same ordering as history
+pagination. Later IDs remain visible. Missing conversations return 404; clearing
+an existing empty/already-cleared history succeeds. Physical cleanup removes records
+only when both participants have cleared them.
+
+`conversationCleared { peerId, clearedThrough }` is emitted only to the clearing
+account's sessions. Clients apply the boundary to messages, previews and pending
+requests, refresh pagination/unread counts, and ignore older out-of-order boundaries.
+
+`POST /messages/react/:id` accepts `{ emoji }` from either participant, limited to
+`👍 ❤️ 😂 😮 😢 🙏`. Repeating your current emoji removes it; choosing another
+replaces only your reaction. Updates are atomic, including concurrent toggles.
+Invalid/deleted messages return 400, missing messages 404, nonparticipants 403.
+The response is `{ message, reactions, reactionVersion }`; the monotonically
+increasing per-message version is also included in `messageReaction` events:
+`{ messageId, reactions, reactionVersion }`, sent to both participants' account
+rooms, including the initiator's other sessions. Consumers ignore older versions
+and never restore a deleted message from a late reaction response/event.
+
 ### Conversations
 | Method | Endpoint                       | Description                |
 |--------|--------------------------------|----------------------------|
@@ -79,6 +114,7 @@ username conflicts.
 | `newMessage`        | server → client  | Incoming message               |
 | `messageEdited`     | server → client  | A message was edited           |
 | `messageDeleted`    | server → client  | A message was deleted          |
+| `conversationCleared` | server → clearing account | History hidden through a message ID |
 | `messageReaction`   | server → client  | A reaction changed             |
 | `messagesRead`      | server → client  | Recipient read your messages   |
 | `userTyping`        | server → client  | Peer is typing                 |

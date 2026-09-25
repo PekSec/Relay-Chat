@@ -42,6 +42,7 @@ const messageSchema = new mongoose.Schema({
     }],
 
     // Emoji tepkileri: her kullanıcı bir mesaja tek tepki bırakabilir
+    reactionVersion: { type: Number, default: 0 },
     reactions: [{
         userId: {
             type: mongoose.Schema.Types.ObjectId,
@@ -75,4 +76,3 @@ messageSchema.index({ senderId: 1, receiverId: 1, _id: -1 });
 
 const Message = mongoose.model("Message", messageSchema);
 export default Message;
-

@@ -1,13 +1,16 @@
 import Avatar from '../Avatar';
-import { IoHappyOutline, IoPencilOutline, IoTrashOutline } from 'react-icons/io5';
+import { IoPencilOutline } from 'react-icons/io5';
 import { useState, useEffect, useRef } from 'react';
 import useAuth from "../../zustand/useAuth";
 import useConversation from "../../zustand/useConversation";
 import useEditMessage from "../../hooks/messages/useEditMessage";
-import useDeleteMessage from "../../hooks/messages/useDeleteMessage";
+import IconButton from '@atlaskit/button/icon/button';
+import DeleteIcon from '@atlaskit/icon/core/delete';
 import useReactToMessage from "../../hooks/messages/useReactToMessage";
-
-const REACTIONS = ["👍", "❤️", "😂", "😮", "😢", "🙏"];
+import Button from '@atlaskit/button/default/button';
+import SectionMessage from '@atlaskit/section-message';
+import EmojiPicker from '../emoji/EmojiPicker';
+import { emojiName } from '../../utils/emoji';
 
 // Arama terimini mesaj metni içinde vurgula.
 // Kullanıcı girdisi regex'e gömüldüğü için özel karakterler kaçırılıyor.
@@ -22,14 +25,14 @@ const highlight = (text, term) => {
     );
 };
 
-const Message = ({ message, searchTerm = "", showAvatar = true }) => {
+const Message = ({ message, searchTerm = "", showAvatar = true, onRequestDelete }) => {
 
     const { authUser } = useAuth();
     const { selectedConversation } = useConversation();
 
     const { editMessage, loading } = useEditMessage();
-    const { deleteMessage, loading: deleteLoading } = useDeleteMessage();
-    const { react } = useReactToMessage();
+    const rowRef = useRef(null);
+    const { react, loading: reactionLoading, error: reactionError, clearError } = useReactToMessage();
 
     const [isEditing, setIsEditing] = useState(false);
     const [editedText, setEditedText] = useState(message.message);
@@ -37,18 +40,15 @@ const Message = ({ message, searchTerm = "", showAvatar = true }) => {
     const [showActions, setShowActions] = useState(false); // dokunmatik için
     const pickerRef = useRef(null);
 
-    // Seçici yalnızca dışarı tıklanınca veya Escape ile kapanır.
-    // Önceden imleç mesajdan ayrılır ayrılmaz kapandığı için
-    // emojiye ulaşmaya çalışırken kayboluyordu.
+    // Portal içindeki seçicinin kapanmasını kendi bileşeni yönetir.
     useEffect(() => {
-        if (!showPicker && !showActions) return;
+        if (!showActions || showPicker) return;
         const onDown = (e) => {
             if (!pickerRef.current?.contains(e.target)) {
-                setShowPicker(false);
                 setShowActions(false);
             }
         };
-        const onKey = (e) => { if (e.key === "Escape") { setShowPicker(false); setShowActions(false); } };
+        const onKey = (e) => { if (e.key === "Escape") setShowActions(false); };
         document.addEventListener("mousedown", onDown);
         document.addEventListener("keydown", onKey);
         return () => {
@@ -82,18 +82,13 @@ const Message = ({ message, searchTerm = "", showAvatar = true }) => {
         setIsEditing(false);
     };
 
-    const handleDelete = async () => {
-        if (!window.confirm("Bu mesajı silmek istediğinize emin misiniz?")) return;
-        await deleteMessage(message._id);
-    };
-
     // Aynı emojiye basanları tek rozette topla
     const grouped = (message.reactions || []).reduce((acc, r) => {
         acc[r.emoji] = (acc[r.emoji] || 0) + 1;
         return acc;
     }, {});
 
-    if (isEditing) {
+    if (isEditing && !message.isDeleted) {
         return (
             <div className={`flex ${fromMe ? 'justify-end' : 'justify-start'} px-4 py-1`}>
                 <div className='flex flex-col gap-2 w-full max-w-md'>
@@ -148,6 +143,7 @@ const Message = ({ message, searchTerm = "", showAvatar = true }) => {
             <div className={`flex flex-col min-w-0 max-w-[min(34rem,calc(100%-3.5rem))] ${fromMe ? 'items-end' : 'items-start'}`}>
                 <div className='relative' ref={pickerRef}>
                     <div
+                        ref={rowRef} tabIndex={-1}
                         className={`bubble ${fromMe ? 'bubble-out' : 'bubble-in'} ${message.isDeleted ? 'italic opacity-60' : ''}`}
                         onClick={() => setShowActions(v => !v)}
                     >
@@ -162,21 +158,15 @@ const Message = ({ message, searchTerm = "", showAvatar = true }) => {
                             // Dar ekranda balonun yanında yer yok; butonlar balonun
                             // üstüne alınır. Geniş ekranda yanda durmaya devam eder.
                             className={`absolute z-10 flex items-center gap-0.5 transition-opacity
-                                        ${showActions ? 'opacity-100' : 'opacity-0'} group-hover:opacity-100
+                                        ${showActions || showPicker ? 'opacity-100' : 'opacity-0'} group-hover:opacity-100
                                         focus-within:opacity-100
                                         bottom-full mb-1 md:bottom-auto md:top-1/2 md:mb-0 md:-translate-y-1/2
                                         ${fromMe ? 'right-0 md:right-full md:mr-1.5' : 'left-0 md:left-full md:ml-1.5'}`}
                         >
-                            <button
-                                onClick={() => setShowPicker(v => !v)}
-                                className='w-7 h-7 rounded-full flex items-center justify-center text-xs'
-                                style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}
-                                title='Tepki ver'
-                                aria-label='Tepki ver'
-                                aria-expanded={showPicker}
-                            >
-                                <IoHappyOutline />
-                            </button>
+                            <EmojiPicker reaction isOpen={showPicker} loading={reactionLoading} error={reactionError}
+                                selected={message.reactions?.find(r => String(r.userId) === String(authUser?._id))?.emoji}
+                                onOpen={() => { clearError(); setShowPicker(true); }} onClose={() => setShowPicker(false)}
+                                onSelect={emoji => react(message._id, emoji)} />
                             {fromMe && (
                                 <>
                                     <button
@@ -188,67 +178,37 @@ const Message = ({ message, searchTerm = "", showAvatar = true }) => {
                                     >
                                         <IoPencilOutline />
                                     </button>
-                                    <button
-                                        onClick={handleDelete}
-                                        disabled={deleteLoading}
-                                        className='w-7 h-7 rounded-full flex items-center justify-center text-xs'
-                                        style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}
-                                        title='Sil'
-                                        aria-label='Sil'
-                                    >
-                                        <IoTrashOutline />
-                                    </button>
+                                    <IconButton icon={DeleteIcon} label="Sil" appearance="subtle"
+                                        onClick={event => onRequestDelete({ id: message._id, text: message.message,
+                                            trigger: event.currentTarget, row: rowRef.current })} />
                                 </>
                             )}
                         </div>
                     )}
 
-                    {/* Emoji seçici */}
-                    {showPicker && (
-                        <div
-                            className={`absolute z-20 bottom-full mb-1.5 ${fromMe ? 'right-0' : 'left-0'}
-                                        flex gap-1 p-1.5 rounded-xl shadow-xl max-w-[90vw] flex-wrap`}
-                            style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}
-                        >
-                            {REACTIONS.map(emoji => (
-                                <button
-                                    key={emoji}
-                                    type='button'
-                                    onClick={() => { react(message._id, emoji); setShowPicker(false); }}
-                                    className='w-8 h-8 rounded-lg text-base hover:scale-110 transition-transform'
-                                    title={emoji}
-                                >
-                                    {emoji}
-                                </button>
-                            ))}
-                        </div>
-                    )}
                 </div>
 
                 {/* Tepki rozetleri */}
-                {Object.keys(grouped).length > 0 && (
+                {!message.isDeleted && Object.keys(grouped).length > 0 && (
                     <div className='flex gap-1 mt-1 flex-wrap'>
                         {Object.entries(grouped).map(([emoji, count]) => {
                             const mine = (message.reactions || [])
                                 .some(r => r.emoji === emoji && String(r.userId) === String(authUser?._id));
                             return (
-                                <button
+                                <Button appearance="subtle" isSelected={mine} aria-pressed={mine} isDisabled={reactionLoading}
                                     key={emoji}
                                     onClick={() => react(message._id, emoji)}
-                                    className='flex items-center gap-1 px-1.5 py-0.5 rounded-full text-xs'
-                                    style={{
-                                        background: mine ? 'var(--accent-soft)' : 'var(--bg-elevated)',
-                                        border: `1px solid ${mine ? 'var(--accent)' : 'var(--border-subtle)'}`,
-                                        color: 'var(--text-secondary)'
-                                    }}
+                                    aria-label={`${emojiName(emoji)} tepkisi, ${count} kişi`}
                                 >
                                     <span>{emoji}</span>
                                     {count > 1 && <span>{count}</span>}
-                                </button>
+                                </Button>
                             );
                         })}
                     </div>
                 )}
+                {!message.isDeleted && !showPicker && reactionError &&
+                    <div role="alert"><SectionMessage appearance="error">{reactionError}</SectionMessage></div>}
 
                 <div className='flex items-center gap-1.5 mt-0.5 px-1'>
                     <span className='text-[11px]' style={{ color: 'var(--text-muted)' }}>{formatTime()}</span>

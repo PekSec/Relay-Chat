@@ -1,5 +1,145 @@
 # Verification record
 
+## Emoji selectors / contract step 04c — 26 September 2026
+
+User approved B (desktop Popup/mobile Modal) and temporary Unicode after the
+official artwork source/license and React 19 support could not be verified.
+This delivers that temporary scope: 13 searchable composer choices, six existing
+reactions, shared lazy panel, grapheme-safe caret/selection insertion, keyboard
+navigation, focus return, inline errors and pending protection. Official artwork
+and the full catalog are **not integrated**. Native Unicode remains message data
+and display; there are no external emoji asset requests.
+
+| Check | Observed result |
+| --- | --- |
+| New emoji Chromium | 50 desktop/mobile checks passed |
+| New insertion/state checks | Caret, selection, UTF-16 limit, ZWJ/skin tone/combining, late history, out-of-order events, deletion and reset passed |
+| Reaction backend | Six toggles, ownership/invalid/missing/deleted cases, 20 rounds of concurrent participants, duplicate toggles and reaction/deletion races passed |
+| Existing smoke / security / realtime | 41 / 37 / 8 passed |
+| Existing UI / settings | 56 / 106 passed |
+| Previous delete / clear dialogs | 47 / 47 passed |
+| Conversation query regression | At most two reads, correct previews/status filtering |
+| Build / lint | Passed; existing Vite >500 kB advisory remains |
+
+The backend race check reproduced VersionError failures before the fix. Atomic
+reaction updates now preserve both participants and increment `reactionVersion`.
+Events go to both account rooms; HTTP/socket share a version-aware store update.
+The independent read-only review found no additional actionable regression.
+
+`@atlaskit/popup@6.3.10` installed with strict peer checks, without React downgrade
+or force. The emoji package/react-intl were not installed. Lazy EmojiPanel JS is
+2.22 kB / 1.14 kB gzip; shared Modal JS is 72.11 / 23.31 kB. Home JS is
+92.10 / 29.27 kB. Main JS is 620.84 / 189.71 kB, compared with the recorded 04b
+619.85 / 189.38 kB (+0.99 / +0.33 kB). These chunk figures are not the full cost
+of opening the picker: shared chunks and CSS can also load on first use.
+
+Reproduce with `test:emoji` and `test:emoji-ui` (included in `test:all` and CI),
+an explicit disposable MONGO_URI, and a production build for browser checks.
+Tests used local MongoDB 7 on port 27018 and Chromium; no remote CI or deployment.
+Inspected [desktop light](screenshots/emoji-desktop-light.png) and
+[mobile dark](screenshots/emoji-mobile-dark.png) captures include the length-limit
+error state. Current scope and remaining artwork acceptance are in the
+[emoji contract](contracts/atlassian-overhaul/emoji.md).
+
+## History clearing / contract step 04b — 25 September 2026
+
+User selected B (person name/avatar). The lazy modal uses the installed Modal,
+Avatar, Button, SectionMessage and Spinner components. It captures the target,
+focuses Cancel, prevents repeated pending requests, preserves history on failure,
+and returns focus to the header action. Search resets after success. The result
+empty state now says only “Henüz mesaj yok.” No new dependency was installed.
+
+| Check | Observed result |
+| --- | --- |
+| New history-clearing Chromium | 47 checks passed on desktop/mobile |
+| New backend/state checks | Pending/active account isolation, repeat clear, missing conversation, concurrent arrival, physical cleanup, stale responses and session reset passed |
+| Previous deletion checks | 47 browser checks, store regression and 30 backend races passed |
+| Existing smoke / security / realtime | 41 / 37 / 8 passed |
+| Existing UI / settings Chromium | 56 / 106 passed |
+| Conversation queries | Correct previews/status filtering, at most two reads |
+| Build / lint / changed JavaScript syntax / CI YAML / diff | Passed |
+
+The backend regression first failed because clearing an incoming pending request
+deleted the sender's history too. Clearing now always applies to the authenticated
+user. A captured highest message ID bounds the update using existing pagination
+ordering. The API returns this `clearedThrough` boundary and sends an account-only
+`conversationCleared` event. HTTP/socket updates preserve later messages, discard
+cleared records from late history/list responses, and reset pagination. Pending
+request hiding shares the same behavior. No new endpoint was added.
+
+Browser checks cover the captured person, cancel/focus trap/return, desktop overlay,
+light/dark, large text, 404/500/network failure, double submit, two account sessions,
+peer history preservation, a new message before the clear response arrives, reload,
+empty/repeated clearing, search reset, pending requests, new requests after clearing,
+conversation switch with a delayed response, and logout.
+
+Read-only review and follow-up checks caught stale preview and unread snapshot
+races. Each was reproduced before its fix. The state check covers old-ID and null
+previews and old pending request snapshots without losing a known newer message.
+The browser check delays a count response after clearing, delivers a new message
+while both own tabs have no conversation selected, and verifies the unread count
+remains one after a fresh snapshot. Aborted responses cannot close a later modal.
+
+Reproduce with `npm run test:clear-history` and `npm run test:clear-dialog`, both
+included in `test:all` and CI. Set an explicit disposable `MONGO_URI`; the browser
+suite requires a build and defaults to port 5028. Local tests used disposable
+MongoDB 7 on port 27018 and Chromium. Inspected screenshots:
+[desktop light](screenshots/clear-desktop-light.png), [mobile dark](screenshots/clear-mobile-dark.png).
+
+ClearHistoryModal JS: 2.28 kB / 1.20 kB gzip, plus shared Avatar
+19.15 kB / 6.93 kB gzip and Modal 76.88 kB / 24.60 kB gzip. Main JS:
+619.85 kB / 189.38 kB gzip. The existing Vite >500 kB advisory remains.
+No remote CI run, deployment, commit or push was performed in this step.
+04c emoji selection/provider assets and the main chat design still require
+separate decisions; see the [dialog contract](contracts/atlassian-overhaul/04-dialogs.md).
+
+## Message deletion / contract step 04a — 25 September 2026
+
+Implemented the approved B modal with a 240-grapheme message preview, safe initial
+focus, inline errors, retry, and a single pending request. The modal loads lazily
+and uses existing Atlaskit dependencies. No provider branding or slogans are shown.
+04b history clearing, 04c emoji integration, and the main chat design remain unapproved.
+
+| Check | Observed result |
+| --- | --- |
+| Deletion Chromium | 47 checks passed on desktop/mobile |
+| Deletion state regression | Unloaded targets, stale history/page/list/edit, previews, repeat events, session reset passed |
+| Deletion backend regression | Ownership, invalid/missing ID, idempotent retry and 30 edit/delete races passed |
+| Existing smoke / security / realtime | 41 / 37 / 8 passed |
+| Existing UI / settings Chromium | 56 / 106 passed |
+| Conversation queries | All/pending/active results correct, at most two reads |
+| Production build / frontend lint / changed JavaScript syntax / diff | Passed |
+
+The backend test first reproduced a repeated deletion returning 400. Deletion now
+uses an atomic update and returns 200 on an owner's retry. Editing atomically
+excludes deleted records. The unchanged `{ messageId }` socket payload reaches
+all sessions of both accounts. HTTP and socket results share the store action.
+
+The final read-only review found two additional races. A deletion arriving before
+history loaded was lost, and a sender's other tab retained an open editor after
+deletion. Both were reproduced by failing checks, then fixed: session-scoped
+deletion IDs normalize later message/list writes, and a deleted row cannot render
+its editor. IDs are discarded on account reset. The second-tab browser test now
+keeps an editor open when the first tab deletes the message.
+
+Browser coverage includes light/dark, large text, grapheme boundaries, focus trap
+and return, cancel/desktop overlay, 403/404/non-JSON server/network failures,
+duplicate submit, latest/older message previews, HTTP-only filtered deletion focus,
+conversation change with a delayed response, and logout. Mobile uses the installed
+Modal's full-screen layout. Screenshots inspected: [desktop](screenshots/delete-desktop-light.png),
+[mobile dark](screenshots/delete-mobile-dark.png). Unicode is preserved; the official
+emoji provider/asset work remains in 04c.
+
+`npm run test:delete-message` and `npm run test:delete-dialog` are included in
+`test:all` and CI. Both require an explicit disposable `MONGO_URI`; the browser
+suite requires a production build and defaults to port 5027. Local runs used
+MongoDB 7 on port 27018 and Chromium. No remote CI run or deployment was performed.
+
+Deletion modal JS: 2.17 kB / 1.18 kB gzip, plus the shared modal chunk
+76.88 kB / 24.60 kB gzip. Main JS: 618.40 kB / 188.93 kB gzip; the existing
+Vite >500 kB advisory remains. No download timing is inferred from these sizes.
+Scope and next decision: [04-dialogs contract](contracts/atlassian-overhaul/04-dialogs.md).
+
 ## Signup / contract step 03 — 25 September 2026
 
 Implemented the approved A single-column card using the existing auth layout,

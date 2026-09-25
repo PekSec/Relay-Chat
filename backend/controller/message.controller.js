@@ -131,21 +131,23 @@ export const clearConversation = async (req, res) => {
         }
 
         const pair = { $or: [{ senderId, receiverId: userToChatId }, { senderId: userToChatId, receiverId: senderId }] };
-        // Only the receiver can decline a pending request for both participants.
-        const firstMessage = await Message.findOne(pair).sort({ _id: 1 });
-        if (conversation.status === "pending" && firstMessage?.receiverId.toString() === senderId) {
-            const result = await Message.deleteMany(pair);
-            await Conversation.findByIdAndDelete(conversation._id);
-            return res.status(200).json({ message: "Pending request declined", deletedCount: result.deletedCount });
+        // Use the same ID ordering as history pagination; later arrivals stay visible.
+        const last = await Message.findOne(pair).sort({ _id: -1 }).select('_id').lean();
+        const clearedThrough = last?._id?.toString() || conversation.messages.map(String).sort().at(-1) || null;
+        let deletedCount = 0;
+        if (clearedThrough) {
+            const scope = { ...pair, _id: { $lte: clearedThrough } };
+            const result = await Message.updateMany({ ...scope, clearedBy: { $ne: senderId } }, { $addToSet: { clearedBy: senderId } });
+            deletedCount = result.modifiedCount;
+            // Pending and accepted conversations both preserve the other user's history.
+            await Message.deleteMany({ ...scope, clearedBy: { $all: conversation.participants } });
+            io.to(`user:${senderId}`).emit('conversationCleared', { peerId: userToChatId, clearedThrough });
         }
-        // Clearing an accepted conversation only hides this user's history.
-        const result = await Message.updateMany({ ...pair, clearedBy: { $ne: senderId } }, { $addToSet: { clearedBy: senderId } });
-        // The preview reference may outlive a removed message; populate safely omits it.
-        await Message.deleteMany({ ...pair, clearedBy: { $all: conversation.participants } });
 
         res.status(200).json({
             message: "Conversation cleared",
-            deletedCount: result.modifiedCount
+            deletedCount,
+            clearedThrough
         });
     }
     catch (error) {
@@ -182,26 +184,27 @@ export const editMessage = async (req, res) => {
             return res.status(400).json({ error: "Message cannot exceed 2000 characters" });
         }
 
-        message.message = newMessage.trim(); //mesajı yeni mesajla güncelle
-        message.isEdited = true;
-        message.editedAt = Date.now();
-
-        await message.save();//db ye kaydet
+        const updatedMessage = await Message.findOneAndUpdate(
+            { _id: messageId, senderId: userId, isDeleted: { $ne: true } },
+            { $set: { message: newMessage.trim(), isEdited: true, editedAt: new Date() } },
+            { new: true }
+        );
+        if (!updatedMessage) return res.status(400).json({ error: "A deleted message cannot be edited" });
 
         // SOCKET.IO - Real-time mesaj düzenleme bildirimi - alıcı online ise anında ilet bu dbye kaydedildikten sonra anlık olarak websocket ile gönder
         const receiversocketId = getReceiverSocketId(message.receiverId);
         if (receiversocketId) {
             io.to(receiversocketId).emit("messageEdited", { // messageEdited eventini alıcıya emit et, bu nesneyi yolla
                 messageId: message._id,
-                newMessage: message.message,
-                isEdited: message.isEdited,
-                editedAt: message.editedAt
+                newMessage: updatedMessage.message,
+                isEdited: updatedMessage.isEdited,
+                editedAt: updatedMessage.editedAt
             });
         }
 
         res.status(200).json({//düzenlenen mesajı dön
             message: "Message edited successfully",
-            updatedMessage: message
+            updatedMessage
         });
 
 
@@ -241,23 +244,18 @@ export const deleteMessage = async (req, res) => {
         if (message.senderId.toString() !== userId) {
             return res.status(403).json({ error: "Forbidden. You can only delete your own messages." });
         }
-        if (message.isDeleted) {
-            return res.status(400).json({ error: "Message is already deleted" });
-        }
-
-        message.isDeleted = true;
-        message.message = "This message was deleted";
-        await message.save();
-
-        // Karşı taraf açık sohbetteyse anında güncellensin
-        const receiverSocketId = getReceiverSocketId(message.receiverId);
-        if (receiverSocketId) {
-            io.to(receiverSocketId).emit("messageDeleted", { messageId: message._id });
-        }
+        const deletedMessage = await Message.findOneAndUpdate(
+            { _id: messageId, senderId: userId },
+            { $set: { isDeleted: true, message: "This message was deleted" } },
+            { new: true }
+        );
+        if (!deletedMessage) return res.status(404).json({ error: "Message not found" });
+        io.to(`user:${message.senderId}`).to(`user:${message.receiverId}`)
+            .emit("messageDeleted", { messageId: message._id });
 
         res.status(200).json({
             message: "Message deleted successfully",
-            deletedMessage: message
+            deletedMessage
         });
 
     } catch (error) {
@@ -345,33 +343,27 @@ export const reactToMessage = async (req, res) => {
             return res.status(403).json({ error: "Forbidden. You are not part of this conversation." });
         }
 
-        const existing = message.reactions.find(r => r.userId.toString() === userId);
+        const participant = new mongoose.Types.ObjectId(userId);
+        const reactions = { $ifNull: ['$reactions', []] };
+        const sameUser = { $eq: ['$$reaction.userId', participant] };
+        const others = { $filter: { input: reactions, as: 'reaction', cond: { $not: [sameUser] } } };
+        const alreadySelected = { $anyElementTrue: [{ $map: { input: reactions, as: 'reaction',
+            in: { $and: [sameUser, { $eq: ['$$reaction.emoji', emoji] }] } } }] };
+        const updated = await Message.findOneAndUpdate({ _id: messageId, isDeleted: { $ne: true },
+            $or: [{ senderId: participant }, { receiverId: participant }] }, [{ $set: {
+            reactions: { $cond: [alreadySelected, others, { $concatArrays: [others, [{ userId: participant, emoji }]] }] },
+            reactionVersion: { $add: [{ $ifNull: ['$reactionVersion', 0] }, 1] },
+        } }], { new: true });
+        if (!updated) return res.status(400).json({ error: 'Message is no longer available' });
 
-        if (existing && existing.emoji === emoji) {
-            // Aynı emojiye tekrar basıldı -> tepkiyi kaldır
-            message.reactions = message.reactions.filter(r => r.userId.toString() !== userId);
-        } else if (existing) {
-            existing.emoji = emoji; // farklı emoji -> değiştir
-        } else {
-            message.reactions.push({ userId, emoji });
-        }
-
-        await message.save();
-
-        // Karşı tarafa anlık bildir
-        const otherUserId =
-            message.senderId.toString() === userId ? message.receiverId : message.senderId;
-        const otherSocketId = getReceiverSocketId(otherUserId);
-        if (otherSocketId) {
-            io.to(otherSocketId).emit("messageReaction", {
-                messageId: message._id,
-                reactions: message.reactions
-            });
-        }
+        io.to(`user:${message.senderId}`).to(`user:${message.receiverId}`).emit('messageReaction', {
+            messageId: message._id, reactions: updated.reactions, reactionVersion: updated.reactionVersion,
+        });
 
         res.status(200).json({
             message: "Reaction updated",
-            reactions: message.reactions
+            reactions: updated.reactions,
+            reactionVersion: updated.reactionVersion
         });
     } catch (error) {
         console.error("Error reacting to message:", error);

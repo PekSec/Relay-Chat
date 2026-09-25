@@ -12,7 +12,7 @@ const useListenEditedMessages = () => {
         socket.on("messageEdited", (editedMessage) => {
             const { messageId, newMessage, isEdited, editedAt } = editedMessage;
             setMessages(messages => messages.map(msg =>
-                msg._id === messageId
+                msg._id === messageId && !msg.isDeleted
                     ? { ...msg, message: newMessage, isEdited, editedAt }
                     : msg
             ));

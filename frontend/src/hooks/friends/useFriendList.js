@@ -32,7 +32,10 @@ const useFriendList = (endpoint, field, key) => {
                     status: 'pending',
                 })).filter(item => item._id && item.lastMessage && item.lastMessage.senderId !== userId);
             }
-            if (!controller.signal.aborted) useFriendStore.setState({ [key]: items });
+            if (!controller.signal.aborted) {
+                if (key === 'messageRequests') useFriendStore.getState().setMessageRequests(items);
+                else useFriendStore.setState({ [key]: items });
+            }
         } catch (error) {
             if (!controller.signal.aborted && error.name !== 'AbortError') setError('Liste yüklenemedi. Tekrar dene.');
         } finally {
