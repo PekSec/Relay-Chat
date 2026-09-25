@@ -1,1 +1,27 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><linearGradient id="a" x2="1" y2="1"><stop stop-color="#6366f1"/><stop offset="1" stop-color="#a855f7"/></linearGradient></defs><rect width="64" height="64" rx="18" fill="url(#a)"/><path d="M15 19h34v24H29l-10 8v-8h-4z" fill="#fff"/><g fill="#6366f1"><circle cx="24" cy="31" r="3"/><circle cx="32" cy="31" r="3"/><circle cx="40" cy="31" r="3"/></g></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" fill="none" role="img" aria-labelledby="relay-title relay-desc">
+  <title id="relay-title">Relay</title>
+  <desc id="relay-desc">Two filled white conversation bubbles joined by an open-stem capital R connection, on a rounded square with a smooth Atlassian Blue800 to Teal500 gradient.</desc>
+  <defs>
+    <linearGradient id="relay-background" x1="0" y1="0" x2="512" y2="512" gradientUnits="userSpaceOnUse" color-interpolation="sRGB">
+      <stop stop-color="#1558BC"/>
+      <stop offset="1" stop-color="#42B2D7"/>
+    </linearGradient>
+    <mask id="relay-message-dots" x="0" y="0" width="512" height="512" maskUnits="userSpaceOnUse" style="mask-type:luminance">
+      <rect width="512" height="512" fill="#fff"/>
+      <g fill="#000">
+        <circle cx="133" cy="156" r="6"/>
+        <circle cx="157" cy="156" r="6"/>
+        <circle cx="181" cy="156" r="6"/>
+        <circle cx="322" cy="356" r="6"/>
+        <circle cx="346" cy="356" r="6"/>
+        <circle cx="370" cy="356" r="6"/>
+      </g>
+    </mask>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#relay-background)"/>
+  <g fill="#fff" mask="url(#relay-message-dots)">
+    <path d="M190 140H273C319 140 352 169 352 210S319 280 273 280H232L356 346C364 350 367 360 362 368C358 376 348 379 340 374L184 278C178 274 175 267 178 259C180 253 186 248 194 248H273C301 248 320 233 320 210S301 172 273 172H190Z"/>
+    <path d="M157 102C187 102 211 126 211 156S187 210 157 210C148 210 140 208 132 204L107 212C102 214 98 210 100 205L108 180C104 173 103 165 103 156C103 126 127 102 157 102Z"/>
+    <path d="M346 302C376 302 400 326 400 356C400 365 398 373 394 380L402 405C404 410 400 414 395 412L370 404C362 408 354 410 346 410C316 410 292 386 292 356S316 302 346 302Z"/>
+  </g>
+</svg>
