@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import useSendMessage from '../../hooks/messages/useSendMessage';
 import useSocket from '../../zustand/useSocket';
 import useConversation from '../../zustand/useConversation';
-import { IoSend } from 'react-icons/io5';
+import { IoSend, IoHappyOutline } from 'react-icons/io5';
+import useTheme from '../../zustand/useTheme';
 
 const QUICK_EMOJIS = ['😀', '😂', '🥰', '😎', '🤔', '👍', '🙏', '🎉', '❤️', '🔥', '✅', '😢'];
 const MAX_LENGTH = 2000;
@@ -13,6 +14,7 @@ const MessageInput = () => {
     const { loading, sendMessage } = useSendMessage();
     const socket = useSocket(state => state.socket);
     const receiverId = useConversation(state => state.selectedConversation?._id);
+    const sendKey = useTheme(state => state.preferences.sendKey);
     const timeoutRef = useRef(null);
     const lastTypingRef = useRef(0);
     const inputRef = useRef(null);
@@ -69,9 +71,9 @@ const MessageInput = () => {
         <form className="composer flex-shrink-0 px-3 sm:px-4 py-3" onSubmit={handleSubmit} style={{ borderTop: '1px solid var(--border-subtle)' }}>
             <div className="flex items-end gap-2">
                 <div className="relative" ref={emojiRef}>
-                    <button type="button" onClick={() => setShowEmoji(value => !value)} className="w-10 h-10 icon-btn text-lg" title="Emoji ekle" aria-expanded={showEmoji} aria-label="Emoji ekle">🙂</button>
+                    <button type="button" onClick={() => setShowEmoji(value => !value)} className="w-10 h-10 icon-btn text-lg" title="Emoji ekle" aria-expanded={showEmoji} aria-label="Emoji ekle"><IoHappyOutline /></button>
                     {showEmoji && (
-                        <div className="absolute bottom-full left-0 mb-2 z-30 grid grid-cols-6 gap-1 p-2 rounded-xl shadow-xl animate-pop" aria-label="Emojiler" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', width: '15rem' }}>
+                        <div className="absolute bottom-full left-0 mb-2 z-30 grid grid-cols-6 gap-1 p-2 rounded-xl shadow-xl" aria-label="Emojiler" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', width: '15rem' }}>
                             {QUICK_EMOJIS.map(emoji => <button key={emoji} type="button" onClick={() => {
                                 setMessage(value => (value + emoji).slice(0, MAX_LENGTH));
                                 setShowEmoji(false);
@@ -83,15 +85,16 @@ const MessageInput = () => {
                 <textarea ref={inputRef} rows={1} placeholder="Bir mesaj yaz..." aria-label="Mesaj" maxLength={MAX_LENGTH}
                     className="field min-w-0 flex-1 resize-none max-h-32 scroll-slim" value={message} onChange={handleTyping}
                     onKeyDown={event => {
-                        if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) handleSubmit(event);
+                        if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing &&
+                            (sendKey === 'enter' || event.ctrlKey || event.metaKey)) handleSubmit(event);
                     }} disabled={loading} />
-                <button type="submit" className="btn-primary-grad btn-icon-only w-10 h-10 flex items-center justify-center flex-shrink-0"
+                <button type="submit" className="primary-button btn-icon-only w-10 h-10 flex items-center justify-center flex-shrink-0"
                     disabled={loading || !message.trim()} title="Gönder" aria-label="Gönder">
                     {loading ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <IoSend className="text-lg" />}
                 </button>
             </div>
             <div className="flex justify-between pt-1.5 pl-12 text-[10px] text-[color:var(--text-muted)]">
-                <span className="hidden sm:inline">Enter ile gönder · Shift + Enter ile yeni satır</span>
+                <span className="hidden sm:inline">{sendKey === 'enter' ? 'Enter' : 'Ctrl / ⌘ + Enter'} ile gönder · Shift + Enter ile yeni satır</span>
                 {message.length > 1800 && <span className="ml-auto" aria-live="polite">{message.length}/{MAX_LENGTH}</span>}
             </div>
         </form>

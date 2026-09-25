@@ -1,4 +1,5 @@
 import Avatar from '../Avatar';
+import { IoHappyOutline, IoPencilOutline, IoTrashOutline } from 'react-icons/io5';
 import { useState, useEffect, useRef } from 'react';
 import useAuth from "../../zustand/useAuth";
 import useConversation from "../../zustand/useConversation";
@@ -115,7 +116,7 @@ const Message = ({ message, searchTerm = "", showAvatar = true }) => {
                             style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }} disabled={loading}>
                             Vazgeç
                         </button>
-                        <button onClick={handleEditSave} className='btn-primary-grad text-xs px-3 py-1.5' disabled={loading}>
+                        <button onClick={handleEditSave} className='primary-button text-xs px-3 py-1.5' disabled={loading}>
                             Kaydet
                         </button>
                     </div>
@@ -126,7 +127,7 @@ const Message = ({ message, searchTerm = "", showAvatar = true }) => {
 
     return (
         <div
-            className={`group flex gap-2 px-4 ${showAvatar ? 'mt-3' : 'mt-0.5'} ${fromMe ? 'flex-row-reverse' : 'flex-row'} animate-rise`}
+            className={`group flex gap-2 px-4 ${showAvatar ? 'mt-3' : 'mt-0.5'} ${fromMe ? 'flex-row-reverse' : 'flex-row'}`}
         >
             {/* Avatar yalnızca karşı taraf için gösterilir; kendi mesajlarımızda
                 kim olduğumuz zaten belli, tekrar etmek yer kaplıyordu.
@@ -174,7 +175,7 @@ const Message = ({ message, searchTerm = "", showAvatar = true }) => {
                                 aria-label='Tepki ver'
                                 aria-expanded={showPicker}
                             >
-                                🙂
+                                <IoHappyOutline />
                             </button>
                             {fromMe && (
                                 <>
@@ -185,7 +186,7 @@ const Message = ({ message, searchTerm = "", showAvatar = true }) => {
                                         title='Düzenle'
                                         aria-label='Düzenle'
                                     >
-                                        ✏️
+                                        <IoPencilOutline />
                                     </button>
                                     <button
                                         onClick={handleDelete}
@@ -195,7 +196,7 @@ const Message = ({ message, searchTerm = "", showAvatar = true }) => {
                                         title='Sil'
                                         aria-label='Sil'
                                     >
-                                        🗑️
+                                        <IoTrashOutline />
                                     </button>
                                 </>
                             )}
@@ -206,7 +207,7 @@ const Message = ({ message, searchTerm = "", showAvatar = true }) => {
                     {showPicker && (
                         <div
                             className={`absolute z-20 bottom-full mb-1.5 ${fromMe ? 'right-0' : 'left-0'}
-                                        flex gap-1 p-1.5 rounded-xl shadow-xl max-w-[90vw] flex-wrap animate-pop`}
+                                        flex gap-1 p-1.5 rounded-xl shadow-xl max-w-[90vw] flex-wrap`}
                             style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}
                         >
                             {REACTIONS.map(emoji => (
@@ -234,7 +235,7 @@ const Message = ({ message, searchTerm = "", showAvatar = true }) => {
                                 <button
                                     key={emoji}
                                     onClick={() => react(message._id, emoji)}
-                                    className='flex items-center gap-1 px-1.5 py-0.5 rounded-full text-xs animate-pop'
+                                    className='flex items-center gap-1 px-1.5 py-0.5 rounded-full text-xs'
                                     style={{
                                         background: mine ? 'var(--accent-soft)' : 'var(--bg-elevated)',
                                         border: `1px solid ${mine ? 'var(--accent)' : 'var(--border-subtle)'}`,
@@ -260,11 +261,11 @@ const Message = ({ message, searchTerm = "", showAvatar = true }) => {
                         <span title={message.isRead ? 'Okundu' : 'İletildi'}>
                             {message.isRead ? (
                                 <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 16 15">
-                                    <path fill="#53bdeb" d="M15.01 3.316l-.478-.372a.365.365 0 0 0-.51.063L8.666 9.88a.32.32 0 0 1-.484.033l-.358-.325a.32.32 0 0 0-.484.032l-.378.483a.418.418 0 0 0 .036.54l1.32 1.267a.32.32 0 0 0 .484-.034l6.272-8.048a.366.366 0 0 0-.064-.512zm-4.1 0l-.478-.372a.365.365 0 0 0-.51.063L4.566 9.88a.32.32 0 0 1-.484.033L1.891 7.769a.366.366 0 0 0-.515.006l-.423.433a.364.364 0 0 0 .006.514l3.258 3.185c.143.14.361.125.484-.033l6.272-8.048a.365.365 0 0 0-.063-.51z" />
+                                    <path fill="var(--accent-hover)" d="M15.01 3.316l-.478-.372a.365.365 0 0 0-.51.063L8.666 9.88a.32.32 0 0 1-.484.033l-.358-.325a.32.32 0 0 0-.484.032l-.378.483a.418.418 0 0 0 .036.54l1.32 1.267a.32.32 0 0 0 .484-.034l6.272-8.048a.366.366 0 0 0-.064-.512zm-4.1 0l-.478-.372a.365.365 0 0 0-.51.063L4.566 9.88a.32.32 0 0 1-.484.033L1.891 7.769a.366.366 0 0 0-.515.006l-.423.433a.364.364 0 0 0 .006.514l3.258 3.185c.143.14.361.125.484-.033l6.272-8.048a.365.365 0 0 0-.063-.51z" />
                                 </svg>
                             ) : (
                                 <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 16 15">
-                                    <path fill="#8696a0" d="M10.91 3.316l-.478-.372a.365.365 0 0 0-.51.063L4.566 9.88a.32.32 0 0 1-.484.033L1.891 7.769a.366.366 0 0 0-.515.006l-.423.433a.364.364 0 0 0 .006.514l3.258 3.185c.143.14.361.125.484-.033l6.272-8.048a.365.365 0 0 0-.063-.51z" />
+                                    <path fill="var(--text-muted)" d="M10.91 3.316l-.478-.372a.365.365 0 0 0-.51.063L4.566 9.88a.32.32 0 0 1-.484.033L1.891 7.769a.366.366 0 0 0-.515.006l-.423.433a.364.364 0 0 0 .006.514l3.258 3.185c.143.14.361.125.484-.033l6.272-8.048a.365.365 0 0 0-.063-.51z" />
                                 </svg>
                             )}
                         </span>

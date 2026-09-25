@@ -20,6 +20,7 @@ requires the authentication cookie.
 | GET    | `/auth/me`      | Current session user |
 | PUT    | `/auth/profile` | Update name / avatar |
 | PUT    | `/auth/password`| Change password     |
+| PATCH  | `/auth/preferences` | Save account appearance and messaging preferences |
 
 ### Friends
 | Method | Endpoint                  | Description                   |
@@ -73,6 +74,18 @@ requires the authentication cookie.
 
 
 ## Pagination and sessions
+
+`PATCH /api/auth/preferences` accepts a non-empty partial object with `theme`
+(`system`, `light`, `dark`), `accent` (the 14 named palette IDs), `density`
+(`comfortable`, `compact`), `fontSize` (`standard`, `large`), `sendKey`
+(`enter`, `mod-enter`), and boolean `chatSound`, `notificationSound`,
+`messagePreviews`. Unknown keys and invalid types/values return 400. The authenticated
+account alone is updated, atomically per supplied field; the response is
+`{ preferences: <complete preferences> }`. Signup, login, `/auth/me` and profile
+responses also include `user.preferences`. Older accounts receive defaults without
+a data backfill. Other devices pick up changes on their next session load.
+See the [preference contract](contracts/atlassian-overhaul/shared.md) for the full
+palette IDs and defaults.
 
 `GET /api/messages/:id` returns the latest 50 messages in chronological order.
 Request older history with `?before=<oldest-message-id>&limit=50` (maximum 50).

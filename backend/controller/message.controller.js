@@ -62,12 +62,13 @@ export const sendMessage = async (req, res) => {
             message: message.trim(),
         });
 
-        if (newMessage) {
-            conversation.messages = [newMessage._id]; // Keep only the preview reference; history is queried from Message.
-        }
-        // Mesaj ve konuşmayı paralel olarak kaydet - performans için
         await newMessage.save();
-        await conversation.save();
+        // Atomically keep the newest preview even when message writes finish out of order.
+        // A stale pending request must never overwrite an accepted conversation's status.
+        conversation = await Conversation.findByIdAndUpdate(conversation._id, {
+            $push: { messages: { $each: [newMessage._id], $sort: -1, $slice: 1 } },
+            ...(conversation.status === "active" ? { $set: { status: "active" } } : {})
+        }, { new: true });
 
         // SOCKET.IO - Real-time mesaj gönderimi - alıcı online ise anında ilet bu dbye kaydedildikten sonra anlık olarak websocket ile gönder
         const receiverSocketId = getReceiverSocketId(receiverId);

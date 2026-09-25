@@ -1,3 +1,4 @@
+import Button from '@atlaskit/button/new';
 import { passwordIsValid } from '../../utils/password';
 import GenderCheckBox from "./GenderCheckBox";
 import { Link } from "react-router-dom";
@@ -40,21 +41,14 @@ const SignUp = () => {
     const passwordsMatch = inputs.confirmPassword === "" || inputs.password === inputs.confirmPassword;
 
     return (
-        <div className='w-full max-w-sm mx-auto animate-rise'>
-            <div className='surface-glass rounded-2xl p-7 shadow-2xl'>
+        <div className='w-full max-w-sm mx-auto'>
+            <div className='surface rounded-lg p-7'>
 
                 <div className='flex flex-col items-center gap-2 mb-6'>
-                    <div
-                        className='w-14 h-14 rounded-2xl flex items-center justify-center text-2xl brand-badge'
-                    >
-                        💬
-                    </div>
+                    <img src="/favicon.svg" alt="Relay" width="48" height="48" />
                     <h1 className='text-xl font-semibold' style={{ color: 'var(--text-primary)' }}>
                         Hesap oluştur
                     </h1>
-                    <p className='text-sm' style={{ color: 'var(--text-secondary)' }}>
-                        Birkaç saniyede sohbete başla
-                    </p>
                 </div>
 
                 <form onSubmit={handleSubmit} className='flex flex-col gap-3.5'>
@@ -143,10 +137,7 @@ const SignUp = () => {
 
                     <GenderCheckBox onChange={handleCheckboxChange} gender={inputs.gender} />
 
-                    <button
-                        type='submit'
-                        className='btn-primary-grad mt-1 flex items-center justify-center gap-2'
-                        disabled={loading}
+                    <Button type='submit' appearance='primary' isDisabled={loading}
                     >
                         {loading ? (
                             <>
@@ -154,7 +145,7 @@ const SignUp = () => {
                                 Oluşturuluyor
                             </>
                         ) : 'Kayıt ol'}
-                    </button>
+                    </Button>
 
                     <Link to='/login' className='text-center text-sm' style={{ color: 'var(--text-secondary)' }}>
                         Zaten hesabın var mı?{' '}

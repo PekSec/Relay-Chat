@@ -91,10 +91,79 @@ try {
         check(`${label}: both users register through the UI`, Boolean(a._id && b._id));
         await assertLayout(page, `${label} sidebar`);
 
-        await api(context, server.base, `/friends/send/${b._id}`, "POST");
-        const { friendRequests } = await api(peerContext, server.base, "/friends/requests");
-        assert.equal(friendRequests.length, 1);
-        await api(peerContext, server.base, "/friends/respond", "POST", { requestId: friendRequests[0]._id, response: "accept" });
+        await page.emulateMedia({ colorScheme: "dark" });
+        await eventually(async () => assert.equal(await page.locator('html').getAttribute('data-color-mode'), 'dark'));
+        const setAccountTheme = async value => {
+            await page.getByRole('button', { name: 'Hesap ayarları', exact: true }).click();
+            if (mobile) {
+                const sections = page.getByRole('combobox', { name: 'Ayarlar bölümü', exact: true });
+                await sections.focus();
+                await sections.press('ArrowDown');
+                await page.getByRole('option', { name: 'Görünüm', exact: true }).click();
+            } else await page.getByRole('button', { name: 'Görünüm', exact: true }).click();
+            const theme = page.getByRole('combobox', { name: 'Tema', exact: true });
+            await theme.focus();
+            await theme.press('ArrowDown');
+            await page.getByRole('option', { name: value, exact: true }).click();
+            const saved = page.waitForResponse(response => response.url().endsWith('/api/auth/preferences') && response.request().method() === 'PATCH');
+            await page.getByRole('button', { name: 'Tercihleri kaydet', exact: true }).click();
+            assert.ok((await saved).ok());
+            await page.getByRole('status').filter({ hasText: 'Tercihler kaydedildi' }).first().waitFor();
+            await page.keyboard.press('Escape');
+            await page.getByRole('dialog').waitFor({ state: 'hidden' });
+        };
+        await setAccountTheme('Açık');
+        await eventually(async () => assert.equal(await page.locator('html').getAttribute('data-color-mode'), 'light'));
+        await page.reload();
+        await eventually(async () => assert.equal(await page.locator('html').getAttribute('data-color-mode'), 'light'));
+        check(`${label}: theme preference survives reload and overrides system`, (await api(context, server.base, '/auth/me')).user.preferences.theme === 'light');
+        await setAccountTheme('Sistem');
+        await eventually(async () => assert.equal(await page.locator('html').getAttribute('data-color-mode'), 'dark'));
+        await page.emulateMedia({ colorScheme: 'light' });
+        await eventually(async () => assert.equal(await page.locator('html').getAttribute('data-color-mode'), 'light'));
+        check(`${label}: system theme follows OS changes`, true);
+
+        await api(peerContext, server.base, `/messages/send/${a._id}`, 'POST', { message: 'Mesaj isteği örneği' });
+        await page.getByTitle('Bildirimler', { exact: true }).click();
+        check(`${label}: message request notification names the sender`, await visible(page.getByRole('region', { name: 'Bildirimler', exact: true }).getByText(b.fullName, { exact: true })));
+        await page.keyboard.press('Escape');
+        let friendFetches = 0;
+        const countFriends = request => { if (new URL(request.url()).pathname === '/api/friends/list') friendFetches++; };
+        page.on('request', countFriends);
+        await page.getByRole('button', { name: 'Kişiler', exact: true }).click();
+        await visible(page.getByRole('searchbox', { name: 'Arkadaşlarda ara' }));
+        await page.waitForTimeout(200);
+        page.off('request', countFriends);
+        check(`${label}: opening contacts reuses the shared list`, friendFetches === 0);
+        await page.getByRole('button', { name: 'Sohbetler', exact: true }).click();
+
+        await page.route('**/api/friends/list', route => route.fulfill({ status: 503, contentType: 'application/json', body: '{}' }));
+        await page.reload();
+        await visible(page.getByRole('alert').filter({ hasText: 'Bazı listeler yüklenemedi' }));
+        await page.unroute('**/api/friends/list');
+        const retried = page.waitForResponse(response => new URL(response.url()).pathname === '/api/friends/list' && response.ok());
+        await page.getByRole('alert').getByRole('button', { name: 'Tekrar dene' }).click();
+        await retried;
+        await page.getByRole('alert').filter({ hasText: 'Bazı listeler yüklenemedi' }).waitFor({ state: 'hidden' });
+        check(`${label}: list failure can be retried`, true);
+
+        await page.getByRole('button', { name: /^İstekler/ }).click();
+        await page.getByRole('region', { name: 'Gelen mesaj istekleri' }).getByRole('button').click();
+        const accepted = page.waitForResponse(response => response.url().includes('/api/conversations/accept/') && response.request().method() === 'PUT');
+        await page.getByRole('button', { name: 'Kabul et ve sohbet et', exact: true }).click();
+        assert.ok((await accepted).ok());
+        await page.getByRole('heading', { name: 'Yeni mesaj isteği' }).waitFor({ state: 'hidden' });
+        check(`${label}: message request can be accepted from the redesigned list`, true);
+        await returnToSidebar(page, mobile);
+        await page.getByRole('button', { name: 'Yeni sohbet', exact: true }).click();
+        await page.getByLabel('Kullanıcı adı veya arkadaş kodu', { exact: true }).fill(b.username);
+        const person = page.getByRole('article').filter({ hasText: b.fullName });
+        await person.getByRole('button', { name: 'Arkadaş ekle', exact: true }).click();
+        await peer.getByRole('button', { name: 'Kişiler', exact: true }).click();
+        await peer.getByRole('button', { name: 'Gelen', exact: true }).click();
+        await peer.getByRole('article').filter({ hasText: a.fullName }).getByRole('button', { name: 'Kabul et', exact: true }).click();
+        await peer.getByRole('button', { name: 'Tümü', exact: true }).click();
+        check(`${label}: user search and friend acceptance work through the UI`, await visible(peer.getByRole('article').filter({ hasText: a.fullName })));
         await api(context, server.base, `/messages/send/${b._id}`, "POST", { message: "Merhaba! Yeni sohbet alanımıza hoş geldin 👋" });
         await api(peerContext, server.base, `/messages/send/${a._id}`, "POST", { message: "Merhaba Deniz! Burada olmak güzel." });
         await page.reload();
@@ -104,6 +173,8 @@ try {
         check(`${label}: conversation history renders`, await visible(page.locator(".bubble").filter({ hasText: "Merhaba Deniz! Burada olmak güzel." })));
         const composer = page.locator("textarea").last();
         await composer.fill("Hafta sonu kahve içelim mi? ☕");
+        await eventually(async () => assert.match(await peer.locator('.relay-sidebar').textContent(), /yazıyor/));
+        check(`${label}: shared sidebar typing listener updates the conversation`, true);
         await composer.press("Enter");
         check(`${label}: outgoing message renders`, await visible(page.locator(".bubble").filter({ hasText: "Hafta sonu kahve içelim mi? ☕" })));
         check(`${label}: peer receives the message without reloading`, await visible(peer.locator(".bubble").filter({ hasText: "Hafta sonu kahve içelim mi? ☕" })));
@@ -121,6 +192,10 @@ try {
         check(`${label}: reaction is persisted`, true);
         await assertLayout(page, `${label} chat`);
         await page.screenshot({ path: `test-results/${label}-chat.png`, fullPage: true, animations: "disabled" });
+        await page.emulateMedia({ colorScheme: 'dark' });
+        await eventually(async () => assert.equal(await page.locator('html').getAttribute('data-color-mode'), 'dark'));
+        await page.screenshot({ path: `test-results/${label}-chat-dark.png`, fullPage: true, animations: 'disabled' });
+        await page.emulateMedia({ colorScheme: 'light' });
 
         // A failed request must preserve the draft so the user can retry.
         await page.route("**/api/messages/send/*", (route) => route.fulfill({
@@ -141,6 +216,8 @@ try {
         await settingsButton.click();
         const modal = page.getByRole("dialog");
         check(`${label}: settings opens accessibly`, await visible(modal));
+        await assertLayout(page, `${label} settings`);
+        await page.screenshot({ path: `test-results/${label}-settings.png`, fullPage: true, animations: 'disabled' });
         await page.locator("#set-fullname").fill("Deniz Kaya");
         const saved = page.waitForResponse((response) => response.url().endsWith("/api/auth/profile") && response.request().method() === "PUT");
         await page.getByRole("button", { name: "Değişiklikleri kaydet", exact: true }).click();
@@ -164,6 +241,7 @@ try {
         await page.reload();
         check(`${label}: logout persists across reload`, await visible(page.getByRole("button", { name: "Giriş yap", exact: true })));
         await assertLayout(page, `${label} login`);
+        await page.screenshot({ path: `test-results/${label}-login.png`, fullPage: true, animations: 'disabled' });
         check(`${label}: no uncaught browser errors`, errors.length === 0, errors.join(" | "));
         await context.tracing.stop({ path: `test-results/${label}-trace.zip` });
         await context.close();

@@ -10,6 +10,7 @@ const useFriendList = (endpoint, field, key) => {
     const connectionVersion = useSocket(state => state.connectionVersion);
     const data = useFriendStore(state => state[key]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
     const request = useRef(null);
     const refresh = useCallback(async () => {
         request.current?.abort();
@@ -17,6 +18,7 @@ const useFriendList = (endpoint, field, key) => {
         request.current = controller;
         if (!userId) return;
         setLoading(true);
+        setError('');
         try {
             const response = await apiFetch(endpoint, { signal: controller.signal });
             const result = await response.json();
@@ -32,12 +34,12 @@ const useFriendList = (endpoint, field, key) => {
             }
             if (!controller.signal.aborted) useFriendStore.setState({ [key]: items });
         } catch (error) {
-            if (error.name !== 'AbortError') console.error('Liste yüklenemedi:', endpoint);
+            if (!controller.signal.aborted && error.name !== 'AbortError') setError('Liste yüklenemedi. Tekrar dene.');
         } finally {
             if (!controller.signal.aborted) setLoading(false);
         }
     }, [endpoint, field, key, userId]);
     useEffect(() => { refresh(); return () => request.current?.abort(); }, [refresh, connectionVersion]);
-    return { data, loading, refresh };
+    return { data, loading, error, refresh };
 };
 export default useFriendList;

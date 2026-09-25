@@ -17,7 +17,7 @@ const GenderCheckBox = (props) => {
 					return (
 						<label
 							key={value}
-							className='cursor-pointer rounded-xl px-3 py-2.5 text-center text-sm transition-colors'
+							className='cursor-pointer rounded px-3 py-2.5 text-center text-sm transition-colors has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2'
 							style={{
 								backgroundColor: selected ? 'var(--accent-soft)' : 'var(--bg-elevated)',
 								border: `1px solid ${selected ? 'var(--accent)' : 'var(--border-subtle)'}`,

@@ -10,6 +10,15 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@atlaskit/avatar": "^29.1.0",
+    "@atlaskit/button": "^25.4.2",
+    "@atlaskit/form": "^18.0.0",
+    "@atlaskit/icon": "^38.0.1",
+    "@atlaskit/modal-dialog": "^17.0.0",
+    "@atlaskit/select": "^23.1.0",
+    "@atlaskit/textfield": "^10.2.6",
+    "@atlaskit/toggle": "^17.3.4",
+    "@atlaskit/tokens": "^20.0.0",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "react-hot-toast": "^2.6.1",
@@ -24,7 +33,6 @@
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^5.0.0",
     "autoprefixer": "^10.6.1",
-    "daisyui": "^4.6.1",
     "eslint": "^9.33.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.5.7",
@@ -32,5 +40,14 @@
     "postcss": "^8.5.6",
     "tailwindcss": "^3.4.17",
     "vite": "^7.1.2"
+  },
+  "overrides": {
+    "react": "$react",
+    "react-dom": "$react-dom",
+    "@atlaskit/analytics-next": {
+      "@atlaskit/analytics-next-stable-react-context": {
+        "react": "$react"
+      }
+    }
   }
 }

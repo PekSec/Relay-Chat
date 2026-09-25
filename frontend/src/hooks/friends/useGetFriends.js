@@ -1,6 +1,6 @@
 import useFriendList from './useFriendList';
 const useGetFriends = () => {
-    const { data, loading } = useFriendList('/api/friends/list', 'friends', 'friends');
-    return { friends: data, loading };
+    const { data, ...status } = useFriendList('/api/friends/list', 'friends', 'friends');
+    return { friends: data, ...status };
 };
 export default useGetFriends;

@@ -1,4 +1,4 @@
-import User from "../models/user.model.js";
+import User, { preferenceFields } from "../models/user.model.js";
 import { disconnectSession, disconnectUser } from "../socket/socket.js";
 import Session from "../models/session.model.js";
 import { validPassword } from "../utils/validation.js";
@@ -66,7 +66,8 @@ export const signup = async (req, res) => {
                     username: newUser.username,
                     gender: newUser.gender,
                     profilePic: newUser.profilePic,
-                    friendCode: newUser.friendCode
+                    friendCode: newUser.friendCode,
+                    preferences: newUser.preferences
                 }
             });
         } else {
@@ -106,7 +107,8 @@ export const login = async (req, res) => {
                 username: user.username,
                 gender: user.gender,
                 profilePic: user.profilePic,
-                friendCode: user.friendCode
+                friendCode: user.friendCode,
+                preferences: user.preferences
             }
         });
     } catch (error) {
@@ -137,7 +139,7 @@ export const logout = async (req, res) => {
 // ═══════════════════════════════════════════════════════════════
 export const getMe = async (req, res) => {
     try {
-        const user = await User.findById(req.userId).select("-password");
+        const user = await User.findById(req.userId).select("fullName username gender profilePic friendCode preferences");
 
         if (!user) {
             return res.status(404).send({ message: "User not found" });
@@ -150,7 +152,8 @@ export const getMe = async (req, res) => {
                 username: user.username,
                 gender: user.gender,
                 profilePic: user.profilePic,
-                friendCode: user.friendCode
+                friendCode: user.friendCode,
+                preferences: user.preferences
             }
         });
     } catch (error) {
@@ -191,7 +194,7 @@ export const updateProfile = async (req, res) => {
         const user = await User.findByIdAndUpdate(req.userId, updates, {
             new: true,
             runValidators: true
-        }).select("-password");
+        }).select("fullName username gender profilePic friendCode preferences");
 
         if (!user) {
             return res.status(404).send({ message: "User not found" });
@@ -205,11 +208,38 @@ export const updateProfile = async (req, res) => {
                 username: user.username,
                 gender: user.gender,
                 profilePic: user.profilePic,
-                friendCode: user.friendCode
+                friendCode: user.friendCode,
+                preferences: user.preferences
             }
         });
     } catch (error) {
         res.status(error.code === 11000 ? 400 : 500).send({ message: error.code === 11000 ? "User already exists" : "Internal Server Error" });
+    }
+};
+
+export const updatePreferences = async (req, res) => {
+    const body = req.body;
+    if (!body || typeof body !== "object" || Array.isArray(body) || !Object.keys(body).length) {
+        return res.status(400).json({ message: "Expected a non-empty preferences object" });
+    }
+    const updates = {};
+    for (const [key, value] of Object.entries(body)) {
+        const field = Object.hasOwn(preferenceFields, key) ? preferenceFields[key] : undefined;
+        if (!field || typeof value !== typeof field.default || (field.enum && !field.enum.includes(value))) {
+            return res.status(400).json({ message: "Invalid preference field or value" });
+        }
+        updates[`preferences.${key}`] = value;
+    }
+    try {
+        // Update only supplied fields so concurrent changes to other preferences survive.
+        const user = await User.findByIdAndUpdate(req.userId, { $set: updates }, {
+            new: true,
+            runValidators: true
+        }).select("preferences");
+        if (!user) return res.status(404).json({ message: "User not found" });
+        res.json({ preferences: user.preferences });
+    } catch {
+        res.status(500).json({ message: "Internal Server Error" });
     }
 };
 

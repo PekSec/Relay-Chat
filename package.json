@@ -14,7 +14,11 @@
     "docker:up": "docker compose up --build -d",
     "docker:down": "docker compose down",
     "test:realtime": "node scripts/realtime-test.js",
-    "test:all": "npm run build && npm test && npm run test:realtime && npm run test:security && npm run test:ui",
+    "test:all": "npm run build && npm test && npm run test:realtime && npm run test:security && npm run test:conversations && npm run test:preferences && npm run test:message-concurrency && npm run test:ui && npm run test:settings",
+    "test:message-concurrency": "node scripts/message-concurrency-test.js",
+    "test:preferences": "node scripts/preferences-test.js",
+    "test:settings": "node scripts/settings-ui-test.js",
+    "test:conversations": "node scripts/conversation-test.js",
     "test:ui": "node scripts/ui-test.js",
     "test:security": "node scripts/security-test.js"
   },

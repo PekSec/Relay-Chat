@@ -1,6 +1,6 @@
 import useFriendList from './useFriendList';
 const useGetMessageRequests = () => {
-    const { loading, refresh } = useFriendList('/api/conversations/status/pending', null, 'messageRequests');
-    return { loading, refreshRequests: refresh };
+    const { loading, error, refresh } = useFriendList('/api/conversations/status/pending', null, 'messageRequests');
+    return { loading, error, refresh, refreshRequests: refresh };
 };
 export default useGetMessageRequests;

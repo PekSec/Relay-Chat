@@ -8,11 +8,9 @@ const Home = () => {
 	return (
 		// Masaüstünde iki sütun; dar ekranda tek sütun: sohbet seçiliyse sohbet,
 		// değilse liste görünür (mobil mesajlaşma uygulamalarındaki davranış).
-		<div
-			className='surface w-full h-full sm:h-[min(92dvh,900px)] sm:max-w-[1400px] sm:rounded-2xl overflow-hidden flex shadow-2xl'
-		>
+		<div className='relay-workspace'>
 			<div
-				className={`${selectedConversation ? 'hidden' : 'flex'} md:flex w-full md:w-[340px] lg:w-[380px] flex-shrink-0 flex-col`}
+				className={`${selectedConversation ? 'hidden' : 'flex'} md:flex w-full md:w-[320px] flex-shrink-0 flex-col min-h-0`}
 				style={{ borderRight: '1px solid var(--border-subtle)' }}
 			>
 				<Sidebar />

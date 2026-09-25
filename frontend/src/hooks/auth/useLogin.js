@@ -44,7 +44,7 @@ const useLogin = () => {
             setAuthUser(userToSave);
             notifySessionChange(); // Zustand store'daki setAuthUser fonksiyonu ile kullanıcı bilgisi kaydediliyor
 
-            toast.success("Hoş geldin");
+            toast.success("Giriş yapıldı.");
             
         } catch (err) {
             console.error("Login error:", err);

@@ -1,0 +1,224 @@
+/* Account accents bridge ADS components and the existing Relay aliases, including portals. */
+:root[data-accent][data-color-mode] {
+  --ds-background-brand-bold: var(--relay-fill);
+  --ds-background-brand-bold-hovered: var(--relay-hover);
+  --ds-background-brand-bold-pressed: var(--relay-pressed);
+  --ds-background-brand-subtlest: var(--relay-soft);
+  --ds-background-brand-subtlest-hovered: var(--relay-soft-hover);
+  --ds-background-brand-subtlest-pressed: var(--relay-soft-hover);
+  --ds-background-selected: var(--relay-soft);
+  --ds-background-selected-hovered: var(--relay-soft-hover);
+  --ds-background-selected-pressed: var(--relay-soft-hover);
+  --ds-text-brand: var(--relay-text);
+  --ds-text-selected: var(--relay-text);
+  --ds-icon-brand: var(--relay-text);
+  --ds-icon-selected: var(--relay-text);
+  --ds-border-brand: var(--relay-text);
+  --ds-border-selected: var(--relay-text);
+  --ds-border-focused: var(--relay-text);
+  --ds-link: var(--relay-text);
+  --ds-link-pressed: var(--relay-text);
+  --ds-link-visited: var(--relay-text);
+  --ds-link-visited-pressed: var(--relay-text);
+}
+:root[data-accent="blue"] {
+  --relay-fill: var(--ds-background-accent-blue-bolder);
+  --relay-hover: var(--ds-background-accent-blue-bolder-hovered);
+  --relay-pressed: var(--ds-background-accent-blue-bolder-pressed);
+  --relay-soft: var(--ds-background-accent-blue-subtlest);
+  --relay-soft-hover: var(--ds-background-accent-blue-subtlest-hovered);
+  --relay-text: var(--ds-text-accent-blue);
+}
+:root[data-accent="lime"] {
+  --relay-fill: var(--ds-background-accent-lime-bolder);
+  --relay-hover: var(--ds-background-accent-lime-bolder-hovered);
+  --relay-pressed: var(--ds-background-accent-lime-bolder-pressed);
+  --relay-soft: var(--ds-background-accent-lime-subtlest);
+  --relay-soft-hover: var(--ds-background-accent-lime-subtlest-hovered);
+  --relay-text: var(--ds-text-accent-lime);
+}
+:root[data-accent="red"] {
+  --relay-fill: var(--ds-background-accent-red-bolder);
+  --relay-hover: var(--ds-background-accent-red-bolder-hovered);
+  --relay-pressed: var(--ds-background-accent-red-bolder-pressed);
+  --relay-soft: var(--ds-background-accent-red-subtlest);
+  --relay-soft-hover: var(--ds-background-accent-red-subtlest-hovered);
+  --relay-text: var(--ds-text-accent-red);
+}
+:root[data-accent="orange"] {
+  --relay-fill: var(--ds-background-accent-orange-bolder);
+  --relay-hover: var(--ds-background-accent-orange-bolder-hovered);
+  --relay-pressed: var(--ds-background-accent-orange-bolder-pressed);
+  --relay-soft: var(--ds-background-accent-orange-subtlest);
+  --relay-soft-hover: var(--ds-background-accent-orange-subtlest-hovered);
+  --relay-text: var(--ds-text-accent-orange);
+}
+:root[data-accent="yellow"] {
+  --relay-fill: var(--ds-background-accent-yellow-bolder);
+  --relay-hover: var(--ds-background-accent-yellow-bolder-hovered);
+  --relay-pressed: var(--ds-background-accent-yellow-bolder-pressed);
+  --relay-soft: var(--ds-background-accent-yellow-subtlest);
+  --relay-soft-hover: var(--ds-background-accent-yellow-subtlest-hovered);
+  --relay-text: var(--ds-text-accent-yellow);
+}
+:root[data-accent="green"] {
+  --relay-fill: var(--ds-background-accent-green-bolder);
+  --relay-hover: var(--ds-background-accent-green-bolder-hovered);
+  --relay-pressed: var(--ds-background-accent-green-bolder-pressed);
+  --relay-soft: var(--ds-background-accent-green-subtlest);
+  --relay-soft-hover: var(--ds-background-accent-green-subtlest-hovered);
+  --relay-text: var(--ds-text-accent-green);
+}
+:root[data-accent="teal"] {
+  --relay-fill: var(--ds-background-accent-teal-bolder);
+  --relay-hover: var(--ds-background-accent-teal-bolder-hovered);
+  --relay-pressed: var(--ds-background-accent-teal-bolder-pressed);
+  --relay-soft: var(--ds-background-accent-teal-subtlest);
+  --relay-soft-hover: var(--ds-background-accent-teal-subtlest-hovered);
+  --relay-text: var(--ds-text-accent-teal);
+}
+:root[data-accent="purple"] {
+  --relay-fill: var(--ds-background-accent-purple-bolder);
+  --relay-hover: var(--ds-background-accent-purple-bolder-hovered);
+  --relay-pressed: var(--ds-background-accent-purple-bolder-pressed);
+  --relay-soft: var(--ds-background-accent-purple-subtlest);
+  --relay-soft-hover: var(--ds-background-accent-purple-subtlest-hovered);
+  --relay-text: var(--ds-text-accent-purple);
+}
+:root[data-accent="magenta"] {
+  --relay-fill: var(--ds-background-accent-magenta-bolder);
+  --relay-hover: var(--ds-background-accent-magenta-bolder-hovered);
+  --relay-pressed: var(--ds-background-accent-magenta-bolder-pressed);
+  --relay-soft: var(--ds-background-accent-magenta-subtlest);
+  --relay-soft-hover: var(--ds-background-accent-magenta-subtlest-hovered);
+  --relay-text: var(--ds-text-accent-magenta);
+}
+:root[data-accent="gray"] {
+  --relay-fill: var(--ds-background-accent-gray-bolder);
+  --relay-hover: var(--ds-background-accent-gray-bolder-hovered);
+  --relay-pressed: var(--ds-background-accent-gray-bolder-pressed);
+  --relay-soft: var(--ds-background-accent-gray-subtlest);
+  --relay-soft-hover: var(--ds-background-accent-gray-subtlest-hovered);
+  --relay-text: var(--ds-text-accent-gray);
+}
+:root[data-accent="relay-bosphorus"] {
+  --relay-fill: #167D9A;
+  --relay-hover: #126A84;
+  --relay-pressed: #10586D;
+  --relay-soft: #E6F4F8;
+  --relay-soft-hover: #CDEAF2;
+  --relay-text: #10657D;
+}
+:root[data-accent="relay-bosphorus"][data-color-mode="dark"] {
+  --relay-fill: #79CDE3;
+  --relay-hover: #A1DEED;
+  --relay-pressed: #C5EAF4;
+  --relay-soft: #18323B;
+  --relay-soft-hover: #20414C;
+  --relay-text: #A1DEED;
+}
+:root[data-accent="relay-iris"] {
+  --relay-fill: #6654C0;
+  --relay-hover: #5543A8;
+  --relay-pressed: #45348C;
+  --relay-soft: #F0EDFC;
+  --relay-soft-hover: #E1DAF7;
+  --relay-text: #5543A8;
+}
+:root[data-accent="relay-iris"][data-color-mode="dark"] {
+  --relay-fill: #B7A9F4;
+  --relay-hover: #D0C6FA;
+  --relay-pressed: #E4DDFD;
+  --relay-soft: #2C2546;
+  --relay-soft-hover: #3B315B;
+  --relay-text: #D0C6FA;
+}
+:root[data-accent="relay-pine"] {
+  --relay-fill: #287A60;
+  --relay-hover: #21664F;
+  --relay-pressed: #19503E;
+  --relay-soft: #E8F5EF;
+  --relay-soft-hover: #CEEADD;
+  --relay-text: #21664F;
+}
+:root[data-accent="relay-pine"][data-color-mode="dark"] {
+  --relay-fill: #83D3B3;
+  --relay-hover: #ACE5CD;
+  --relay-pressed: #CEF2E2;
+  --relay-soft: #1B3329;
+  --relay-soft-hover: #28473A;
+  --relay-text: #ACE5CD;
+}
+:root[data-accent="relay-copper"] {
+  --relay-fill: #A65E3B;
+  --relay-hover: #8D4D2F;
+  --relay-pressed: #743D25;
+  --relay-soft: #FBF0E8;
+  --relay-soft-hover: #F4DDCD;
+  --relay-text: #8D4D2F;
+}
+:root[data-accent="relay-copper"][data-color-mode="dark"] {
+  --relay-fill: #E7B18C;
+  --relay-hover: #F0CCB3;
+  --relay-pressed: #F8E2D1;
+  --relay-soft: #3B2A20;
+  --relay-soft-hover: #513A2C;
+  --relay-text: #F0CCB3;
+}
+
+:root[data-font-size="large"] { font-size:18px; }
+:root { --relay-row-space:12px; --relay-bubble-space:10px; }
+:root[data-density="compact"] { --relay-row-space:8px; --relay-bubble-space:6px; }
+.conversation-row { padding-block:var(--relay-row-space); }
+.person-card { padding-block:var(--relay-row-space); }
+.bubble { padding-block:var(--relay-bubble-space); font-size:.875rem; }
+.field { font-size:.875rem; }
+mark.hit { background:var(--accent-soft); color:var(--ds-text-selected); }
+
+.settings-header { width:100%; display:flex; justify-content:space-between; align-items:center; gap:16px; }
+.settings-eyebrow { margin:0 0 6px; font-size:.625rem; letter-spacing:.12em; font-weight:650; color:var(--text-muted); }
+.settings-layout { display:grid; grid-template-columns:176px minmax(0,1fr); gap:28px; padding:8px 0 16px; }
+.settings-navigation { display:flex; flex-direction:column; align-items:stretch; gap:6px; padding-right:20px; border-right:1px solid var(--border-subtle); }
+.settings-navigation button { justify-content:flex-start; }
+.settings-mobile-section { display:none; }
+.settings-content { min-width:0; min-height:390px; }
+.settings-intro h2 { font-size:1.125rem; font-weight:650; letter-spacing:-.02em; margin:0 0 4px; }
+.settings-intro p, .settings-help { color:var(--text-secondary); font-size:.75rem; line-height:1.6; margin:0; }
+.settings-form { display:flex; flex-direction:column; gap:20px; }
+.settings-field { display:flex; flex-direction:column; gap:6px; min-width:0; }
+.settings-profile-preview { display:flex; align-items:center; gap:16px; padding:16px; background:var(--bg-sunken); border:1px solid var(--border-subtle); border-radius:8px; }
+.settings-profile-preview strong { display:block; overflow-wrap:anywhere; font-size:.875rem; }
+.settings-profile-preview p { color:var(--text-muted); font-size:.75rem; }
+.settings-friend-code { display:flex; justify-content:space-between; align-items:center; gap:16px; padding:16px; border:1px solid var(--border-subtle); border-radius:8px; }
+.settings-friend-code p { color:var(--text-secondary); font-size:.75rem; margin-bottom:4px; }
+.settings-friend-code strong { color:var(--accent-hover); letter-spacing:.25em; }
+.settings-colors { min-width:0; border:0; padding:0; margin:0; }
+.settings-colors legend { font-size:.75rem; font-weight:600; margin-bottom:12px; }
+.settings-swatches { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px; margin:8px 0 12px; }
+.settings-swatches button { font-size:.75rem; justify-content:flex-start; }
+.settings-swatch { display:block; width:16px; height:16px; border-radius:50%; box-shadow:inset 0 0 0 1px #0000001a; flex-shrink:0; }
+.settings-preview { border:1px solid var(--border-subtle); background:var(--bg-sunken); border-radius:8px; padding:16px; }
+.settings-preview-message { margin:10px 0 16px; padding:12px; background:var(--accent-soft); color:var(--ds-text-selected); border-radius:8px; font-size:.875rem; }
+.settings-preview>div { display:flex; gap:16px; align-items:center; flex-wrap:wrap; }
+.settings-preview a { color:var(--ds-link); font-size:.75rem; text-decoration:underline; }
+.settings-option-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+.settings-toggle { display:flex; justify-content:space-between; gap:16px; align-items:center; padding-block:14px; border-bottom:1px solid var(--border-subtle); }
+.settings-toggle p { font-size:.75rem; color:var(--text-secondary); margin:4px 0 0; line-height:1.6; }
+.settings-error, .settings-success { font-size:.875rem; margin-top:16px; }
+.settings-error { color:var(--ds-text-danger); }
+.settings-success { color:var(--ds-text-success); }
+.settings-footer { width:100%; display:flex; justify-content:space-between; align-items:center; gap:12px; }
+.settings-footer p { color:var(--text-muted); font-size:.6875rem; }
+.settings-footer>div { display:flex; gap:8px; flex-shrink:0; }
+@media (max-width:767px) {
+  .settings-layout { grid-template-columns:minmax(0,1fr); gap:20px; }
+  .settings-navigation { display:none; }
+  .settings-mobile-section { display:flex; flex-direction:column; gap:6px; }
+  .settings-content { min-height:0; }
+  .settings-swatches { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .settings-footer { flex-wrap:wrap; }
+  .settings-footer>div { width:100%; justify-content:flex-end; }
+  .settings-option-grid { grid-template-columns:minmax(0,1fr); }
+  .settings-content input { font-size:1rem; }
+  .field { font-size:1rem; }
+}

@@ -2,7 +2,7 @@ import Avatar from '../Avatar';
 import useConversation from "../../zustand/useConversation";
 import useSocket from "../../zustand/useSocket";
 import { FaClock } from "react-icons/fa";
-import useGlobalTyping from "../../hooks/socket/useGlobalTyping"; // Tüm konuşmalar için global yazıyor hook'u
+import useTheme from '../../zustand/useTheme';
 
 // Son mesaj zamanını kısa biçimde göster: bugünse saat, dünse "dün", öncesi tarih
 const shortTime = (value) => {
@@ -25,11 +25,11 @@ const Conversation = (props) => {
 
   const { selectedConversation, setSelectedConversation } = useConversation();
   const { onlineUsers } = useSocket();
-  const { isUserTyping } = useGlobalTyping(); // Tüm konuşmalardaki yazıyor durumunu kontrol et
+  const showPreviews = useTheme(state => state.preferences.messagePreviews);
 
   const isSelected = selectedConversation?._id === props.conversation._id;
   const isOnline = onlineUsers.includes(props.conversation._id);
-  const isThisUserTyping = isUserTyping(props.conversation._id);
+  const isThisUserTyping = props.isTyping;
   const isPending = props.conversation.status === 'pending';
   const unread = props.unreadCount || 0;
 
@@ -39,16 +39,7 @@ const Conversation = (props) => {
     <button
       type='button'
       aria-pressed={isSelected}
-      className={`w-full text-left flex gap-3 items-center px-3 py-2.5 rounded-xl cursor-pointer transition-colors ${isSelected ? 'tile-active' : ''}`}
-      style={{
-        border: `1px solid ${isSelected ? 'var(--border-strong)' : 'transparent'}`
-      }}
-      onMouseEnter={(e) => {
-        if (!isSelected) e.currentTarget.style.background = 'var(--bg-hover)';
-      }}
-      onMouseLeave={(e) => {
-        if (!isSelected) e.currentTarget.style.background = 'transparent';
-      }}
+      className={`conversation-row w-full text-left flex gap-3 items-center px-3 py-3 rounded-md ${isSelected ? 'tile-active' : ''}`}
       onClick={() => setSelectedConversation(props.conversation)}
     >
       {/* Avatar - online göstergesi ile */}
@@ -57,7 +48,7 @@ const Conversation = (props) => {
           name={props.conversation.fullName}
           src={props.conversation.profilePic}
           alt=''
-          className={`w-11 h-11 avatar-ring ${isOnline ? 'avatar-ring-online' : ''}`}
+          className="w-11 h-11 avatar-ring"
         />
         {isOnline && (
           <span
@@ -93,7 +84,7 @@ const Conversation = (props) => {
             ) : isPending ? (
               <span className='italic text-amber-500'>Yanıt bekleniyor</span>
             ) : lastMessage?.message ? (
-              lastMessage.isDeleted ? <span className='italic'>Bu mesaj silindi</span> : lastMessage.message
+              !showPreviews ? 'Mesaj önizlemesi gizli' : lastMessage.isDeleted ? <span className='italic'>Bu mesaj silindi</span> : lastMessage.message
             ) : (
               <span className='italic'>Henüz mesaj yok</span>
             )}
@@ -103,7 +94,7 @@ const Conversation = (props) => {
           {unread > 0 && (
             <span
               className='flex-shrink-0 min-w-[20px] h-5 px-1.5 rounded-full text-[11px] font-semibold flex items-center justify-center animate-badge'
-              style={{ background: 'var(--accent)', color: '#fff' }}
+              style={{ background: 'var(--accent)', color: 'var(--text-inverse)' }}
             >
               {unread > 99 ? '99+' : unread}
             </span>

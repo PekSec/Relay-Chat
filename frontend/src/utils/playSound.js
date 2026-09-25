@@ -1,5 +1,8 @@
-// Basit ses çalıcı
+import useTheme from '../zustand/useTheme';
+
 const playSound = (isChatOpen) => {
+    const preferences = useTheme.getState().preferences;
+    if (!(isChatOpen ? preferences.chatSound : preferences.notificationSound)) return;
     try {
         const soundFile = isChatOpen ? '/message.mp3' : '/notification.mp3';
         const audio = new Audio(soundFile);

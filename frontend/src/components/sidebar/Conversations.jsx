@@ -1,6 +1,7 @@
 import Conversation from "./Conversation";
 import useGetConversations from "../../hooks/conversation/useGetConversations";
 import useUnread from "../../zustand/useUnread";
+import useGlobalTyping from '../../hooks/socket/useGlobalTyping';
 
 // Conversations Bileşeni - Sidebar'daki "Sohbetler" sekmesinin içeriği
 // useGetConversations hook'u ile backend'den çekilen sohbet listesini render eder.
@@ -12,6 +13,7 @@ import useUnread from "../../zustand/useUnread";
 const Conversations = ({ filter = "" }) => {
     const { loading, conversations, error, retry } = useGetConversations();
     const { counts } = useUnread();
+    const { isUserTyping } = useGlobalTyping();
 
     // Kenar çubuğundaki arama kutusuna göre isme/kullanıcı adına filtrele
     const visible = filter
@@ -51,11 +53,11 @@ const Conversations = ({ filter = "" }) => {
 
     return (
         <div className='flex flex-col gap-0.5 px-2 py-2 overflow-y-auto scroll-slim'>
-            {visible.map((conversation, idx) => (
+            {visible.map(conversation => (
                 <Conversation
                     key={conversation._id}
                     conversation={conversation}
-                    isLast={idx === visible.length - 1}
+                    isTyping={isUserTyping(conversation._id)}
                     unreadCount={counts[conversation._id] || 0}
                 />
             ))}

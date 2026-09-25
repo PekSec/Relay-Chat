@@ -1,6 +1,6 @@
 import useFriendList from './useFriendList';
 const useGetSentRequests = () => {
-    const { data, loading } = useFriendList('/api/friends/sentRequests', 'sentRequests', 'sentFriendRequests');
-    return { sentFriendRequests: data, loading };
+    const { data, ...status } = useFriendList('/api/friends/sentRequests', 'sentRequests', 'sentFriendRequests');
+    return { sentFriendRequests: data, ...status };
 };
 export default useGetSentRequests;

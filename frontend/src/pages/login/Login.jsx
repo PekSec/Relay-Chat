@@ -1,3 +1,4 @@
+import Button from '@atlaskit/button/new';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import useLogin from '../../hooks/auth/useLogin';
@@ -18,22 +19,15 @@ const Login = () => {
 
 	//görsel kısım
 	return (
-		<div className='w-full max-w-sm mx-auto animate-rise'>
-			<div className='surface-glass rounded-2xl p-7 shadow-2xl'>
+		<div className='w-full max-w-sm mx-auto'>
+			<div className='surface rounded-lg p-7'>
 
 				{/* Marka başlığı */}
 				<div className='flex flex-col items-center gap-2 mb-6'>
-					<div
-						className='w-14 h-14 rounded-2xl flex items-center justify-center text-2xl brand-badge'
-					>
-						💬
-					</div>
+					<img src="/favicon.svg" alt="Relay" width="48" height="48" />
 					<h1 className='text-xl font-semibold' style={{ color: 'var(--text-primary)' }}>
-						Tekrar hoş geldin
+						Giriş yap
 					</h1>
-					<p className='text-sm' style={{ color: 'var(--text-secondary)' }}>
-						Sohbete devam etmek için giriş yap
-					</p>
 				</div>
 
 				<form onSubmit={handleSubmit} className='flex flex-col gap-4'>
@@ -87,10 +81,7 @@ const Login = () => {
 					</div>
 
 					{/* Login butonu */}
-					<button
-						type='submit'
-						className='btn-primary-grad mt-1 flex items-center justify-center gap-2'
-						disabled={loading}
+					<Button type='submit' appearance='primary' isDisabled={loading}
 					>
 						{loading ? (
 							<>
@@ -98,7 +89,7 @@ const Login = () => {
 								Giriş yapılıyor
 							</>
 						) : 'Giriş yap'}
-					</button>
+					</Button>
 
 					<Link to='/signup' className='text-center text-sm mt-1' style={{ color: 'var(--text-secondary)' }}>
 						Hesabın yok mu?{' '}

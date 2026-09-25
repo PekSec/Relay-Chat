@@ -1,4 +1,5 @@
 import Avatar from '../Avatar';
+import Button from '@atlaskit/button/new';
 import Messages from "./Messages";
 import MessageInput from "./MessageInput";
 import { TiMessages } from "react-icons/ti";
@@ -14,7 +15,7 @@ import useUnread from "../../zustand/useUnread";
 import useAuth from "../../zustand/useAuth";
 import useRespondToMessageRequests from "../../hooks/friends/useRespondToMessageRequests";
 import { useEffect, useState } from "react";
-import { IoClose, IoSearch, IoArrowBack } from "react-icons/io5";
+import { IoClose, IoSearch, IoArrowBack, IoTrashOutline } from "react-icons/io5";
 import useFriendStore from "../../zustand/useFriend";
 import useSendFriendRequest from "../../hooks/friends/useSendFriendRequest";
 import useRespondToFriendRequests from "../../hooks/friends/useRespondToFriendRequests";
@@ -68,11 +69,7 @@ const MessageContainer = () => {
 
     // Arkadaş ekle butonuna basıldığında
     const handleAddFriend = async () => {
-        const success = await sendFriendRequest(selectedConversation._id);
-        if (success) {
-            // Zustand store'a ekle → banner anında "Request already sent" olarak güncellenir
-            // The request hook stores the canonical server response.
-        }
+        await sendFriendRequest(selectedConversation._id);
     };
 
     useListenMessagesRead(); // Okundu bildirimlerini dinle
@@ -114,16 +111,15 @@ const MessageContainer = () => {
 
     return (
         <div className="flex flex-col h-full w-full min-w-0 panel-chat">
-            {!isConnected && <div role="status" className="px-4 py-2 text-xs text-center text-amber-200 bg-amber-500/10 flex-shrink-0">Bağlantı yeniden kuruluyor… <button className="underline ml-2" onClick={() => socket?.connect()}>Tekrar bağlan</button></div>}
+            {!isConnected && <div role="status" className="px-4 py-2 text-xs text-center flex-shrink-0" style={{ color: 'var(--ds-text-warning)', background: 'var(--ds-background-warning)' }}>Bağlantı yeniden kuruluyor… <button className="underline ml-2" onClick={() => socket?.connect()}>Tekrar bağlan</button></div>}
             {noChatSelected ? <NoChatSelected /> : (<> {/* Sohbet seçilmemişse NoChatSelected, seçilmişse mesaj alanı */}
 
                 {/* ═══════════ HEADER ═══════════ */}
                 <div
-                    className='flex items-center gap-3 px-4 py-3 flex-shrink-0 relative header-fade'
+                    className='flex items-center gap-3 px-4 py-3 flex-shrink-0 relative chat-header'
                     style={{
                         borderBottom: '1px solid var(--border-subtle)',
-                        background: 'linear-gradient(180deg, color-mix(in srgb, var(--bg-panel) 95%, transparent), color-mix(in srgb, var(--bg-panel) 80%, transparent))',
-                        backdropFilter: 'blur(12px)'
+                        background: 'var(--bg-panel)'
                     }}
                 >
                     {/* Dar ekranda listeye dön */}
@@ -141,7 +137,7 @@ const MessageContainer = () => {
                             name={selectedConversation.fullName}
                             src={selectedConversation.profilePic}
                             alt=''
-                            className={`w-10 h-10 avatar-ring ${isOnline ? 'avatar-ring-online' : ''}`}
+                            className="w-10 h-10 avatar-ring"
                         />
                         {isOnline && (
                             <span
@@ -191,7 +187,7 @@ const MessageContainer = () => {
                         className='w-9 h-9 icon-btn flex-shrink-0 text-sm'
                         title='Sohbeti temizle'
                     >
-                        {loading ? '...' : '🗑️'}
+                        {loading ? '…' : <IoTrashOutline />}
                     </button>
                 </div>
 
@@ -217,9 +213,9 @@ const MessageContainer = () => {
                     2. isReceiver → Son mesajı karşı taraf göndermiş olmalı (biz alıcıyız)
                     Bu banner sadece ALICIYA gösterilir → "Kabul et ve sohbet et" veya "Delete" */}
                 {isPending && isReceiver && (
-                    <div className="bg-[color:var(--bg-panel)] p-6 border-b border-[color:var(--border-subtle)] flex flex-col items-center gap-4 animate-in fade-in slide-in-from-top-4 duration-500 backdrop-blur-md">
+                    <div className="bg-[color:var(--bg-sunken)] p-5 border-b border-[color:var(--border-subtle)] flex flex-col items-center gap-3">
                         <div className="text-center px-4">
-                            <h3 className="text-white text-lg font-bold flex items-center gap-2 justify-center">
+                            <h3 className="text-base font-semibold flex items-center gap-2 justify-center">
                                 📩 Yeni mesaj isteği
                             </h3>
                             <p className="text-sm text-[color:var(--text-muted)] mt-1">
@@ -228,21 +224,21 @@ const MessageContainer = () => {
                         </div>
                         <div className="flex gap-4 w-full max-w-xs justify-center">
                             {/* Kabul → acceptRequest(conversationId) → conversation status "active" olur */}
-                            <button
+                            <Button
                                 onClick={() => acceptRequest(selectedConversation.conversationId)}
-                                disabled={actionLoading}
-                                className="btn btn-sm flex-1 bg-green-600 hover:bg-green-700 border-none text-white h-11"
+                                isDisabled={actionLoading}
+                                appearance="primary"
                             >
-                                {actionLoading ? <span className="loading loading-spinner loading-sm"></span> : "Kabul et ve sohbet et"}
-                            </button>
+                                {actionLoading ? 'İşleniyor…' : "Kabul et ve sohbet et"}
+                            </Button>
                             {/* Reddet → declineRequest(userId) → conversation ve mesajlar silinir */}
-                            <button
+                            <Button
                                 onClick={() => declineRequest(selectedConversation._id)}
-                                disabled={actionLoading}
-                                className="btn btn-sm flex-1 bg-transparent hover:bg-red-500/10 border border-red-500/50 text-red-500 h-11"
+                                isDisabled={actionLoading}
+                                appearance="subtle"
                             >
                                 Reddet
-                            </button>
+                            </Button>
                         </div>
                     </div>
                 )}
@@ -259,7 +255,7 @@ const MessageContainer = () => {
                     - incomingRequest var → "X sana istek gönderdi" + Accept butonu
                     - İkisi de yok → "Arkadaş değilsiniz: X" + Add Friend butonu */}
                 {!isPending && !isFriend && !isBannerDismissed && conversations.some(c => c._id === selectedConversation._id) && (
-                    <div className="bg-[color:var(--accent)]/10 p-2 border-b border-[color:var(--accent)]/20 flex items-center justify-between group animate-in fade-in slide-in-from-bottom-2 duration-300">
+                    <div className="bg-[color:var(--accent-soft)] p-3 border-b border-[color:var(--border-subtle)] flex flex-wrap items-center justify-between gap-3">
                         <div className="flex items-center gap-3 ml-2">
                             <TiMessages className="text-[color:var(--accent-hover)] text-xl" />
                             <div>
@@ -277,30 +273,30 @@ const MessageContainer = () => {
                         <div className="flex items-center gap-2">
                             {/* Gelen istek varsa → Accept Request butonu */}
                             {incomingRequest && (
-                                <button
+                                <Button
                                     onClick={() => respondToRequest(incomingRequest._id, "accept")}
-                                    disabled={respondFriendLoading}
-                                    className="btn btn-xs bg-[color:var(--accent)] hover:bg-[color:var(--accent-hover)] border-none text-white px-4"
+                                    isDisabled={respondFriendLoading}
+                                    appearance="primary" spacing="compact"
                                 >
                                     {respondFriendLoading ? "..." : "İsteği kabul et"}
-                                </button>
+                                </Button>
                             )}
 
                             {/* Ne gönderilen ne gelen istek varsa → Add Friend butonu */}
                             {!sentRequest && !incomingRequest && (
-                                <button
+                                <Button
                                     onClick={handleAddFriend}
-                                    disabled={sendFriendLoading}
-                                    className="btn btn-xs btn-info bg-[color:var(--accent)]/20 hover:bg-[color:var(--accent)] border-[color:var(--accent)]/50 text-[color:var(--accent-hover)] hover:text-white transition-all"
+                                    isDisabled={sendFriendLoading}
+                                    appearance="primary" spacing="compact"
                                 >
                                     {sendFriendLoading ? "..." : "Arkadaş ekle"}
-                                </button>
+                                </Button>
                             )}
 
                             {/* Banner'ı kapat (X butonu) */}
                             <button
                                 onClick={() => setIsBannerDismissed(true)}
-                                className="p-1.5 hover:bg-white/10 rounded-full text-[color:var(--text-muted)] hover:text-white transition-colors ml-2"
+                                className="p-1.5 icon-btn ml-2"
                                 title="Kapat"
                             >
                                 <IoClose size={18} />
@@ -329,17 +325,16 @@ const NoChatSelected = () => {
     const { authUser } = useAuth();
     return (
         <div className='flex flex-col items-center justify-center w-full h-full px-6'>
-            <div className='surface-glass rounded-2xl px-8 py-9 text-center max-w-sm animate-rise'>
-                <div className='w-16 h-16 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4 brand-badge'>
-                    <TiMessages style={{ color: '#fff' }} />
+            <div className='px-8 py-9 text-center max-w-sm'>
+                <div className='w-16 h-16 rounded-lg flex items-center justify-center text-3xl mx-auto mb-4' style={{ background: 'var(--accent-soft)', color: 'var(--accent-hover)' }}>
+                    <TiMessages />
                 </div>
 
                 <h2 className='text-lg font-semibold mb-1.5' style={{ color: 'var(--text-primary)' }}>
-                    Hoş geldin, {authUser?.fullName?.split(' ')[0] || 'yolcu'} 👋
+                    Sohbet seç
                 </h2>
                 <p className='text-sm leading-relaxed' style={{ color: 'var(--text-secondary)' }}>
-                    Soldaki listeden bir sohbet seç ya da arkadaş kodunu paylaşarak
-                    yeni biriyle konuşmaya başla.
+                    Mesajları görmek için listeden bir sohbet seç.
                 </p>
 
                 {/* Kendi arkadaş kodu: paylaşması kolay olsun */}

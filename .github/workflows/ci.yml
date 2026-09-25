@@ -95,6 +95,23 @@ jobs:
       - name: Install Chromium
         run: npx --no-install playwright install --with-deps chromium
 
+      - name: Check account preferences API
+        run: npm run test:preferences 2>&1 | tee test-results/preferences.log
+        env:
+          MONGO_URI: mongodb://127.0.0.1:27017/ci_preferences
+          PORT: 5011
+
+      - name: Check concurrent message delivery
+        run: npm run test:message-concurrency 2>&1 | tee test-results/message-concurrency.log
+        env:
+          MONGO_URI: mongodb://127.0.0.1:27017/ci_message_concurrency
+          PORT: 5017
+
+      - name: Check conversation preview queries
+        run: npm run test:conversations 2>&1 | tee test-results/conversations.log
+        env:
+          MONGO_URI: mongodb://127.0.0.1:27017/ci_conversations
+
       - name: Run desktop and mobile browser tests
         run: npm run test:ui 2>&1 | tee test-results/ui.log
         env:
@@ -102,6 +119,12 @@ jobs:
           NODE_ENV: production
           PORT: 5002
           CLIENT_URL: http://127.0.0.1:5002
+
+      - name: Check settings on desktop and mobile
+        run: npm run test:settings 2>&1 | tee test-results/settings.log
+        env:
+          MONGO_URI: mongodb://127.0.0.1:27017/ci_settings
+          PORT: 5012
 
       - name: Save test evidence
         if: always()

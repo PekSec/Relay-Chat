@@ -140,6 +140,7 @@ for reporting and security boundaries. Automated checks are not a completed pent
 
 ## Documentation
 
+- [Atlassian migration contracts and next-session handoff](docs/contracts/atlassian-overhaul/README.md)
 - [Local verification results](docs/VERIFICATION.md)
 - [Architecture and design limits](docs/ARCHITECTURE.md)
 - [API, pagination and socket events](docs/API.md)

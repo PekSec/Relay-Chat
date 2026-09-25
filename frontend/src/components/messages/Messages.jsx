@@ -44,7 +44,7 @@ const Messages = ({ searchTerm = '' }) => {
     if (loading && messages.length === 0) return <div className="flex-1 min-h-0 overflow-hidden py-3" role="status" aria-label="Mesajlar yükleniyor">{Array.from({ length: 4 }, (_, i) => <MessageSkeleton key={i} />)}</div>;
     return (
         <div className="relative flex-1 min-h-0 flex flex-col">
-            {error && <div className="px-4 py-2 text-xs text-center text-red-300" role="alert">{error} <button className="underline ml-2" onClick={retry}>Tekrar dene</button></div>}
+            {error && <div className="px-4 py-2 text-xs text-center text-[color:var(--danger)]" role="alert">{error} <button className="underline ml-2" onClick={retry}>Tekrar dene</button></div>}
             <div ref={listRef} aria-label="Mesaj geçmişi" className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden scroll-slim py-3 flex flex-col"
                 onScroll={event => {
                     const el = event.currentTarget;
