@@ -71,4 +71,6 @@ Focus için her eşleşmede en az 2 px görünür outline ve komşu yüzeye kar�
 
 ## Backend inceleme sınırı
 
+02'de oturum doğrulama ayrımı sabitlendi: geçersiz/süresi dolmuş oturum HTTP 401, doğrulamayı engelleyen DB hatası HTTP 503 döner. Socket handshake aynı durumları `UNAUTHORIZED` / `SESSION_UNAVAILABLE` kodlarıyla ayırır. İstemci altyapı hatasını logout olarak yorumlamaz; doğrulanamayan socket olayı işlenmez. Sonraki modüller bu ayrımı korur.
+
 Başlangıçta mesaj geçmişinde 50 öğelik cursor pagination vardır. Sohbet listesinde aggregation ile son görünür mesaj lookup'ı vardır; bunu “N+1 zaten çözülmüş” diye incelemeden atlama. İlgili modülde sorgu sayısı, payload ve indeks kullanımını ölç. Sırf olası büyüme için yeni cache, endpoint ya da pagination protokolü ekleme. Doğrulanmış sorun için en küçük ortak düzeltmeyi ve onu bozan tek gerekli testi ekle.

@@ -5,6 +5,12 @@
 All routes below are prefixed with `/api`. Every route except signup, login and health probes
 requires the authentication cookie.
 
+Protected routes return **401** for an invalid, expired or revoked session and
+**503** when a database failure prevents session verification. A 503 does not
+invalidate the cookie. Socket handshake errors expose the equivalent
+`error.data.code`: `UNAUTHORIZED` or `SESSION_UNAVAILABLE`. Packets that cannot
+be authenticated are rejected and their socket is disconnected.
+
 ### Health
 | Method | Endpoint       | Description                              |
 |--------|----------------|------------------------------------------|

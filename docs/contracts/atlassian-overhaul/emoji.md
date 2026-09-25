@@ -4,7 +4,9 @@
 
 ## Mevcut kapsam
 
-Composer'da 12 Unicode hızlı seçenek; Message içinde altı Unicode tepki (`👍`, `❤️`, `😂`, `😮`, `😢`, `🙏`); MessageContainer karşılama metninde `👋`; kullanıcı mesaj gövdeleri serbest metindir. Backend aynı altı tepkiyi kabul eder. Geçiş picker, tepki satırı, mevcut mesaj gövdeleri ve dekoratif UI emojilerini birlikte kapsar; mesaj/tepki wire değerleri Unicode kalır.
+Composer'da 12 Unicode hızlı seçenek; Message içinde altı Unicode tepki (`👍`, `❤️`, `😂`, `😮`, `😢`, `🙏`); kullanıcı mesaj gövdeleri serbest metindir. Backend aynı altı tepkiyi kabul eder. Geçiş picker, tepki satırı, mevcut mesaj gövdeleri ve kalan dekoratif UI emojilerini birlikte kapsar; mesaj/tepki wire değerleri Unicode kalır.
+
+Metin düzeltmesinde MessageContainer karşılama `👋` emojisi kaldırıldı. 02'de Login `👁️`/`🙈` düğmeleri işlevsel Atlaskit ikonlarına, App oturum kartındaki `💬` mevcut Relay logosuna dönüştürüldü. Bu değişiklikler emoji seti entegrasyonu değildir; veri kaynağı/lisans araştırmasının sırası hâlâ 04'tür.
 
 ## Gerçek veri kaynağı ve kullanım koşulları
 
@@ -19,4 +21,4 @@ Unicode metin kalıcı gerçek veridir; desteklenen grapheme dizileri (ZWJ, vari
 
 Görüntüleyici Unicode metinle birleştirilebilir erişilebilir ad taşır; copy/paste orijinal mesajı üretir. Emoji ekleme imleç konumunu ve 2.000 karakter sınırını korur; surrogate/ZWJ dizisini ortadan kesmez. Backend altı tepki sözleşmesi genişletilmez; picker'ın mesaj yazma seçenekleri ile reaction seçenekleri karıştırılmaz.
 
-Kabul: tüm altı tepki, karşılama emojisi, eski/yeni mesaj gövdeleri; ZWJ ve skin tone; klavye seçimi/focus dönüşü; mobil popup; asset 404/offline; uzun mesaj sınırı ve metin kopyalama. Lisans/kaynak kanıtı, bundle farkı ve browser test sonuçları eklenmeden “Atlassian emoji tamamlandı” yazılmaz.
+Kabul: tüm altı tepki, kalan dekoratif emojiler, eski/yeni mesaj gövdeleri; ZWJ ve skin tone; klavye seçimi/focus dönüşü; mobil popup; asset 404/offline; uzun mesaj sınırı ve metin kopyalama. Lisans/kaynak kanıtı, bundle farkı ve browser test sonuçları eklenmeden “Atlassian emoji tamamlandı” yazılmaz.

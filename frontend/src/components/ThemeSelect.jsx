@@ -1,15 +1,15 @@
+import Select from '@atlaskit/select';
+import { Label } from '@atlaskit/form';
 import useTheme from '../zustand/useTheme';
+
+const options = [{ value: 'system', label: 'Sistem' }, { value: 'light', label: 'Açık' }, { value: 'dark', label: 'Koyu' }];
 
 export default function ThemeSelect() {
     const { preference, changing, setPreference } = useTheme();
-    return (
-        <label className="theme-control">
-            <span>Tema</span>
-            <select aria-label="Tema" value={preference} disabled={changing} onChange={event => setPreference(event.target.value)}>
-                <option value="system">Sistem</option>
-                <option value="light">Açık</option>
-                <option value="dark">Koyu</option>
-            </select>
-        </label>
-    );
+    return <div className="theme-control">
+        <Label htmlFor="guest-theme">Tema</Label>
+        <Select inputId="guest-theme" instanceId="guest-theme" options={options}
+            value={options.find(option => option.value === preference)}
+            onChange={option => setPreference(option.value)} isSearchable={false} isDisabled={changing} />
+    </div>;
 }

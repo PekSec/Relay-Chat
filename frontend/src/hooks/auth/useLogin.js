@@ -1,59 +1,47 @@
+import { useEffect, useRef, useState } from 'react';
 import { notifySessionChange } from '../../utils/sessionEvents';
 import apiFetch from '../../utils/apiFetch';
-import { useState } from "react";
-import toast from "react-hot-toast";
-import useAuth from "../../zustand/useAuth";
+import useAuth from '../../zustand/useAuth';
 
-const useLogin = () => {
-    const [loading, setLoading] = useState(false); //yükleniyor durumu
+export default function useLogin() {
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
+    const pending = useRef(null);
+    useEffect(() => () => pending.current?.abort(), []);
 
-    const setAuthUser = useAuth((state) => state.setAuthUser);//zustanddaki setAuthUser fonksiyonunu alıyoruz
-    //const { setAuthUser } = useAuth(); //destructorla da alabiliriz ama bu kodda stateli kullanımını göstermek istiyoruz
-    //yani state ile alıp setAuthUsera eşitledik
-
-    const handleInputErrors = (userData) => { //input hatalarını kontrol eden fonksiyon
-        const { username, password } = userData;
-        if (!username || !password) { //js de "falsy" değerlere false der, boş string, null, undefined, 0, NaN hepsi false kabul edilir
-            toast.error("Tüm alanları doldur");
-            return false;
-        }
-        return true;
-    };
-
-    const login = async (userData) => { //login işlemini yapan fonksiyon,userData parametre olarak alınıyor ve 
-    // bu Login.jsx deki inputs objesi
-        const success = handleInputErrors(userData);
-        if(!success) return; //yanlışssa fonksiyondan çık
-
+    const login = async (values) => {
+        if (pending.current) return;
+        const controller = new AbortController();
+        pending.current = controller;
         setLoading(true);
+        setError('');
         try {
-            const res = await apiFetch('/api/auth/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(userData)
+            const response = await apiFetch('/api/auth/login', {
+                method: 'POST', signal: controller.signal,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(values)
             });
-
-            const data = await res.json();
-            if (!res.ok) {
-                throw new Error(data.message || "Giriş yapılamadı");
+            if (!response.ok) {
+                setError(response.status === 429 ? 'Çok fazla giriş denemesi. Bir süre sonra tekrar dene.' :
+                    [400, 401].includes(response.status) ? 'Kullanıcı adı veya parola hatalı.' :
+                        'Giriş yapılamadı. Tekrar dene.');
+                return;
             }
-            // Keep the public profile in memory; authentication remains in the HttpOnly cookie.
-            const userToSave = data.user || data;
-            setAuthUser(userToSave);
-            notifySessionChange(); // Zustand store'daki setAuthUser fonksiyonu ile kullanıcı bilgisi kaydediliyor
-
-            toast.success("Giriş yapıldı.");
-            
+            const data = await response.json();
+            const user = data.user || data;
+            if (!user?._id) {
+                setError('Giriş yapılamadı. Tekrar dene.');
+                return;
+            }
+            useAuth.getState().setAuthUser(user);
+            notifySessionChange();
         } catch (err) {
-            console.error("Login error:", err);
-            if (err.name !== 'AbortError') toast.error(err.message);
-        }     finally {
-            setLoading(false);
+            if (err.name !== 'AbortError') setError(err instanceof SyntaxError ?
+                'Giriş yapılamadı. Tekrar dene.' : 'Bağlantı kurulamadı. Tekrar dene.');
+        } finally {
+            pending.current = null;
+            if (!controller.signal.aborted) setLoading(false);
         }
     };
-
-    return { loading, login };
+    return { loading, error, login };
 }
-export default useLogin;

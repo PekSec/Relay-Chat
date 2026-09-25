@@ -32,7 +32,12 @@ io.use(async (socket, next) => {
         socket.data.session = session;
         socket.data.token = socket.request.cookies.token;
         next();
-    } catch { next(new Error("Authentication required")); }
+    } catch (error) {
+        const unavailable = error.code === "SESSION_UNAVAILABLE";
+        next(Object.assign(new Error(unavailable ? "Session service unavailable" : "Authentication required"), {
+            data: { code: unavailable ? "SESSION_UNAVAILABLE" : "UNAUTHORIZED" }
+        }));
+    }
 });
 
 io.on("connection", (socket) => {

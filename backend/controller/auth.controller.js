@@ -87,7 +87,7 @@ export const login = async (req, res) => {
             return res.status(400).send({ message: "Username and password are required" });
         }
 
-        const user = await User.findOne({ username: username }); //users collectionında kullanıcıyı bul
+        const user = await User.findOne({ username }).select("password fullName username gender profilePic friendCode preferences");
 
         if (!user) {
             return res.status(400).send({ message: "Invalid username or password" });

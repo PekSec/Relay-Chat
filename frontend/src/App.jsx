@@ -8,11 +8,14 @@ import useListenFriendEvents from './hooks/socket/useListenFriendEvents';
 import useUnreadCounts from './hooks/messages/useUnreadCounts';
 import useDocumentTitle from './hooks/useDocumentTitle';
 import useSession from './hooks/auth/useSession';
-import ThemeSelect from './components/ThemeSelect';
+import Button from '@atlaskit/button/default/button';
+import SectionMessage from '@atlaskit/section-message';
+import Spinner from '@atlaskit/spinner';
 
 const Home = lazy(() => import('./pages/home/Home'));
 const Login = lazy(() => import('./pages/login/Login'));
 const SignUp = lazy(() => import('./pages/signup/SignUp'));
+const ThemeSelect = lazy(() => import('./components/ThemeSelect'));
 
 function App() {
     const userId = useAuth((state) => state.authUser?._id);
@@ -59,12 +62,13 @@ function App() {
     return (
         <main className={`app-shell ${userId && !checking ? 'app-shell-chat' : 'app-shell-auth'}`}>
             {checking || error ? (
-                <div className="surface rounded-2xl p-8 max-w-sm text-center" role="status">
-                    <div className="brand-badge w-12 h-12 rounded-2xl grid place-items-center mx-auto mb-4" aria-hidden="true">💬</div>
-                    <h1 className="font-semibold mb-2">Relay</h1>
-                    <p className="text-sm text-[color:var(--text-secondary)]">{error || 'Oturum kontrol ediliyor...'}</p>
-                    {error && <button className="primary-button mt-5" onClick={retry}>Tekrar dene</button>}
-                </div>
+                <section className="auth-card" aria-label="Oturum">
+                    <div className="auth-brand"><img src="/favicon.svg" alt="" width="32" height="32" />Relay</div>
+                    {error ? <>
+                        <div role="alert"><SectionMessage appearance="error">{error}</SectionMessage></div>
+                        <div className="auth-submit"><Button appearance="primary" onClick={retry}>Tekrar dene</Button></div>
+                    </> : <p className="auth-progress" role="status"><Spinner size="small" />Oturum kontrol ediliyor…</p>}
+                </section>
             ) : (
                 <Suspense fallback={<p role="status">Sayfa yükleniyor…</p>}><Routes>
                     <Route path="/" element={userId ? <Home key={userId} /> : <Navigate to="/login" replace />} />
@@ -73,7 +77,7 @@ function App() {
                     <Route path="*" element={<Navigate to={userId ? '/' : '/login'} replace />} />
                 </Routes></Suspense>
             )}
-            {!userId && !checking && !error && <div className="auth-theme"><ThemeSelect /></div>}
+            {!userId && !checking && !error && <div className="auth-theme"><Suspense fallback={null}><ThemeSelect /></Suspense></div>}
             <Toaster position="top-center" toastOptions={{ style: { background: 'var(--bg-elevated)', color: 'var(--text-primary)', border: '1px solid var(--border-strong)' } }} />
         </main>
     );

@@ -19,13 +19,20 @@ const useSession = () => {
                     if (version === useAuth.getState().sessionVersion) useAuth.getState().logout();
                     return;
                 }
-                if (!response.ok) throw new Error('Sunucuya şu anda ulaşılamıyor.');
+                if (!response.ok) {
+                    if (!controller.signal.aborted && version === useAuth.getState().sessionVersion) {
+                        setError('Sunucuya şu anda ulaşılamıyor.');
+                    }
+                    return;
+                }
                 const data = await response.json();
                 if (!controller.signal.aborted && version === useAuth.getState().sessionVersion) {
                     useAuth.getState().setAuthUser(data.user || data);
                 }
             } catch (err) {
-                if (err.name !== 'AbortError') setError('Bağlantı kurulamadı. İnternet bağlantını kontrol edip tekrar dene.');
+                if (err.name !== 'AbortError' && version === useAuth.getState().sessionVersion) {
+                    setError(err instanceof SyntaxError ? 'Sunucuya şu anda ulaşılamıyor.' : 'Bağlantı kurulamadı. Tekrar dene.');
+                }
             } finally {
                 if (!controller.signal.aborted) setChecking(false);
             }

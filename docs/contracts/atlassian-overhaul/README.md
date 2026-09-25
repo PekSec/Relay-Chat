@@ -1,6 +1,6 @@
 # Atlassian geçiş kontratları
 
-Bu alan sonraki oturumların başlangıç noktasıdır. Geçişin tümü bu oturumda uygulanmaz; ilk teslimat **Ayarlar ve Kişiselleştirme** ile ortak kontratlardır. Mevcut kısmi geçişler de yeniden değerlendirilir.
+Bu alan sonraki oturumların başlangıç noktasıdır. **01 Ayarlar ve Kişiselleştirme** ile **02 Giriş ve oturum** tamamlandı. Diğer ekranlar ayrı onay-uygulama döngüleriyle ilerler. Mevcut kısmi geçişler de yeniden değerlendirilir.
 
 ## Kararlar ve durum
 
@@ -12,7 +12,7 @@ Kullanıcı 25 Eylül 2026 tarihinde önceki plan için **“Implement the plan.
 |---|---|---|
 | Ortak | [Tasarım ve tercih kontratı](./shared.md), [İkon geçişi](./icons.md), [Emoji](./emoji.md) | Ortak yön onaylı; modüllere kademeli uygulanır |
 | 01 | [Ayarlar ve kişiselleştirme](./01-settings.md) | Uygulandı ve doğrulandı; ayarlar UI 106 kontrol geçti |
-| 02 | [Giriş ve oturum](./02-login.md) | Tasarım seçimi bekliyor |
+| 02 | [Giriş ve oturum](./02-login.md) | A — Ortalanmış kart onaylandı, uygulandı; giriş UI 48 kontrol geçti |
 | 03 | [Kayıt](./03-signup.md) | Tasarım seçimi bekliyor |
 | 04 | [Ana sohbet](./04-chat.md) | Tasarım seçimi bekliyor |
 | 04a–c | [Mesaj silme, geçmiş temizleme, emoji popup](./04-dialogs.md) | Her biri ayrı seçim bekliyor |
@@ -38,4 +38,6 @@ Bu envanter sürüm farklarını özetler; sonraki oturum ayrıca `git status --
 
 Her adımda `npm run build`, `npm run lint` ve ilgili mevcut testler çalıştırılır. İlk adımda preferences API, smoke **41**, realtime **8**, security **37**, conversation listesi **iki okuma sınırı**, mevcut UI **56** ve ayarlar UI **106** kontrolleri geçti. Ayarlar testi sırasında bulunan eşzamanlı mesaj gönderim hatası da aynı teslimatta düzeltildi; regresyonda **40/40** istek başarılı. Ayrıntı [01 kanıt kaydındadır](./01-settings.md); son toplu regresyon kaydı `docs/VERIFICATION.md` içindedir. Veritabanı ve tarayıcı test koşulları için mevcut `scripts/test-server.js` esas alınır.
 
-Sonraki oturum önce bu belgeyi, shared kontratı ve 01'in kanıt kaydını okur. Başlangıç **02 — Giriş ve oturum tasarımı seçimi**: seçenekler soru aracında sunulur, açık karar alınmadan o ekran uygulanmaz. Diğer ekranlar bu oturumda yeniden tasarlanmış sayılmaz.
+02 için kullanıcı 25 Eylül 2026'da soru aracında **A — Ortalanmış kart** seçti ve uygulama planını “Implement the plan.” ile onayladı. Ortak metin, ikon ve tema kuralları giriş/oturum akışına uygulandı. HTTP/socket oturum doğrulamasındaki altyapı hatası ayrımı aynı adımda düzeltildi; ayrıntılar [02 kaydındadır](./02-login.md).
+
+Sonraki oturum önce bu belgeyi, shared/emoji/icons kontratlarını ve 02'nin kanıt kaydını okur. Başlangıç **03 — Kayıt tasarımı seçimi**: seçenekler soru aracında sunulur, açık karar alınmadan o ekran uygulanmaz. Tam emoji geçişi 04'te; Lucide ihtiyacı henüz yok.

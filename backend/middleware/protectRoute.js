@@ -7,8 +7,11 @@ const protectRoute = async (req, res, next) => {
         req.userId = decoded.id;
         req.sessionId = decoded.jti;
         next();
-    } catch {
-        res.status(401).json({ message: "Unauthorized: Invalid session" });
+    } catch (error) {
+        const unavailable = error.code === "SESSION_UNAVAILABLE";
+        res.status(unavailable ? 503 : 401).json({
+            message: unavailable ? "Session service unavailable" : "Unauthorized: Invalid session"
+        });
     }
 };
 export default protectRoute;

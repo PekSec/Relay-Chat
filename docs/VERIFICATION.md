@@ -1,5 +1,38 @@
 # Verification record
 
+## Login and session states / contract step 02 — 25 September 2026
+
+User selected A (centered card), then approved implementation. Login now uses
+Atlaskit fields, form validation, status messages, loading indicator and password
+visibility icons. Guest theme selection uses a lazy Select. No provider branding
+or slogans appear in the UI. Step 03 remains unapproved.
+
+- Production build and lint passed. Login JS: 39.20 kB / 14.05 kB gzip; shared
+  Textfield and theme Select load separately. Main JS: 617.76 kB / 188.70 kB gzip;
+  Vite still reports its >500 kB chunk advisory. No download-time claim is made.
+- New login Chromium suite: **48 checks** across desktop/mobile, light/dark,
+  validation, password visibility, loading, duplicate submit, 400/429/500/offline,
+  session 401/503/retry, Enter, reload, real cross-tab logout/account change,
+  preference isolation and signup navigation.
+- Session fault regression: invalid/revoked/deleted-user sessions remain 401;
+  DB failures return 503. Real Socket.IO handshakes distinguish these errors;
+  unverified packets never reach handlers. Before the fix the DB failure
+  assertion failed with 401 instead of 503. The initial browser test reproduced
+  the server error being incorrectly displayed as a network error.
+- Existing smoke **41**, security **37**, realtime **8**, UI **56**, settings
+  **106** checks passed using disposable MongoDB 7 and production Chromium.
+  The shared guest theme selector test now uses combobox keyboard interaction.
+- Run `npm run test:session-errors` without Mongo, and `npm run test:login` after
+  a build with explicit disposable `MONGO_URI` (default app port 5013). Both are
+  included in `test:all` and CI. Local evidence is in `test-results/login*.log`.
+- Screenshots inspected: [desktop](screenshots/login-desktop.png),
+  [mobile](screenshots/login-mobile.png),
+  [light error](screenshots/login-desktop-light.png),
+  [dark error](screenshots/login-mobile-dark.png).
+
+Implementation and handoff: [02 contract](contracts/atlassian-overhaul/02-login.md).
+No remote CI run, deployment or push was performed.
+
 ## Account personalization / contract step 01 — 25 September 2026
 
 Implemented the approved sectioned Atlaskit settings modal and account-persisted

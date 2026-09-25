@@ -86,6 +86,9 @@ jobs:
           MONGO_URI: mongodb://127.0.0.1:27017/ci_realtime
           PORT: 5001
 
+      - name: Check session failure classification
+        run: npm run test:session-errors
+
       - name: Run security regression tests
         run: npm run test:security 2>&1 | tee test-results/security.log
         env:
@@ -125,6 +128,12 @@ jobs:
         env:
           MONGO_URI: mongodb://127.0.0.1:27017/ci_settings
           PORT: 5012
+
+      - name: Check login and session states
+        run: npm run test:login 2>&1 | tee test-results/login.log
+        env:
+          MONGO_URI: mongodb://127.0.0.1:27017/ci_login
+          PORT: 5013
 
       - name: Save test evidence
         if: always()

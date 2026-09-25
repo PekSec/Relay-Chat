@@ -229,7 +229,7 @@ try {
         await page.waitForURL('**/login');
         await page.waitForFunction(() => document.documentElement.dataset.accent === 'blue');
         check(`${name}: logout restores guest defaults`, await page.locator('html').getAttribute('data-font-size') === 'standard');
-        await page.getByRole('combobox', { name: 'Tema', exact: true }).selectOption('dark');
+        await choose(page, 'Tema', 'Koyu');
         await signup(context, 'Diğer Hesap');
         await page.goto(server.base);
         await page.waitForFunction(() => document.documentElement.dataset.accent === 'blue');

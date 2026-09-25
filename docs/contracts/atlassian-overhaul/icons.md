@@ -20,11 +20,14 @@ Başlangıç `react-icons` import envanteri aşağıdadır. Hedefler kurulu `@at
 | `IoClose` | SettingsModal, MessageContainer | `cross` | Yok |
 | `IoCopyOutline` | SettingsModal | `copy` | Yok |
 | `IoCheckmark` | SettingsModal | `check-mark` | Yok |
+| `👁️` / `🙈` | Login parola göster/gizle | `eye-open` / `eye-open-strikethrough` | Yok; 02'de taşındı |
 | `TiMessages` | MessageContainer | `comment` | Yok |
 
 `TiMessages` için birebir çift baloncuk şekli yerine aynı anlamı taşıyan resmî `comment` kullanılır; yalnız şekil farkı yeni ikon bağımlılığı gerekçesi değildir. İlk adımda ayarlar içindeki `IoClose`, `IoCopyOutline`, `IoCheckmark` kullanımları taşındı; yeni bölüm simgeleri de Atlaskit'ten gelir. Diğer satırlar ilgili ekranın onaylı adımında taşınır; `react-icons` bu nedenle henüz kaldırılmadı.
 
 ## Boyut, isim ve fallback
+
+02 oturum yükleme/hata kartındaki `💬` dekorasyonu mevcut Relay logosuyla değiştirildi; yeni ikon veya emoji bağımlılığı eklenmedi.
 
 - Yeni core API'de `size="medium"` **16 px**, `small` **12 px**. Legacy `medium=24px` bilgisi bu API'ye uygulanmaz. Standart eylemler 16 px; dokunma hedefi ikon boyutundan bağımsız en az 24 px, ürün butonlarında tercihen 40 px olur.
 - Atlaskit glyph stroke'u dış CSS ile değiştirilmez. Metin yanında dekoratif ikon `label=""`; yalnız ikon butonunda butonun erişilebilir adı anlamı taşır. Semantik renk token'ı veya `currentColor` kullanılır.
