@@ -1,5 +1,46 @@
 # Verification record
 
+## Signup / contract step 03 — 25 September 2026
+
+Implemented the approved A single-column card using the existing auth layout,
+Atlaskit form fields, password visibility icons, status messages and RadioGroup.
+Gender remains a required male/female choice. Signup preserves input on errors,
+focuses invalid fields, and prevents duplicate requests. No slogans or provider
+branding were added. Step 04 still requires a separate design selection.
+
+| Check | Observed result |
+| --- | --- |
+| Signup API regression | 29 checks passed |
+| Signup Chromium | 38 checks passed; desktop/mobile and short 320×480 viewport |
+| Existing login / UI / settings Chromium | 48 / 56 / 106 passed |
+| Existing smoke / security / realtime | 41 / 37 / 8 passed |
+| Build / lint / syntax / CI YAML / diff | Passed |
+
+The signup API test first failed on an injected friend-code duplicate. The fix
+uses the unique index with at most five save attempts, hashing once; username
+conflicts get their own stable code. The test also verifies that session creation
+failure leaves the saved account intact and returns `ACCOUNT_CREATED_LOGIN_REQUIRED`.
+Validation boundaries include 3/20-character usernames and 72/73-byte UTF-8 passwords.
+Fault injection is at the database boundary; successful records use real MongoDB.
+
+Browser coverage includes linked field errors/focus, password confirmation after
+editing the first password, both visibility buttons, radio keyboard selection,
+real duplicate username, 429/500/503/offline, non-JSON errors, duplicate submit,
+themes, short-screen scrolling, default preferences, redirect and login link.
+New tests run through `npm run test:signup-api` and `npm run test:signup`; both need
+an explicitly supplied disposable `MONGO_URI`. The browser test needs a build and
+defaults to port 5020. CI and `test:all` include both tests.
+
+Screenshots inspected: [desktop](screenshots/signup-desktop.png),
+[mobile](screenshots/signup-mobile.png), [dark error](screenshots/signup-mobile-dark.png).
+SignUp JS is 7.03 kB / 3.29 kB gzip plus shared form/icon/Textfield chunks.
+Main JS is 617.86 kB / 188.75 kB gzip; the existing Vite >500 kB advisory remains.
+No network timing claim or remote CI execution is implied by these local checks.
+
+The independent read-only review reported no important finding. Details and next
+step: [03 contract](contracts/atlassian-overhaul/03-signup.md). No deployment or push
+was performed in this step.
+
 ## Login and session states / contract step 02 — 25 September 2026
 
 User selected A (centered card), then approved implementation. Login now uses

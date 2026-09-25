@@ -1,77 +1,52 @@
-import { passwordIsValid } from '../../utils/password';
+import { useEffect, useRef, useState } from 'react';
 import { notifySessionChange } from '../../utils/sessionEvents';
 import apiFetch from '../../utils/apiFetch';
-import { useState } from "react";
-import toast from "react-hot-toast";
-import useAuth from "../../zustand/useAuth";
+import useAuth from '../../zustand/useAuth';
 
+export default function useSignup() {
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
+    const pending = useRef(null);
+    useEffect(() => () => pending.current?.abort(), []);
 
-const useSignup = () => {
-    const [loading, setLoading] = useState(false); //yükleniyor durumu
-    const setAuthUser = useAuth((state) => state.setAuthUser); //Zustand store'daki setAuthUser fonksiyonu. auth işlemleri her yerde kullanılabilmesi için Zustand store'da tutuluyor
-    // const setAuthUser = useAuth(); böyle de kullanılır ama zustand ile genelde state tercih edilir.
-
-    const handleInputErrors = (userData) => { //input hatalarını kontrol eden fonksiyon
-        const { fullName, username, password, confirmPassword, gender } = userData;
-
-        if (!username || !fullName || !password || !confirmPassword || !gender) {
-            toast.error("Tüm alanları doldur");
-            return false;
-        }
-
-        if (password !== confirmPassword) {
-            toast.error("Parolalar eşleşmiyor");
-            return false;
-        }
-
-        if (!passwordIsValid(password)) {
-            toast.error("Parola en az 8 karakter ve en fazla 72 UTF-8 bayt olmalı");
-            return false;
-        }
-
-        return true;
-    };
-
-    const signUp = async (userData) => { //kayıt işlemini yapan fonksiyon ve inputs objesini parametre olarak alıyor.
-        const success = handleInputErrors(userData); //inputs objesi handleInputErrors fonksiyonuna gönderilip doğrulanıyor
-        if (!success) return;
-
+    const signUp = async (values) => {
+        if (pending.current) return;
+        const controller = new AbortController();
+        pending.current = controller;
         setLoading(true);
+        setError('');
         try {
-            const res = await apiFetch('/api/auth/signup', { //backende istek atılıyor
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(userData) // inputs objesi json stringe çevrilip body olarak gönderiliyor
+            const response = await apiFetch('/api/auth/signup', {
+                method: 'POST', signal: controller.signal,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(values)
             });
-
-            const data = await res.json(); //response json formatına çevriliyor
-
-            if (!res.ok) {
-                throw new Error(data.message || "Hesap oluşturulamadı");
+            // A proxy may return HTML; never expose upstream response text.
+            let data;
+            try { data = await response.json(); }
+            catch (err) { if (!(err instanceof SyntaxError)) throw err; }
+            if (!response.ok) {
+                if (response.status === 400 && data?.code === 'USERNAME_TAKEN') {
+                    return { username: 'Bu kullanıcı adı kullanılıyor.' };
+                }
+                setError(response.status === 503 && data?.code === 'ACCOUNT_CREATED_LOGIN_REQUIRED' ?
+                    'Hesap oluşturuldu. Oturum açılamadı; giriş yap.' : response.status === 429 ?
+                        'Çok fazla kayıt denemesi. Bir süre sonra tekrar dene.' : 'Hesap oluşturulamadı. Tekrar dene.');
+                return;
             }
-
-            // Keep the public profile in memory after the server creates the session.
-
-            const userToSave = data.user || data; // API yanıtında user objesi olabilir veya doğrudan data olabilir
-            setAuthUser(userToSave);
-            notifySessionChange(); // Other tabs revalidate the shared session cookie.
-
-            toast.success("Hesabın oluşturuldu");
-
+            const user = data?.user || data;
+            if (!user?._id) {
+                setError('Hesap oluşturulamadı. Tekrar dene.');
+                return;
+            }
+            useAuth.getState().setAuthUser(user);
+            notifySessionChange();
         } catch (err) {
-            console.error("Signup error:", err);
-            if (err.name !== 'AbortError') toast.error(err.message);
+            if (err.name !== 'AbortError') setError('Bağlantı kurulamadı. Tekrar dene.');
         } finally {
-            setLoading(false); //işlem bittiğinde loading false yapılır
+            pending.current = null;
+            if (!controller.signal.aborted) setLoading(false);
         }
     };
-
-    return { //dışarıya açılan özellikler
-        loading,
-        signUp
-    };
-};
-
-export default useSignup;
+    return { loading, error, signUp };
+}

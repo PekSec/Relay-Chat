@@ -17,6 +17,7 @@ React, Zustand, Express ve MongoDB korunur. Önce mevcut endpoint, store ve tüm
 | Modal | `@atlaskit/modal-dialog` |
 | Form alanı / açıklama / hata | `@atlaskit/form`, `@atlaskit/textfield`, `@atlaskit/textarea` |
 | Seçim / aç-kapat | `@atlaskit/select`, `@atlaskit/toggle` |
+| Tekli seçenek grubu | `@atlaskit/radio` (`RadioGroup`; 03'te kullanıldı) |
 | Avatar / tooltip / popup | `@atlaskit/avatar`, `@atlaskit/tooltip`, `@atlaskit/popup` |
 | Sekme / durum / yükleme | `@atlaskit/tabs`, `@atlaskit/section-message`, `@atlaskit/spinner` |
 | Emoji / ikon / tema | Emoji kontratı, ikon kontratı, `@atlaskit/tokens` |

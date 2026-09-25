@@ -1,162 +1,72 @@
-import Button from '@atlaskit/button/new';
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import Form, { Field, ErrorMessage, HelperMessage } from '@atlaskit/form';
+import Textfield from '@atlaskit/textfield';
+import Button from '@atlaskit/button/default/button';
+import IconButton from '@atlaskit/button/icon/button';
+import { RadioGroup } from '@atlaskit/radio';
+import SectionMessage from '@atlaskit/section-message';
+import Spinner from '@atlaskit/spinner';
+import EyeIcon from '@atlaskit/icon/core/eye-open';
+import EyeOffIcon from '@atlaskit/icon/core/eye-open-strikethrough';
 import { passwordIsValid } from '../../utils/password';
-import GenderCheckBox from "./GenderCheckBox";
-import { Link } from "react-router-dom";
-import { useState } from "react";
-import useSignup from "../../hooks/auth/useSignup";
+import useSignup from '../../hooks/auth/useSignup';
 
-const SignUp = () => {
+const genders = [{ value: 'male', label: 'Erkek' }, { value: 'female', label: 'Kadın' }];
+const passwordFields = [
+    { name: 'password', label: 'Parola', action: 'Parolayı', validate: value => !value ? 'Parolanı gir.' :
+        passwordIsValid(value) ? undefined : value.length < 8 ? 'Parola en az 8 karakter olmalı.' : 'Parola çok uzun; daha az karakter kullan.' },
+    { name: 'confirmPassword', label: 'Parola tekrar', action: 'Parola tekrarını', validate: (value, values) =>
+        !value ? 'Parolanı tekrar gir.' : value !== values.password ? 'Parolalar eşleşmiyor.' : undefined }
+];
 
-    //use State in dizi kullanımı çoklu use state gibi düşün
-    //ama değişikliklerde değişmeyenleri korumak için spread operatörünü kullanıyoruz
-    const [inputs, setInputs] = useState({
-        fullName: "",
-        username: "",
-        password: "",
-        confirmPassword: "",
-        gender: ""
-    });
-
-    const { signUp, loading } = useSignup(); //useSignup hook'unu kullan
-
-    const handleCheckboxChange = (e) => {
-        const value = e.target.value;       // 'male' veya 'female'
-        const checked = e.target.checked;   // true veya false
-
-        if (checked) {
-            setInputs({ ...inputs, gender: value }); //sadece gender alanını güncelle
-        } else {
-            setInputs({ ...inputs, gender: "" }); // uncheck için
-        }
-    };
-
-    const handleSubmit = async (e) => {//form submit olduğunda, e parametre olarak event objesi gelir
-        e.preventDefault();//sayfanın yenilenmesini engeller
-        await signUp(inputs); //useSignup hook'undan gelen signUp fonksiyonunu çağır
-    }
-
-    // Kullanıcı adı kuralı backend ile aynı: 3-20 karakter, harf/rakam/alt çizgi
-    const usernameValid = inputs.username === "" || /^[a-zA-Z0-9_]{3,20}$/.test(inputs.username);
-    const passwordValid = inputs.password === "" || passwordIsValid(inputs.password);
-    const passwordsMatch = inputs.confirmPassword === "" || inputs.password === inputs.confirmPassword;
-
-    return (
-        <div className='w-full max-w-sm mx-auto'>
-            <div className='surface rounded-lg p-7'>
-
-                <div className='flex flex-col items-center gap-2 mb-6'>
-                    <img src="/favicon.svg" alt="Relay" width="48" height="48" />
-                    <h1 className='text-xl font-semibold' style={{ color: 'var(--text-primary)' }}>
-                        Hesap oluştur
-                    </h1>
-                </div>
-
-                <form onSubmit={handleSubmit} className='flex flex-col gap-3.5'>
-                    <div className='flex flex-col gap-1.5'>
-                        <label htmlFor='fullName' className='text-xs font-medium' style={{ color: 'var(--text-secondary)' }}>
-                            Ad soyad
-                        </label>
-                        <input
-                            id='fullName'
-                            maxLength={50}
-                            required
-                            type='text'
-                            autoComplete='name'
-                            placeholder='Ahmet Yılmaz'
-                            className='field'
-                            value={inputs.fullName}
-                            onChange={(e) => setInputs({ ...inputs, fullName: e.target.value })}
-                        />
-                    </div>
-
-                    <div className='flex flex-col gap-1.5'>
-                        <label htmlFor='username' className='text-xs font-medium' style={{ color: 'var(--text-secondary)' }}>
-                            Kullanıcı adı
-                        </label>
-                        <input
-                            id='username'
-                            maxLength={20}
-                            autoCapitalize='none'
-                            spellCheck={false}
-                            required
-                            type='text'
-                            autoComplete='username'
-                            placeholder='kullaniciadin'
-                            className='field'
-                            value={inputs.username}
-                            onChange={(e) => setInputs({ ...inputs, username: e.target.value })}
-                        />
-                        {!usernameValid && (
-                            <span className='text-xs' style={{ color: 'var(--danger)' }}>
-                                3-20 karakter; yalnızca harf, rakam ve alt çizgi
-                            </span>
-                        )}
-                    </div>
-
-                    <div className='flex flex-col gap-1.5'>
-                        <label htmlFor='password' className='text-xs font-medium' style={{ color: 'var(--text-secondary)' }}>
-                            Parola
-                        </label>
-                        <input
-                            id='password'
-                            required
-                            type='password'
-                            autoComplete='new-password'
-                            placeholder='En az 8 karakter'
-                            className='field'
-                            value={inputs.password}
-                            onChange={(e) => setInputs({ ...inputs, password: e.target.value })}
-                        />
-                        {!passwordValid && (
-                            <span className='text-xs' style={{ color: 'var(--danger)' }}>
-                                Parola en az 8 karakter ve en fazla 72 UTF-8 bayt olmalı
-                            </span>
-                        )}
-                    </div>
-
-                    <div className='flex flex-col gap-1.5'>
-                        <label htmlFor='confirmPassword' className='text-xs font-medium' style={{ color: 'var(--text-secondary)' }}>
-                            Parola tekrar
-                        </label>
-                        <input
-                            id='confirmPassword'
-                            required
-                            type='password'
-                            autoComplete='new-password'
-                            placeholder='Parolayı tekrar gir'
-                            className='field'
-                            value={inputs.confirmPassword}
-                            onChange={(e) => setInputs({ ...inputs, confirmPassword: e.target.value })}
-                        />
-                        {!passwordsMatch && (
-                            <span className='text-xs' style={{ color: 'var(--danger)' }}>
-                                Parolalar eşleşmiyor
-                            </span>
-                        )}
-                    </div>
-
-                    <GenderCheckBox onChange={handleCheckboxChange} gender={inputs.gender} />
-
-                    <Button type='submit' appearance='primary' isDisabled={loading}
-                    >
-                        {loading ? (
-                            <>
-                                <span className='w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin' />
-                                Oluşturuluyor
-                            </>
-                        ) : 'Kayıt ol'}
+export default function SignUp() {
+    const [visible, setVisible] = useState({});
+    const { signUp, loading, error } = useSignup();
+    return <section className="auth-card" aria-labelledby="signup-title">
+        <div className="auth-brand"><img src="/favicon.svg" alt="" width="32" height="32" />Relay</div>
+        <h1 id="signup-title">Hesap oluştur</h1>
+        <Form onSubmit={signUp}>
+            {({ formProps }) => <form {...formProps} noValidate aria-labelledby="signup-title" aria-busy={loading}>
+                {error && <div role="alert" className="auth-error"><SectionMessage appearance="error">{error}</SectionMessage></div>}
+                <Field id="fullName" name="fullName" label="Ad soyad" defaultValue="" isRequired
+                    validate={value => !value?.trim() ? 'Ad soyadını gir.' : value.trim().length > 50 ? 'Ad soyad en fazla 50 karakter olmalı.' : undefined}>
+                    {({ fieldProps, error }) => <>
+                        <Textfield {...fieldProps} autoComplete="name" isReadOnly={loading} />
+                        {error && <ErrorMessage>{error}</ErrorMessage>}
+                    </>}
+                </Field>
+                <Field id="username" name="username" label="Kullanıcı adı" defaultValue="" isRequired
+                    validate={value => !value ? 'Kullanıcı adını gir.' : !/^[a-zA-Z0-9_]{3,20}$/.test(value) ? '3–20 karakter; yalnızca A–Z, a–z, rakam ve alt çizgi.' : undefined}>
+                    {({ fieldProps, error }) => <>
+                        <Textfield {...fieldProps} autoComplete="username" autoCapitalize="none" spellCheck={false} isReadOnly={loading} />
+                        {error && <ErrorMessage>{error}</ErrorMessage>}
+                    </>}
+                </Field>
+                {passwordFields.map(({ name, label, action, validate }) => <Field key={name} id={name}
+                    name={name} label={label} defaultValue="" isRequired validate={validate}>
+                    {({ fieldProps, error }) => <>
+                        <Textfield {...fieldProps} type={visible[name] ? 'text' : 'password'} autoComplete="new-password" isReadOnly={loading}
+                            elemAfterInput={<IconButton type="button" appearance="subtle"
+                                icon={visible[name] ? EyeOffIcon : EyeIcon} label={`${action} ${visible[name] ? 'gizle' : 'göster'}`}
+                                onClick={() => setVisible(current => ({ ...current, [name]: !current[name] }))} />} />
+                        {error ? <ErrorMessage>{error}</ErrorMessage> : name === 'password' && <HelperMessage>En az 8 karakter.</HelperMessage>}
+                    </>}
+                </Field>)}
+                <Field id="gender" name="gender" label="Cinsiyet" defaultValue="" isRequired
+                    validate={value => !value ? 'Cinsiyet seç.' : undefined}>
+                    {({ fieldProps, error }) => <div onBlur={fieldProps.onBlur} onFocus={fieldProps.onFocus}>
+                        <RadioGroup {...fieldProps} options={genders} isDisabled={loading} />
+                        {error && <ErrorMessage>{error}</ErrorMessage>}
+                    </div>}
+                </Field>
+                <div className="auth-submit">
+                    <Button type="submit" appearance="primary" shouldFitContainer isDisabled={loading}>
+                        {loading ? <span className="auth-progress"><Spinner size="small" />Oluşturuluyor</span> : 'Kayıt ol'}
                     </Button>
-
-                    <Link to='/login' className='text-center text-sm' style={{ color: 'var(--text-secondary)' }}>
-                        Zaten hesabın var mı?{' '}
-                        <span style={{ color: 'var(--accent-hover)' }} className='font-medium hover:underline'>
-                            Giriş yap
-                        </span>
-                    </Link>
-                </form>
-            </div>
-        </div>
-    );
-};
-
-export default SignUp;
+                </div>
+                <Link to="/login" className="auth-signup">Giriş yap</Link>
+            </form>}
+        </Form>
+    </section>;
+}

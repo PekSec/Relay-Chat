@@ -32,50 +32,43 @@ export const signup = async (req, res) => {
             return res.status(400).send({ message: "Passwords do not match" }); //şifre eşleşmiyorsa hata döner
         }
 
-        //User modeli mongoose modelidir ve mongodb kısmında users koleksiyonuna karşılık gelir
-        const user = await User.findOne({ username: username });
-        if (user) {
-            return res.status(400).send({ message: "User already exists" });
+        if (await User.exists({ username })) {
+            return res.status(400).send({ message: "User already exists", code: "USERNAME_TAKEN" });
         }
-
-        //hash şifreleme işlemi db ye düz metin şifre kaydetmemek için gerekir
-        const salt = await bcyrpt.genSalt(10); //"10" ne kadar karmaşık olacağını belirler
-        const hashedPassword = await bcyrpt.hash(password, salt);
-
-        // Yeni kullanıcı oluştur. oluşturduğumuz User modeli mongoose modelidir ve mongodb kısmında users koleksiyonuna karşılık gelir
+        const hashedPassword = await bcyrpt.hash(password, 10);
         const newUser = new User({
-            //_id: new mongoose.Types.ObjectId(),yeni bir id oluştur bunu mongoose otomatik oluşturur
-            fullName: fullName.trim(),
-            username: username,
-            password: hashedPassword,
-            gender: gender,
-            profilePic: "", // The UI renders local initials until the user chooses an HTTPS avatar.
-            friendCode: await generateFriendCode(),
+            fullName: fullName.trim(), username, password: hashedPassword, gender, profilePic: ""
         });
-
-        if (newUser) {
-            // Generate token and set cookie işlemi
-            await newUser.save(); // Persist the account before issuing its session.
-            await generateTokenAndSetCookie(newUser, res);
-
-            res.status(201).send({
-                message: "User created successfully",//serverın mesajı  user:bu bu diyor
-                user: {
-                    _id: newUser._id,
-                    fullName: newUser.fullName,
-                    username: newUser.username,
-                    gender: newUser.gender,
-                    profilePic: newUser.profilePic,
-                    friendCode: newUser.friendCode,
-                    preferences: newUser.preferences
-                }
-            });
-        } else {
-            res.status(400).send({ message: "Error creating user" });
+        for (let attempt = 0; attempt < 5; attempt++) {
+            newUser.friendCode = generateFriendCode();
+            try {
+                await newUser.save();
+                break;
+            } catch (error) {
+                if (error.code !== 11000 || !error.keyPattern?.friendCode) throw error;
+                if (attempt === 4) return res.status(503).send({ message: "Account creation unavailable" });
+            }
         }
-
+        try {
+            await generateTokenAndSetCookie(newUser, res);
+        } catch {
+            return res.status(503).send({
+                message: "Account created; login required", code: "ACCOUNT_CREATED_LOGIN_REQUIRED"
+            });
+        }
+        res.status(201).send({
+            message: "User created successfully",
+            user: {
+                _id: newUser._id, fullName: newUser.fullName, username: newUser.username,
+                gender: newUser.gender, profilePic: newUser.profilePic,
+                friendCode: newUser.friendCode, preferences: newUser.preferences
+            }
+        });
     } catch (error) {
-        res.status(error.code === 11000 ? 400 : 500).send({ message: error.code === 11000 ? "User already exists" : "Internal Server Error" });
+        if (error.code === 11000 && error.keyPattern?.username) {
+            return res.status(400).send({ message: "User already exists", code: "USERNAME_TAKEN" });
+        }
+        res.status(500).send({ message: "Internal Server Error" });
     }
 };
 

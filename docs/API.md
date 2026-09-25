@@ -28,7 +28,19 @@ be authenticated are rejected and their socket is disconnected.
 | PUT    | `/auth/password`| Change password     |
 | PATCH  | `/auth/preferences` | Save account appearance and messaging preferences |
 
+Signup keeps its successful **201** `{ message, user }` response. Errors add a
+machine-readable `code` where recovery differs:
+
+- **400**, `USERNAME_TAKEN`: the requested username already exists, including a concurrent insert.
+- **503**, `ACCOUNT_CREATED_LOGIN_REQUIRED`: the account was saved but session creation failed; use login instead of creating it again.
+- **503**, no code: friend-code allocation exhausted five insert attempts; retry signup later. No account was created.
+
+The four-character friend-code format and unique index are unchanged. Only
+friend-code duplicate errors retry; other duplicate keys are not reported as
+username conflicts.
+
 ### Friends
+
 | Method | Endpoint                  | Description                   |
 |--------|---------------------------|-------------------------------|
 | GET    | `/friends/search?query=`  | Search by username or code    |

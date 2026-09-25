@@ -1,6 +1,6 @@
 # Atlassian geçiş kontratları
 
-Bu alan sonraki oturumların başlangıç noktasıdır. **01 Ayarlar ve Kişiselleştirme** ile **02 Giriş ve oturum** tamamlandı. Diğer ekranlar ayrı onay-uygulama döngüleriyle ilerler. Mevcut kısmi geçişler de yeniden değerlendirilir.
+Bu alan sonraki oturumların başlangıç noktasıdır. **01 Ayarlar ve Kişiselleştirme**, **02 Giriş ve oturum** ve **03 Kayıt** tamamlandı. Diğer ekranlar ayrı onay-uygulama döngüleriyle ilerler. Mevcut kısmi geçişler de yeniden değerlendirilir.
 
 ## Kararlar ve durum
 
@@ -13,7 +13,7 @@ Kullanıcı 25 Eylül 2026 tarihinde önceki plan için **“Implement the plan.
 | Ortak | [Tasarım ve tercih kontratı](./shared.md), [İkon geçişi](./icons.md), [Emoji](./emoji.md) | Ortak yön onaylı; modüllere kademeli uygulanır |
 | 01 | [Ayarlar ve kişiselleştirme](./01-settings.md) | Uygulandı ve doğrulandı; ayarlar UI 106 kontrol geçti |
 | 02 | [Giriş ve oturum](./02-login.md) | A — Ortalanmış kart onaylandı, uygulandı; giriş UI 48 kontrol geçti |
-| 03 | [Kayıt](./03-signup.md) | Tasarım seçimi bekliyor |
+| 03 | [Kayıt](./03-signup.md) | A — Tek sütun kart uygulandı; signup UI 38, API 29 kontrol geçti |
 | 04 | [Ana sohbet](./04-chat.md) | Tasarım seçimi bekliyor |
 | 04a–c | [Mesaj silme, geçmiş temizleme, emoji popup](./04-dialogs.md) | Her biri ayrı seçim bekliyor |
 | 05 | [Arkadaşlar](./05-friends.md) | Tasarım seçimi bekliyor |
@@ -40,4 +40,6 @@ Her adımda `npm run build`, `npm run lint` ve ilgili mevcut testler çalıştı
 
 02 için kullanıcı 25 Eylül 2026'da soru aracında **A — Ortalanmış kart** seçti ve uygulama planını “Implement the plan.” ile onayladı. Ortak metin, ikon ve tema kuralları giriş/oturum akışına uygulandı. HTTP/socket oturum doğrulamasındaki altyapı hatası ayrımı aynı adımda düzeltildi; ayrıntılar [02 kaydındadır](./02-login.md).
 
-Sonraki oturum önce bu belgeyi, shared/emoji/icons kontratlarını ve 02'nin kanıt kaydını okur. Başlangıç **03 — Kayıt tasarımı seçimi**: seçenekler soru aracında sunulur, açık karar alınmadan o ekran uygulanmaz. Tam emoji geçişi 04'te; Lucide ihtiyacı henüz yok.
+03 için kullanıcı 25 Eylül 2026'da soru aracında **A — Tek sütun kart** seçti ve planı uygulamaya açtı. Kayıt formu ve iki backend hata yolu tamamlandı; ayrıntılar [03 kaydındadır](./03-signup.md).
+
+Sonraki oturum önce bu belgeyi, shared/emoji/icons kontratlarını ve 03'ün kanıt kaydını okur. Başlangıç **04 — Ana sohbet tasarımı seçimi**: seçenekler soru aracında sunulur, açık karar alınmadan o ekran uygulanmaz. Emoji sağlayıcısı/asset lisansı araştırması 04'e dahildir; bağlı modal/popup'lar kendi seçimlerini gerektirir. Lucide ihtiyacı henüz yok.

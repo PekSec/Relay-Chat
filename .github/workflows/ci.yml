@@ -135,6 +135,17 @@ jobs:
           MONGO_URI: mongodb://127.0.0.1:27017/ci_login
           PORT: 5013
 
+      - name: Check signup boundaries and collision recovery
+        run: npm run test:signup-api 2>&1 | tee test-results/signup-api.log
+        env:
+          MONGO_URI: mongodb://127.0.0.1:27017/ci_signup_api
+
+      - name: Check signup on desktop and mobile
+        run: npm run test:signup 2>&1 | tee test-results/signup.log
+        env:
+          MONGO_URI: mongodb://127.0.0.1:27017/ci_signup
+          PORT: 5020
+
       - name: Save test evidence
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

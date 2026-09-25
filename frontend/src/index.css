@@ -63,7 +63,6 @@ button:focus:not(:focus-visible) { outline:none; }
 .sidebar-preferences>button { width:auto; font-size:11px; padding:6px; }
 .theme-control { display:flex; align-items:center; gap:8px; font-size:12px; color:var(--text-secondary); }
 .theme-control>div { min-width:120px; }
-.surface { background:var(--bg-panel); border:1px solid var(--border-subtle); box-shadow:var(--ds-shadow-overlay, 0 8px 24px #091e421f); }
 .skeleton { background:var(--ds-background-neutral, #dcdfe4); border-radius:4px; }
 .panel-chat { background:var(--bg-panel); }
 .field { width:100%; background:var(--bg-panel); border:1px solid var(--border-strong); border-radius:6px; padding:10px 12px; color:var(--text-primary); font-size:14px; }

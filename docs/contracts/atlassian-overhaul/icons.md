@@ -21,6 +21,7 @@ Başlangıç `react-icons` import envanteri aşağıdadır. Hedefler kurulu `@at
 | `IoCopyOutline` | SettingsModal | `copy` | Yok |
 | `IoCheckmark` | SettingsModal | `check-mark` | Yok |
 | `👁️` / `🙈` | Login parola göster/gizle | `eye-open` / `eye-open-strikethrough` | Yok; 02'de taşındı |
+| Yeni görünürlük eylemleri | SignUp parola ve tekrar | `eye-open` / `eye-open-strikethrough` | Yok; 03'te aynı ikonlar kullanıldı |
 | `TiMessages` | MessageContainer | `comment` | Yok |
 
 `TiMessages` için birebir çift baloncuk şekli yerine aynı anlamı taşıyan resmî `comment` kullanılır; yalnız şekil farkı yeni ikon bağımlılığı gerekçesi değildir. İlk adımda ayarlar içindeki `IoClose`, `IoCopyOutline`, `IoCheckmark` kullanımları taşındı; yeni bölüm simgeleri de Atlaskit'ten gelir. Diğer satırlar ilgili ekranın onaylı adımında taşınır; `react-icons` bu nedenle henüz kaldırılmadı.
