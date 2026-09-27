@@ -6,7 +6,14 @@ import useConversation from './useConversation.js';
 // Tüm componentler ve hook'lar bu store'a erişerek veri okur/yazar.
 // Zustand'ın avantajı: Redux'a göre çok daha az boilerplate kod, direkt fonksiyon çağrısı ile state güncelleme.
 
-const useFriendStore = create((set) => ({
+const useFriendStore = create((set, get) => ({
+    friendListVersion: 0,
+    invalidateFriendLists: () => set(state => ({ friendListVersion: state.friendListVersion + 1 })),
+    applyFriendList: (key, items, version) => {
+        if (get().friendListVersion !== version) return false;
+        set({ [key]: items });
+        return true;
+    },
     // ═══════════ STATE ═══════════
     friends: [],                  // Mevcut arkadaş listesi (kabul edilmiş arkadaşlıklar)
     incomingFriendRequests: [],   // Sana gelen beklemedeki arkadaşlık istekleri
@@ -20,11 +27,13 @@ const useFriendStore = create((set) => ({
 
     // spread operator ile mevcut listeye yeni arkadaşı ekler: [...eskiListe, yeniArkadaş]
     addFriend: (friend) => set((state) => ({
+        friendListVersion: state.friendListVersion + 1,
         friends: [...state.friends.filter(item => item._id !== friend._id), friend]
     })),
 
     // Arkadaşı listeden çıkar (useRemoveFriend hook'u çağırır)
     removeFriend: (friendId) => set((state) => ({
+        friendListVersion: state.friendListVersion + 1,
         friends: state.friends.filter(f => f._id !== friendId) //filter dizide yazılan özelliği karşılayanlar olan yeni dizi döner
     })),
 
@@ -35,11 +44,13 @@ const useFriendStore = create((set) => ({
 
     // Yeni gelen istek ekle (socket.io üzerinden gerçek zamanlı bildirim geldiğinde)
     addIncomingFriendRequest: (request) => set((state) => ({
+        friendListVersion: state.friendListVersion + 1,
         incomingFriendRequests: [...state.incomingFriendRequests.filter(item => item._id !== request._id), request]
     })),
 
     // Gelen isteği listeden kaldır (kabul veya red edildiğinde)
     removeIncomingFriendRequest: (requestId) => set((state) => ({
+        friendListVersion: state.friendListVersion + 1,
         incomingFriendRequests: state.incomingFriendRequests.filter(r => r._id !== requestId)
     })),
 
@@ -50,11 +61,13 @@ const useFriendStore = create((set) => ({
 
     // Yeni gönderilen istek ekle
     addSentFriendRequest: (request) => set((state) => ({
+        friendListVersion: state.friendListVersion + 1,
         sentFriendRequests: [...state.sentFriendRequests.filter(item => item._id !== request._id), request]
     })),
 
     // Gönderilen isteği kaldır (iptal edildiğinde, useCancelRequest hook'u çağırır)
     removeSentFriendRequest: (requestId) => set((state) => ({
+        friendListVersion: state.friendListVersion + 1,
         sentFriendRequests: state.sentFriendRequests.filter(r => r._id !== requestId)
     })),
 
@@ -69,7 +82,7 @@ const useFriendStore = create((set) => ({
             previous.get(item._id) || item : item).filter(item =>
             !boundaries[item._id] || item.lastMessage?._id > boundaries[item._id]) };
     }),
-    reset: () => set({ friends: [], incomingFriendRequests: [], sentFriendRequests: [], messageRequests: [] })
+    reset: () => set(state => ({ friendListVersion: state.friendListVersion + 1, friends: [], incomingFriendRequests: [], sentFriendRequests: [], messageRequests: [] }))
 }));
 export default useFriendStore;
 

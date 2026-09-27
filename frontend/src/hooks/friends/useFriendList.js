@@ -8,6 +8,7 @@ import apiFetch from '../../utils/apiFetch';
 const useFriendList = (endpoint, field, key) => {
     const userId = useAuth(state => state.authUser?._id);
     const connectionVersion = useSocket(state => state.connectionVersion);
+    const friendListVersion = useFriendStore(state => key === 'messageRequests' ? 0 : state.friendListVersion);
     const data = useFriendStore(state => state[key]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -19,6 +20,7 @@ const useFriendList = (endpoint, field, key) => {
         if (!userId) return;
         setLoading(true);
         setError('');
+        const version = useFriendStore.getState().friendListVersion;
         try {
             const response = await apiFetch(endpoint, { signal: controller.signal });
             const result = await response.json();
@@ -34,7 +36,7 @@ const useFriendList = (endpoint, field, key) => {
             }
             if (!controller.signal.aborted) {
                 if (key === 'messageRequests') useFriendStore.getState().setMessageRequests(items);
-                else useFriendStore.setState({ [key]: items });
+                else useFriendStore.getState().applyFriendList(key, items, version);
             }
         } catch (error) {
             if (!controller.signal.aborted && error.name !== 'AbortError') setError('Liste yüklenemedi. Tekrar dene.');
@@ -42,7 +44,7 @@ const useFriendList = (endpoint, field, key) => {
             if (!controller.signal.aborted) setLoading(false);
         }
     }, [endpoint, field, key, userId]);
-    useEffect(() => { refresh(); return () => request.current?.abort(); }, [refresh, connectionVersion]);
+    useEffect(() => { refresh(); return () => request.current?.abort(); }, [refresh, connectionVersion, friendListVersion]);
     return { data, loading, error, refresh };
 };
 export default useFriendList;

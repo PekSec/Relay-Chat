@@ -4,6 +4,16 @@ import FriendRequest from "../models/friendRequest.model.js";
 import { getReceiverSocketId, io } from "../socket/socket.js";
 import Conversation from "../models/conversation.model.js";
 
+const notifyFriendLists = (...ids) => {
+    for (const id of ids) {
+        const room = getReceiverSocketId(id);
+        if (room) io.to(room).emit('friendListsChanged');
+    }
+};
+// ponytail: one app instance; a distributed lease is needed before adding replicas.
+const activeFriendChanges = new Set();
+const friendshipKey = (...ids) => ids.map(id => String(id).toLowerCase()).sort().join(':');
+
 // 📌 Controller Yapısı:
 // Her fonksiyon async (req, res) => { ... } formatındadır
 // req → İstemciden gelen istek (params, query, body, userId)
@@ -126,6 +136,7 @@ export const sendFriendRequest = async (req, res) => {
             });
         }
         const outgoing = await FriendRequest.findById(friendRequest._id).populate("receiverId", publicUserFields);
+        notifyFriendLists(senderId, receiverId);
         res.status(200).json({ message: "Friend request sent successfully", friendRequest: outgoing });
 
     } catch (error) {
@@ -178,6 +189,7 @@ export const getFriendRequests = async (req, res) => {
 // Red: Sadece FriendRequest status'unu "rejected" yapar
 // ═══════════════════════════════════════════════════════════════
 export const respondToFriendRequest = async (req, res) => {
+    let acceptKey;
     try {
         const { requestId, response } = req.body; // Frontend'den gelen veri
         const userId = req.userId;
@@ -202,61 +214,49 @@ export const respondToFriendRequest = async (req, res) => {
             return res.status(400).json({ message: "Response must be either 'accept' or 'reject'" });
         }
 
-        let friendUser = null; // Kabul edilirse arkadaş bilgisi döndürülecek
-
-        if (response === "accept") {
-            // ═══ KABUL İŞLEMİ ═══
-
-            // 1. Her iki kullanıcının friends dizisine birbirini ekle
-            // $push → MongoDB array operatörü, diziye yeni eleman ekler
-            await User.findByIdAndUpdate(userId, {
-                $addToSet: { friends: friendRequest.senderId }
-            });
-            await User.findByIdAndUpdate(friendRequest.senderId, {
-                $addToSet: { friends: userId }
-            });
-
-            // 2. Varsa pending conversation'ları active yap
-            // $all → participants dizisinde HER İKİ ID de varsa eşleş
-            // [userId, senderId] ve [senderId, userId] sırası farketmez, $all her ikisini de yakalar
-            await Conversation.updateMany({
-                participants: { $all: [userId, friendRequest.senderId] },
-                status: "pending"
-            }, { $set: { status: "active" } });
-
-            // 3. FriendRequest status'unu güncelle
-            friendRequest.status = "accepted";
-
-            // 4. Kabul eden kullanıcının bilgilerini al (frontend'e döndürmek için)
-            friendUser = await User.findById(friendRequest.senderId).select(publicUserFields);
-
-            // 5. Socket.IO ile gönderene anlık bildirim → "İsteğin kabul edildi!"
-            const senderSocketId = getReceiverSocketId(friendRequest.senderId);
-            if (senderSocketId) {
-                const acceptedByUser = await User.findById(userId).select(publicUserFields);
-                io.to(senderSocketId).emit("friendRequestResponse", {
-                    friendRequest: friendRequest,
-                    friendUser: friendUser,
-                    acceptedByUser: acceptedByUser
-                });
-            }
-        }
-        else {
-            // ═══ RED İŞLEMİ ═══
-            friendRequest.status = "rejected";
-
-            // Socket.IO ile gönderene bildirim → "İsteğin reddedildi"
-            const senderSocketId = getReceiverSocketId(friendRequest.senderId);
-            if (senderSocketId) {
-                const rejectedByUser = await User.findById(userId).select(publicUserFields);
-                io.to(senderSocketId).emit("friendRequestRejected", {
-                    friendRequest: friendRequest,
-                    rejectedByUser: rejectedByUser
-                });
-            }
+        if (response === 'accept') {
+            const key = friendshipKey(friendRequest.senderId, friendRequest.receiverId);
+            if (activeFriendChanges.has(key)) return res.status(409).json({ message: 'Acceptance is in progress' });
+            activeFriendChanges.add(key);
+            acceptKey = key;
         }
 
-        await friendRequest.save(); // Güncellenmiş FriendRequest'i DB'ye kaydet
+        // Persist the winning intent before side effects; keep failed accepts in
+        // the inbox so retries can finish idempotent writes (standalone Mongo).
+        const claimed = await FriendRequest.findOneAndUpdate(
+            { _id: requestId, receiverId: userId, status: 'pending',
+                ...(response === 'reject' ? { acceptanceStarted: { $ne: true } } : {}) },
+            { $set: response === 'accept' ? { acceptanceStarted: true } : { status: 'rejected' } },
+            { new: true }
+        );
+        if (!claimed) return res.status(400).json({ message: "Friend request is not pending" });
+        let friendUser = null;
+        if (response === 'accept') {
+            await User.updateMany({ _id: { $in: [userId, claimed.senderId] } }, [
+                { $set: { friends: { $setUnion: [{ $ifNull: ['$friends', []] }, [{ $cond: [
+                    { $eq: ['$_id', claimed.senderId] }, claimed.receiverId, claimed.senderId
+                ] }]] } } }
+            ]);
+            await Conversation.updateMany({ participants: { $all: [userId, claimed.senderId] }, status: 'pending' },
+                { $set: { status: 'active' } });
+            friendUser = await User.findById(claimed.senderId).select(publicUserFields);
+        }
+        const actor = await User.findById(userId).select(publicUserFields);
+        if (response === 'accept') {
+            await FriendRequest.updateOne({ _id: requestId, status: 'pending', acceptanceStarted: true },
+                { $set: { status: 'accepted' }, $unset: { acceptanceStarted: '' } });
+            claimed.status = 'accepted';
+        }
+
+        const room = getReceiverSocketId(claimed.senderId);
+        if (room) io.to(room).emit(response === 'accept' ? 'friendRequestResponse' : 'friendRequestRejected',
+            response === 'accept' ? { friendRequest: claimed, friendUser, acceptedByUser: actor } :
+                { friendRequest: claimed, rejectedByUser: actor });
+        notifyFriendLists(userId, claimed.senderId);
+        if (response === 'accept') {
+            const ownRoom = getReceiverSocketId(userId);
+            if (ownRoom) io.to(ownRoom).emit('conversationAccepted');
+        }
 
         res.status(200).json({
             message: "Friend request response sent successfully",
@@ -266,6 +266,8 @@ export const respondToFriendRequest = async (req, res) => {
     } catch (error) {
         console.error("Error responding to friend request:", error);
         res.status(500).json({ message: "Internal Server Error" });
+    } finally {
+        if (acceptKey) activeFriendChanges.delete(acceptKey);
     }
 
 }
@@ -282,7 +284,7 @@ export const getFriends = async (req, res) => {
         // User modelinde friends: [ObjectId] → populate ile tam kullanıcı objesine çevir
         // Populate öncesi: friends: ["675abc", "675def"]
         // Populate sonrası: friends: [{_id: "675abc", fullName: "Ali", ...}, {_id: "675def", ...}]
-        const user = await User.findById(userId).populate("friends", publicUserFields);
+        const user = await User.findById(userId).select("friends").populate("friends", publicUserFields);
 
         if (!user) {
             return res.status(404).json({ message: "User not found" });
@@ -305,18 +307,25 @@ export const getFriends = async (req, res) => {
 // ⚠️ Conversation'a dokunmaz! Active kalır (Instagram modeli)
 // ═══════════════════════════════════════════════════════════════
 export const removeFriend = async (req, res) => {
+    let removeKey;
     try {
         const { friendId } = req.params;
         const userId = req.userId;
 
+        const key = friendshipKey(userId, friendId);
+        if (activeFriendChanges.has(key)) return res.status(409).json({ message: 'Friendship change is in progress' });
+        activeFriendChanges.add(key);
+        removeKey = key;
+        // Retire unfinished acceptance before removing its partial friendship.
+        await FriendRequest.deleteMany({ status: 'pending', acceptanceStarted: true, $or: [
+            { senderId: userId, receiverId: friendId }, { senderId: friendId, receiverId: userId }
+        ] });
+
         // $pull → MongoDB array operatörü, diziden belirtilen elemanı çıkarır
         // Her iki kullanıcıdan birbirinin ID'sini çıkar
-        await User.findByIdAndUpdate(userId, {
-            $pull: { friends: friendId }
-        });
-        await User.findByIdAndUpdate(friendId, {
-            $pull: { friends: userId }
-        });
+        await User.updateMany({ _id: { $in: [userId, friendId] } },
+            { $pull: { friends: { $in: [userId, friendId] } } });
+        notifyFriendLists(userId, friendId);
 
         // Instagram tarzı: Conversation kalır (active olarak), mesajlaşma devam eder
         // Bir kere active olan conversation her zaman active kalır
@@ -328,6 +337,8 @@ export const removeFriend = async (req, res) => {
     } catch (error) {
         console.error("Error removing friend:", error);
         res.status(500).json({ message: "Internal Server Error" });
+    } finally {
+        if (removeKey) activeFriendChanges.delete(removeKey);
     }
 }
 
@@ -385,7 +396,9 @@ export const cancelFriendRequest = async (req, res) => {
         }
 
         // findByIdAndDelete → bulur ve siler (tek sorguda)
-        await FriendRequest.findByIdAndDelete(requestId);
+        const removed = await FriendRequest.findOneAndDelete({ _id: requestId, senderId: userId, status: 'pending', acceptanceStarted: { $ne: true } });
+        if (!removed) return res.status(400).json({ message: 'Only pending requests can be cancelled' });
+        notifyFriendLists(userId, removed.receiverId);
 
         res.status(200).json({
             message: "Friend request cancelled successfully"

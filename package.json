@@ -14,7 +14,7 @@
     "docker:up": "docker compose up --build -d",
     "docker:down": "docker compose down",
     "test:realtime": "node scripts/realtime-test.js",
-    "test:all": "npm run build && npm test && npm run test:session-errors && npm run test:realtime && npm run test:security && npm run test:conversations && npm run test:preferences && npm run test:message-concurrency && npm run test:ui && npm run test:settings && npm run test:login && npm run test:signup-api && npm run test:signup && npm run test:delete-message && npm run test:delete-dialog && npm run test:clear-history && npm run test:clear-dialog && npm run test:emoji && npm run test:emoji-ui && npm run test:chat",
+    "test:all": "npm run build && npm test && npm run test:session-errors && npm run test:realtime && npm run test:security && npm run test:conversations && npm run test:preferences && npm run test:message-concurrency && npm run test:ui && npm run test:settings && npm run test:login && npm run test:signup-api && npm run test:signup && npm run test:delete-message && npm run test:delete-dialog && npm run test:clear-history && npm run test:clear-dialog && npm run test:emoji && npm run test:emoji-ui && npm run test:chat && npm run test:friends",
     "test:emoji": "node scripts/emoji-insertion-test.js && node scripts/reaction-state-test.js && node scripts/reaction-race-test.js",
     "test:emoji-ui": "node scripts/emoji-dialog-test.js",
     "test:clear-history": "node scripts/cleared-history-state-test.js && node scripts/clear-history-test.js",
@@ -31,7 +31,8 @@
     "test:conversations": "node scripts/conversation-test.js",
     "test:ui": "node scripts/ui-test.js",
     "test:security": "node scripts/security-test.js",
-    "test:chat": "node scripts/edited-message-state-test.js && node scripts/chat-ui-test.js"
+    "test:chat": "node scripts/edited-message-state-test.js && node scripts/chat-ui-test.js",
+    "test:friends": "node scripts/friends-state-test.js && node scripts/friends-test.js && node scripts/friends-ui-test.js"
   },
   "type": "module",
   "keywords": [],

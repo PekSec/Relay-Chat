@@ -52,7 +52,7 @@ const MessageContainer = () => {
     const closeSearch = () => { setShowSearch(false); setSearchTerm(''); searchTrigger.current?.focus(); };
     const { friends, incomingFriendRequests, sentFriendRequests } = useFriendStore();
     const { sendFriendRequest, loading: sendFriendLoading } = useSendFriendRequest();
-    const { respondToRequest, loading: respondFriendLoading } = useRespondToFriendRequests();
+    const { respondToRequest, loading: respondFriendLoading, error: respondFriendError, errorId: respondFriendErrorId } = useRespondToFriendRequests();
 
     useEffect(() => {
         setIsBannerDismissed(false);
@@ -197,6 +197,7 @@ const MessageContainer = () => {
                             <p className="min-w-0 break-words">{sentRequest ? 'İstek zaten gönderildi' : incomingRequest
                                 ? `${selectedConversation.fullName} sana istek gönderdi` : `Arkadaş değilsiniz: ${selectedConversation.fullName}`}</p>
                             <div className="flex items-center gap-2">
+                                {respondFriendError && respondFriendErrorId === incomingRequest?._id && <p role="alert">{respondFriendError}</p>}
                                 {incomingRequest && <Button onClick={() => respondToRequest(incomingRequest._id, 'accept')} isDisabled={respondFriendLoading} appearance="primary">İsteği kabul et</Button>}
                                 {!sentRequest && !incomingRequest && <Button onClick={handleAddFriend} isDisabled={sendFriendLoading} appearance="primary">Arkadaş ekle</Button>}
                                 <Tooltip content="Kapat"><IconButton icon={CrossIcon} label="Kapat" appearance="subtle" onClick={() => setIsBannerDismissed(true)} /></Tooltip>

@@ -12,20 +12,22 @@ invalidate the cookie. Socket handshake errors expose the equivalent
 be authenticated are rejected and their socket is disconnected.
 
 ### Health
-| Method | Endpoint       | Description                              |
-|--------|----------------|------------------------------------------|
-| GET    | `/health`      | Liveness probe, no authentication needed |
-| GET    | `/ready`       | Database readiness, 200 or 503 |
+
+| Method | Endpoint  | Description                              |
+| ------ | --------- | ---------------------------------------- |
+| GET    | `/health` | Liveness probe, no authentication needed |
+| GET    | `/ready`  | Database readiness, 200 or 503           |
 
 ### Auth
-| Method | Endpoint        | Description         |
-|--------|-----------------|---------------------|
-| POST   | `/auth/signup`  | Create an account   |
-| POST   | `/auth/login`   | Log in              |
-| POST   | `/auth/logout`  | Log out             |
-| GET    | `/auth/me`      | Current session user |
-| PUT    | `/auth/profile` | Update name / avatar |
-| PUT    | `/auth/password`| Change password     |
+
+| Method | Endpoint            | Description                                       |
+| ------ | ------------------- | ------------------------------------------------- |
+| POST   | `/auth/signup`      | Create an account                                 |
+| POST   | `/auth/login`       | Log in                                            |
+| POST   | `/auth/logout`      | Log out                                           |
+| GET    | `/auth/me`          | Current session user                              |
+| PUT    | `/auth/profile`     | Update name / avatar                              |
+| PUT    | `/auth/password`    | Change password                                   |
 | PATCH  | `/auth/preferences` | Save account appearance and messaging preferences |
 
 Signup keeps its successful **201** `{ message, user }` response. Errors add a
@@ -41,27 +43,43 @@ username conflicts.
 
 ### Friends
 
-| Method | Endpoint                  | Description                   |
-|--------|---------------------------|-------------------------------|
-| GET    | `/friends/search?query=`  | Search by username or code    |
-| POST   | `/friends/send/:id`       | Send a friend request         |
-| POST   | `/friends/respond`        | Accept or reject a request    |
-| GET    | `/friends/list`           | List friends                  |
-| GET    | `/friends/requests`       | Incoming requests             |
-| GET    | `/friends/sentRequests`   | Outgoing requests             |
-| DELETE | `/friends/cancel/:id`     | Cancel a sent request         |
-| DELETE | `/friends/remove/:id`     | Remove a friend               |
+| Method | Endpoint                 | Description                |
+| ------ | ------------------------ | -------------------------- |
+| GET    | `/friends/search?query=` | Search by username or code |
+| POST   | `/friends/send/:id`      | Send a friend request      |
+| POST   | `/friends/respond`       | Accept or reject a request |
+| GET    | `/friends/list`          | List friends               |
+| GET    | `/friends/requests`      | Incoming requests          |
+| GET    | `/friends/sentRequests`  | Outgoing requests          |
+| DELETE | `/friends/cancel/:id`    | Cancel a sent request      |
+| DELETE | `/friends/remove/:id`    | Remove a friend            |
+
+Accept/reject/cancel compete for the pending request. Once acceptance starts,
+rejection and cancellation return 400; a failed acceptance remains in the pending
+list and can be retried to finish its idempotent writes. An overlapping acceptance
+or removal for the same pair returns 409 in the supported single-instance server.
+Removal retires unfinished acceptance for that pair, so retrying an older request
+cannot restore a removed friendship. Friendship removal preserves conversation
+status and both participants' message histories.
+
+Successful send/respond/cancel/remove operations emit `friendListsChanged` with
+no payload to both accounts' rooms, including the initiating account's other tabs.
+Clients refresh the existing three friend-list endpoints and discard older
+snapshots. The existing friend notification events remain available. Successful
+acceptance also emits `conversationAccepted` to the accepting account's room to
+refresh its pending message requests and conversation status.
 
 ### Messages
-| Method | Endpoint             | Description                  |
-|--------|----------------------|------------------------------|
-| GET    | `/messages/:id`      | Conversation with a user     |
-| POST   | `/messages/send/:id` | Send a message               |
-| PUT    | `/messages/edit/:id` | Edit your own message        |
-| DELETE | `/messages/:id`      | Delete your own message      |
-| POST   | `/messages/react/:id`| Add or remove a reaction     |
-| GET    | `/messages/unread/counts` | Unread count per sender |
-| DELETE | `/messages/clear/:id`| Clear conversation history   |
+
+| Method | Endpoint                  | Description                |
+| ------ | ------------------------- | -------------------------- |
+| GET    | `/messages/:id`           | Conversation with a user   |
+| POST   | `/messages/send/:id`      | Send a message             |
+| PUT    | `/messages/edit/:id`      | Edit your own message      |
+| DELETE | `/messages/:id`           | Delete your own message    |
+| POST   | `/messages/react/:id`     | Add or remove a reaction   |
+| GET    | `/messages/unread/counts` | Unread count per sender    |
+| DELETE | `/messages/clear/:id`     | Clear conversation history |
 
 Message deletion is owner-only: invalid IDs return **400**, missing messages
 **404**, and another user's message **403**. Deleting your already deleted message
@@ -104,33 +122,34 @@ rooms, including the initiator's other sessions. Consumers ignore older versions
 and never restore a deleted message from a late reaction response/event.
 
 ### Conversations
-| Method | Endpoint                       | Description                |
-|--------|--------------------------------|----------------------------|
-| GET    | `/conversations`               | List conversations         |
-| GET    | `/conversations/status/:status`| Filter by status           |
-| PUT    | `/conversations/accept/:id`    | Accept a message request   |
+
+| Method | Endpoint                        | Description              |
+| ------ | ------------------------------- | ------------------------ |
+| GET    | `/conversations`                | List conversations       |
+| GET    | `/conversations/status/:status` | Filter by status         |
+| PUT    | `/conversations/accept/:id`     | Accept a message request |
 
 ## Socket Events
 
-| Event               | Direction        | Purpose                        |
-|---------------------|------------------|--------------------------------|
-| `conversationAccepted` | server → client | Message request accepted |
-| `getOnlineUsers`    | server → client  | Current online user IDs        |
-| `newMessage`        | server → client  | Incoming message               |
-| `messageEdited`     | server → client  | A message was edited           |
-| `messageDeleted`    | server → client  | A message was deleted          |
-| `conversationCleared` | server → clearing account | History hidden through a message ID |
-| `messageReaction`   | server → client  | A reaction changed             |
-| `messagesRead`      | server → client  | Recipient read your messages   |
-| `userTyping`        | server → client  | Peer is typing                 |
-| `userStoppedTyping` | server → client  | Peer stopped typing            |
-| `newFriendRequest`  | server → client  | Incoming friend request        |
-| `friendRequestResponse` | server → client | Your request was accepted   |
-| `friendRequestRejected` | server → client | Your request was rejected   |
-| `typing`            | client → server  | User started typing            |
-| `stopTyping`        | client → server  | User stopped typing            |
-| `chatOpened`        | client → server  | Mark messages as read          |
-
+| Event                   | Direction                 | Purpose                                           |
+| ----------------------- | ------------------------- | ------------------------------------------------- |
+| `conversationAccepted`  | server → client           | Message request accepted                          |
+| `getOnlineUsers`        | server → client           | Current online user IDs                           |
+| `newMessage`            | server → client           | Incoming message                                  |
+| `messageEdited`         | server → client           | A message was edited                              |
+| `messageDeleted`        | server → client           | A message was deleted                             |
+| `conversationCleared`   | server → clearing account | History hidden through a message ID               |
+| `messageReaction`       | server → client           | A reaction changed                                |
+| `messagesRead`          | server → client           | Recipient read your messages                      |
+| `userTyping`            | server → client           | Peer is typing                                    |
+| `userStoppedTyping`     | server → client           | Peer stopped typing                               |
+| `newFriendRequest`      | server → client           | Incoming friend request                           |
+| `friendRequestResponse` | server → client           | Your request was accepted                         |
+| `friendRequestRejected` | server → client           | Your request was rejected                         |
+| `friendListsChanged`    | server → both accounts    | Refresh friendship lists after a persisted change |
+| `typing`                | client → server           | User started typing                               |
+| `stopTyping`            | client → server           | User stopped typing                               |
+| `chatOpened`            | client → server           | Mark messages as read                             |
 
 ## Pagination and sessions
 

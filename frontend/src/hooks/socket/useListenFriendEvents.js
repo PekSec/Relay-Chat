@@ -11,48 +11,45 @@ import useFriendStore from "../../zustand/useFriend";
 // Burada tek yerde dinlenip store güncelleniyor, böylece arayüz anında tepki verir.
 const useListenFriendEvents = () => {
     const { socket } = useSocket();
-    const {
-        addIncomingFriendRequest,
-        removeSentFriendRequest,
-        addFriend
-    } = useFriendStore();
+    const invalidate = useFriendStore(state => state.invalidateFriendLists);
 
     useEffect(() => {
         if (!socket) return;
 
         // Biri sana arkadaşlık isteği gönderdi
-        const onNewRequest = ({ sender, friendRequest }) => {
+        const onNewRequest = ({ sender }) => {
             // Store, populate edilmiş senderId bekliyor (gelen kutusu böyle render ediliyor)
-            addIncomingFriendRequest({ ...friendRequest, senderId: sender });
+            invalidate();
             toast.success(`${sender?.fullName || "Birisi"} sana arkadaşlık isteği gönderdi`);
         };
 
         // Gönderdiğin istek kabul edildi
-        const onAccepted = ({ friendRequest, acceptedByUser }) => {
-            removeSentFriendRequest(friendRequest._id);
-            if (acceptedByUser) addFriend(acceptedByUser);
+        const onAccepted = ({ acceptedByUser }) => {
+            invalidate();
             refreshConversationStatuses();
             toast.success(`${acceptedByUser?.fullName || "Kullanıcı"} arkadaşlık isteğini kabul etti`);
         };
 
         // Gönderdiğin istek reddedildi
-        const onRejected = ({ friendRequest, rejectedByUser }) => {
-            removeSentFriendRequest(friendRequest._id);
+        const onRejected = ({ rejectedByUser }) => {
+            invalidate();
             toast(`${rejectedByUser?.fullName || "Kullanıcı"} arkadaşlık isteğini reddetti`);
         };
 
+        socket.on("friendListsChanged", invalidate);
         socket.on("conversationAccepted", refreshConversationStatuses);
         socket.on("newFriendRequest", onNewRequest);
         socket.on("friendRequestResponse", onAccepted);
         socket.on("friendRequestRejected", onRejected);
 
         return () => {
+            socket.off("friendListsChanged", invalidate);
             socket.off("conversationAccepted", refreshConversationStatuses);
             socket.off("newFriendRequest", onNewRequest);
             socket.off("friendRequestResponse", onAccepted);
             socket.off("friendRequestRejected", onRejected);
         };
-    }, [socket, addIncomingFriendRequest, removeSentFriendRequest, addFriend]);
+    }, [socket, invalidate]);
 };
 
 export default useListenFriendEvents;

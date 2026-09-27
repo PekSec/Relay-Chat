@@ -27,7 +27,7 @@ export default function Sidebar() {
     const incomingList = useGetFriendRequests();
     const friendList = useGetFriends();
     const outgoingList = useGetSentRequests();
-    const failedLists = [messageList, incomingList, friendList, outgoingList].filter(list => list.error);
+    const failedLists = (view === 'friends' ? [messageList] : [messageList, incomingList, friendList, outgoingList]).filter(list => list.error);
 
     const openFriends = (tab = 'all') => { setFriendsInitialTab(tab); setView('friends'); };
     const back = () => setView('conversations');
@@ -50,7 +50,7 @@ export default function Sidebar() {
             <div className="flex-1 min-h-0 overflow-hidden">
                 <div className={view === 'conversations' ? 'h-full flex flex-col' : 'hidden'}><Conversations filter={filter} /></div>
                 {view === 'requests' && <div className="h-full overflow-y-auto scroll-slim"><Requests /></div>}
-                {view === 'friends' && <Friends key={friendsInitialTab} onBack={back} initialTab={friendsInitialTab} loading={friendList.loading} loadingIncoming={incomingList.loading} loadingOutgoing={outgoingList.loading} />}
+                {view === 'friends' && <Friends key={friendsInitialTab} onBack={back} initialTab={friendsInitialTab} lists={[friendList, incomingList, outgoingList]} />}
                 {view === 'addFriend' && <AddFriend onBack={back} />}
             </div>
             <footer className="sidebar-account">

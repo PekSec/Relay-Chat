@@ -185,6 +185,12 @@ jobs:
           MONGO_URI: mongodb://127.0.0.1:27017/ci_chat
           PORT: 5030
 
+      - name: Check friends, races and desktop/mobile interactions
+        run: npm run test:friends 2>&1 | tee test-results/friends.log
+        env:
+          MONGO_URI: mongodb://127.0.0.1:27017/ci_friends
+          PORT: 5033
+
       - name: Save test evidence
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

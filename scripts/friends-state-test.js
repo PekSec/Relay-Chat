@@ -1,0 +1,17 @@
+import assert from 'node:assert/strict';
+import useFriendStore from '../frontend/src/zustand/useFriend.js';
+const state = () => useFriendStore.getState();
+state().reset();
+const version = state().friendListVersion;
+state().addFriend({ _id: 'new' });
+assert.notEqual(state().friendListVersion, version, 'mutation invalidates outstanding snapshots');
+assert.equal(state().applyFriendList('friends', [], version), false);
+assert.deepEqual(state().friends, [{ _id: 'new' }]);
+state().addFriend({ _id: 'new' });
+assert.equal(state().friends.length, 1);
+const current = state().friendListVersion;
+assert.equal(state().applyFriendList('friends', [{ _id: 'fresh' }], current), true);
+state().reset();
+assert.equal(state().applyFriendList('friends', [{ _id: 'old-account' }], current), false);
+assert.deepEqual(state().friends, []);
+console.log('PASS stale list rejection, duplicate events and account reset');

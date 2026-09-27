@@ -16,6 +16,9 @@ const friendRequestSchema = new mongoose.Schema({
         ref: "User",
         required: true
     },
+    // A claimed acceptance stays pending until its idempotent writes finish.
+    // Missing on older records; no backfill is needed.
+    acceptanceStarted: { type: Boolean },
     status: {
         type: String,
         enum: ["pending", "accepted", "rejected"], // sadece bu 3 değerden biri olabilir, enum ile kısıtlıyoruz

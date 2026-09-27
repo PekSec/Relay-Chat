@@ -46,3 +46,7 @@ Kabul: simge anlamı/erişilebilir adı korunur, aynı satırdaki ikonlar tutarl
 Conversation, UserInfo, Sidebar, LogoutButton, MessageContainer, Messages, MessageInput ve Message içindeki yukarıdaki hedefler uygulandı. `TiMessages` yerine `comment`; gönderimde `send`, düzenlemede `edit`, gezinmede `arrow-left`/`arrow-down`, aramalarda `search`, hesapta `settings`/`notification`/`log-out`, beklemede `clock` kullanılır. IconButton erişilebilir adları ve Tooltip'leri içerir. Okundu/iletildi çizimleri mevcut küçük SVG olarak kaldı; role=img ve Türkçe erişilebilir ad eklendi.
 
 `rg 'react-icons' frontend/src` sonucunda yalnız 05 Friends içindeki `FiMessageSquare`/`FiUserMinus` kaldı. Bu ekranın ayrı kararı beklendiğinden `react-icons` bağımlılığı korundu. Lucide ihtiyacı yok.
+
+## 05 arkadaşlar — 27 Eylül 2026
+
+Friends içindeki son iki kullanım `comment` ve `person-remove` core ikonlarına taşındı. Butonlarda görünür Mesaj/Çıkar metinleri korunur. Kaynakta `react-icons` import'u kalmadığı doğrulandı; paket manifest ve lock dosyasından kaldırıldı. Build/lint ve arkadaşlık UI kontrolleri geçti. Lucide eklenmedi; 06–08 ekranlarının bileşen geçişi kendi tasarım seçimlerini bekler.

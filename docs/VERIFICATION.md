@@ -3,6 +3,52 @@
 The newest entry describes the current implementation. Older entries record the
 scope and checks performed at the time; their pending-work notes are historical.
 
+## Friends / contract step 05 — 27 September 2026
+
+The user selected A (All/Incoming/Outgoing tabs with compact rows) and a short
+confirmation before removal, then approved implementation. Tabs 21.2.5 was added
+after verifying React 19 peer support. Safe ChatAvatar, installed controls and
+theme tokens are reused. The last react-icons imports and dependency were removed.
+
+Friend list snapshots are guarded by a local mutation version. A payload-free
+`friendListsChanged` event refreshes both accounts' tabs through existing REST
+lists. Accepting-account tabs also receive the existing conversation-status event.
+Mutation errors stay attached to their target; removal preserves chat history.
+
+Conditional pending transitions choose accept/reject/cancel. An optional internal
+`acceptanceStarted` field retains acceptance intent until idempotent writes finish,
+allowing recovery after partial database failures without a replica-set migration.
+Removal retires unfinished intent. An in-process pair guard prevents acceptance
+and removal interleaving; this retains the documented single-instance limit.
+
+| Check                 | Observed result                                                                                                                                      |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Friends Chromium      | **58 checks passed**, desktop and 320 px mobile                                                                                                      |
+| Backend               | **36 concurrent race rounds**; ownership, validation, injected write failures/retry, removal after partial acceptance and overlapping removal passed |
+| Store                 | Stale snapshots, duplicate records and account reset passed                                                                                          |
+| Queries               | At most two reads per populated list; incoming/outgoing `IXSCAN`; public profile projection and synthetic JSON lengths checked                       |
+| Full regression       | `npm run test:all` passed, including the initial 57 friends UI checks                                                                                |
+| Final targeted checks | Updated backend recovery/race checks and the complete **58/58** browser suite passed afterward                                                       |
+| Build / lint          | Passed; existing main-chunk >500 kB advisory remains                                                                                                 |
+| CI                    | `test:friends` added; remote CI was not run                                                                                                          |
+
+Browser coverage includes Turkish search, keyboard tabs, distinct loading/empty/
+error/retry states, pending and failed actions, confirmation focus/return, both
+accounts' histories, multiple tabs, reconnect, delayed snapshots, account changes,
+draft/existing chat opening, theme/accent, density, large text and long names.
+Each device test starts a fresh server process so the production IP limiter stays
+enabled without exhausting its window across the entire scenario sequence.
+
+Read-only review caught failure recovery, wrong-chat error display and sibling-tab
+conversation state issues; follow-up tests also cover removal superseding an
+unfinished acceptance. All were fixed. Local evidence is in ignored
+`test-results/friends-*.log`; tests use an explicit disposable MongoDB 7 database.
+No deployment, push or remote CI result is claimed.
+
+Inspected screenshots: [desktop light](screenshots/friends-desktop.png),
+[mobile dark](screenshots/friends-mobile.png). Implementation/handoff:
+[05 contract](contracts/atlassian-overhaul/05-friends.md). Next design decision is 06.
+
 ## Main chat / contract step 04 — 27 September 2026
 
 The user selected A: a 320 px conversation list and flexible chat on desktop,
@@ -20,15 +66,15 @@ including older pages, and preserves the visible data if any refresh page fails.
 Late send responses cannot replace newer previews. Backend payloads, schemas
 and the two-read conversation aggregation remain unchanged.
 
-| Check | Observed result |
-| --- | --- |
-| New chat Chromium | **45 checks passed** across desktop and mobile |
-| New store regression | Edit before history, ordered updates, previews, late send, deletion, clearing and account reset passed |
-| Existing chat / settings UI | **56 / 106 passed** |
-| Emoji / delete / clear UI | **69 / 47 / 47 passed** |
-| Full regression | `npm run test:all` passed, including auth/session, realtime, security, conversations, preferences, message concurrency and all dialogs |
-| Build / lint | Passed; the existing >500 kB main-chunk advisory remains |
-| CI | `test:chat` added; remote CI was not run in this session |
+| Check                       | Observed result                                                                                                                        |
+| --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| New chat Chromium           | **45 checks passed** across desktop and mobile                                                                                         |
+| New store regression        | Edit before history, ordered updates, previews, late send, deletion, clearing and account reset passed                                 |
+| Existing chat / settings UI | **56 / 106 passed**                                                                                                                    |
+| Emoji / delete / clear UI   | **69 / 47 / 47 passed**                                                                                                                |
+| Full regression             | `npm run test:all` passed, including auth/session, realtime, security, conversations, preferences, message concurrency and all dialogs |
+| Build / lint                | Passed; the existing >500 kB main-chunk advisory remains                                                                               |
+| CI                          | `test:chat` added; remote CI was not run in this session                                                                               |
 
 The full suite included the first 41 chat checks. Four subsequent long-name and
 maximum unbroken-message layout checks were added and the complete chat suite
@@ -53,10 +99,10 @@ Local Windows port 5040 was occupied by a system service; completed tests used
 ports 5029–5033. The temporary MongoDB container is removed after verification.
 No deployment is claimed.
 
-| Chat | Light | Dark |
-| --- | --- | --- |
-| Desktop | [View](screenshots/desktop-chat.png) | [View](screenshots/desktop-chat-dark.png) |
-| Mobile | [View](screenshots/mobile-chat.png) | [View](screenshots/mobile-chat-dark.png) |
+| Chat                                       | Light                                                     | Dark                                                   |
+| ------------------------------------------ | --------------------------------------------------------- | ------------------------------------------------------ |
+| Desktop                                    | [View](screenshots/desktop-chat.png)                      | [View](screenshots/desktop-chat-dark.png)              |
+| Mobile                                     | [View](screenshots/mobile-chat.png)                       | [View](screenshots/mobile-chat-dark.png)               |
 | Purple accent, large type, compact density | [Desktop](screenshots/chat-desktop-light-preferences.png) | [Mobile](screenshots/chat-mobile-dark-preferences.png) |
 
 Implementation and next-step handoff: [04 chat contract](contracts/atlassian-overhaul/04-chat.md).
@@ -70,16 +116,16 @@ desktop Popup/mobile Modal. Emojibase 17.0.0 JSON and its MIT license are vendor
 locally; the picker and backend validation share the same catalog. Native Unicode
 is retained; the browser's glyph support determines which choices Frimousse shows.
 
-| Check | Observed result |
-| --- | --- |
-| Emoji Chromium | **69 desktop/mobile checks passed** |
-| Insertion and state | Caret/selection, UTF-16 limit, ZWJ/skin tones/combining marks, late history, out-of-order events, deletion and reset passed |
-| Reaction backend | Catalog examples, skin tones/ZWJ/flags/keycaps, invalid values, original-six presentation aliases, ownership and 20 concurrent participant/toggle/deletion rounds passed |
-| Themes and layout | Light/dark surfaces, live account accent, large text and 320 px mobile layout with 44 px targets passed |
-| Loading and recovery | Lazy same-origin data requests, failed data fetch/retry with draft preservation, API 404/500/offline errors and duplicate-request protection passed |
-| Accessibility | Keyboard selection, focus return and valid saved-selection semantics on reaction gridcells passed |
-| Build / lint | Passed; Vite's existing >500 kB main-chunk advisory remains |
-| Docker | Image build passed; Node 22 runtime validated reactions and confirmed identical backend/static catalog files |
+| Check                | Observed result                                                                                                                                                          |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Emoji Chromium       | **69 desktop/mobile checks passed**                                                                                                                                      |
+| Insertion and state  | Caret/selection, UTF-16 limit, ZWJ/skin tones/combining marks, late history, out-of-order events, deletion and reset passed                                              |
+| Reaction backend     | Catalog examples, skin tones/ZWJ/flags/keycaps, invalid values, original-six presentation aliases, ownership and 20 concurrent participant/toggle/deletion rounds passed |
+| Themes and layout    | Light/dark surfaces, live account accent, large text and 320 px mobile layout with 44 px targets passed                                                                  |
+| Loading and recovery | Lazy same-origin data requests, failed data fetch/retry with draft preservation, API 404/500/offline errors and duplicate-request protection passed                      |
+| Accessibility        | Keyboard selection, focus return and valid saved-selection semantics on reaction gridcells passed                                                                        |
+| Build / lint         | Passed; Vite's existing >500 kB main-chunk advisory remains                                                                                                              |
+| Docker               | Image build passed; Node 22 runtime validated reactions and confirmed identical backend/static catalog files                                                             |
 
 The expanded tests first failed against the old catalog. Browser checks also
 exposed Popup autofocus overriding the search focus; that conflict was corrected.
@@ -101,9 +147,9 @@ The browser test regenerates composer and reaction captures in both themes and
 devices under `test-results/`; representative captures are checked into
 `docs/screenshots/`. Length-limit captures remain separate test artifacts.
 
-| Flow | Desktop light | Desktop dark | Mobile light | Mobile dark |
-| --- | --- | --- | --- | --- |
-| Composer | [View](screenshots/emoji-desktop-light.png) | [View](screenshots/emoji-desktop-dark.png) | [View](screenshots/emoji-mobile-light.png) | [View](screenshots/emoji-mobile-dark.png) |
+| Flow            | Desktop light                                        | Desktop dark                                        | Mobile light                                        | Mobile dark                                        |
+| --------------- | ---------------------------------------------------- | --------------------------------------------------- | --------------------------------------------------- | -------------------------------------------------- |
+| Composer        | [View](screenshots/emoji-desktop-light.png)          | [View](screenshots/emoji-desktop-dark.png)          | [View](screenshots/emoji-mobile-light.png)          | [View](screenshots/emoji-mobile-dark.png)          |
 | Reaction search | [View](screenshots/emoji-reaction-desktop-light.png) | [View](screenshots/emoji-reaction-desktop-dark.png) | [View](screenshots/emoji-reaction-mobile-light.png) | [View](screenshots/emoji-reaction-mobile-dark.png) |
 
 Behavior, data provenance and update instructions: [emoji contract](contracts/atlassian-overhaul/emoji.md).
@@ -116,15 +162,15 @@ focuses Cancel, prevents repeated pending requests, preserves history on failure
 and returns focus to the header action. Search resets after success. The result
 empty state now says only “Henüz mesaj yok.” No new dependency was installed.
 
-| Check | Observed result |
-| --- | --- |
-| New history-clearing Chromium | 47 checks passed on desktop/mobile |
-| New backend/state checks | Pending/active account isolation, repeat clear, missing conversation, concurrent arrival, physical cleanup, stale responses and session reset passed |
-| Previous deletion checks | 47 browser checks, store regression and 30 backend races passed |
-| Existing smoke / security / realtime | 41 / 37 / 8 passed |
-| Existing UI / settings Chromium | 56 / 106 passed |
-| Conversation queries | Correct previews/status filtering, at most two reads |
-| Build / lint / changed JavaScript syntax / CI YAML / diff | Passed |
+| Check                                                     | Observed result                                                                                                                                      |
+| --------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| New history-clearing Chromium                             | 47 checks passed on desktop/mobile                                                                                                                   |
+| New backend/state checks                                  | Pending/active account isolation, repeat clear, missing conversation, concurrent arrival, physical cleanup, stale responses and session reset passed |
+| Previous deletion checks                                  | 47 browser checks, store regression and 30 backend races passed                                                                                      |
+| Existing smoke / security / realtime                      | 41 / 37 / 8 passed                                                                                                                                   |
+| Existing UI / settings Chromium                           | 56 / 106 passed                                                                                                                                      |
+| Conversation queries                                      | Correct previews/status filtering, at most two reads                                                                                                 |
+| Build / lint / changed JavaScript syntax / CI YAML / diff | Passed                                                                                                                                               |
 
 The backend regression first failed because clearing an incoming pending request
 deleted the sender's history too. Clearing now always applies to the authenticated
@@ -167,15 +213,15 @@ focus, inline errors, retry, and a single pending request. The modal loads lazil
 and uses existing Atlaskit dependencies. No provider branding or slogans are shown.
 04b history clearing, 04c emoji integration, and the main chat design remain unapproved.
 
-| Check | Observed result |
-| --- | --- |
-| Deletion Chromium | 47 checks passed on desktop/mobile |
-| Deletion state regression | Unloaded targets, stale history/page/list/edit, previews, repeat events, session reset passed |
-| Deletion backend regression | Ownership, invalid/missing ID, idempotent retry and 30 edit/delete races passed |
-| Existing smoke / security / realtime | 41 / 37 / 8 passed |
-| Existing UI / settings Chromium | 56 / 106 passed |
-| Conversation queries | All/pending/active results correct, at most two reads |
-| Production build / frontend lint / changed JavaScript syntax / diff | Passed |
+| Check                                                               | Observed result                                                                               |
+| ------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| Deletion Chromium                                                   | 47 checks passed on desktop/mobile                                                            |
+| Deletion state regression                                           | Unloaded targets, stale history/page/list/edit, previews, repeat events, session reset passed |
+| Deletion backend regression                                         | Ownership, invalid/missing ID, idempotent retry and 30 edit/delete races passed               |
+| Existing smoke / security / realtime                                | 41 / 37 / 8 passed                                                                            |
+| Existing UI / settings Chromium                                     | 56 / 106 passed                                                                               |
+| Conversation queries                                                | All/pending/active results correct, at most two reads                                         |
+| Production build / frontend lint / changed JavaScript syntax / diff | Passed                                                                                        |
 
 The backend test first reproduced a repeated deletion returning 400. Deletion now
 uses an atomic update and returns 200 on an owner's retry. Editing atomically
@@ -215,13 +261,13 @@ Gender remains a required male/female choice. Signup preserves input on errors,
 focuses invalid fields, and prevents duplicate requests. No slogans or provider
 branding were added. Step 04 still requires a separate design selection.
 
-| Check | Observed result |
-| --- | --- |
-| Signup API regression | 29 checks passed |
-| Signup Chromium | 38 checks passed; desktop/mobile and short 320×480 viewport |
-| Existing login / UI / settings Chromium | 48 / 56 / 106 passed |
-| Existing smoke / security / realtime | 41 / 37 / 8 passed |
-| Build / lint / syntax / CI YAML / diff | Passed |
+| Check                                   | Observed result                                             |
+| --------------------------------------- | ----------------------------------------------------------- |
+| Signup API regression                   | 29 checks passed                                            |
+| Signup Chromium                         | 38 checks passed; desktop/mobile and short 320×480 viewport |
+| Existing login / UI / settings Chromium | 48 / 56 / 106 passed                                        |
+| Existing smoke / security / realtime    | 41 / 37 / 8 passed                                          |
+| Build / lint / syntax / CI YAML / diff  | Passed                                                      |
 
 The signup API test first failed on an injected friend-code duplicate. The fix
 uses the unique index with at most five save attempts, hashing once; username
@@ -287,16 +333,16 @@ Implemented the approved sectioned Atlaskit settings modal and account-persisted
 preferences. The [contract index](contracts/atlassian-overhaul/README.md) is the
 handoff for later sessions; only step 01 is implemented in this delivery.
 
-| Check | Observed result |
-| --- | --- |
-| Frontend lint / Vite production build | Passed |
-| Preferences API regression | Defaults, legacy records, partial writes, validation, isolation and all accents passed |
-| Settings Chromium suite | 106 checks passed, desktop and mobile |
-| Accent contrast | 28 light/dark combinations; minimum measured text contrast 4.51:1; focus >= 3:1 |
-| Existing HTTP / realtime / security suites | 41 / 8 / 37 passed |
-| Existing Chromium UI suite | 56 passed |
-| Conversation query regression | Passed; 2 read commands per list |
-| Concurrent-message regression | 40 sends succeeded; exact history, newest bounded preview and active status verified |
+| Check                                      | Observed result                                                                        |
+| ------------------------------------------ | -------------------------------------------------------------------------------------- |
+| Frontend lint / Vite production build      | Passed                                                                                 |
+| Preferences API regression                 | Defaults, legacy records, partial writes, validation, isolation and all accents passed |
+| Settings Chromium suite                    | 106 checks passed, desktop and mobile                                                  |
+| Accent contrast                            | 28 light/dark combinations; minimum measured text contrast 4.51:1; focus >= 3:1        |
+| Existing HTTP / realtime / security suites | 41 / 8 / 37 passed                                                                     |
+| Existing Chromium UI suite                 | 56 passed                                                                              |
+| Conversation query regression              | Passed; 2 read commands per list                                                       |
+| Concurrent-message regression              | 40 sends succeeded; exact history, newest bounded preview and active status verified   |
 
 The settings tests reproduced a pre-existing concurrent-send `VersionError`:
 messages persisted but the later conversation save could return HTTP 500. An
@@ -336,23 +382,23 @@ migration decisions and limits are maintained in the [contract index](contracts/
 Local verification on **21 September 2026**, from the `release/production-ready`
 branch. This records observed results; it is not a penetration-test certificate.
 
-| Check | Result |
-| --- | --- |
-| Frontend ESLint | Passed |
-| Vite production build | Passed |
-| Backend and test JavaScript syntax | Passed |
-| HTTP smoke suite | 41 checks passed |
-| Authenticated Socket.IO suite | 8 checks passed |
-| Security regression suite | 37 checks passed |
-| Chromium desktop/mobile suite | 38 checks passed |
-| `npm audit` backend and frontend | 0 reported vulnerabilities at scan time |
-| Gitleaks full Git history | Passed, no findings |
-| GitHub Actions actionlint and YAML parsing | Passed |
-| Local and optional production Compose validation | Passed |
-| Actual Docker build and startup | Both services healthy |
-| Docker auth, live delivery, restart persistence | Passed |
-| Runtime restrictions | UID 1000, read-only root, MongoDB unpublished |
-| Trivy 0.74.0 runtime image scan | No HIGH/CRITICAL findings with available fixes |
+| Check                                            | Result                                         |
+| ------------------------------------------------ | ---------------------------------------------- |
+| Frontend ESLint                                  | Passed                                         |
+| Vite production build                            | Passed                                         |
+| Backend and test JavaScript syntax               | Passed                                         |
+| HTTP smoke suite                                 | 41 checks passed                               |
+| Authenticated Socket.IO suite                    | 8 checks passed                                |
+| Security regression suite                        | 37 checks passed                               |
+| Chromium desktop/mobile suite                    | 38 checks passed                               |
+| `npm audit` backend and frontend                 | 0 reported vulnerabilities at scan time        |
+| Gitleaks full Git history                        | Passed, no findings                            |
+| GitHub Actions actionlint and YAML parsing       | Passed                                         |
+| Local and optional production Compose validation | Passed                                         |
+| Actual Docker build and startup                  | Both services healthy                          |
+| Docker auth, live delivery, restart persistence  | Passed                                         |
+| Runtime restrictions                             | UID 1000, read-only root, MongoDB unpublished  |
+| Trivy 0.74.0 runtime image scan                  | No HIGH/CRITICAL findings with available fixes |
 
 The initial runtime scan detected vulnerable dependencies inside the base image's
 bundled npm installation. Package managers are now removed after dependency

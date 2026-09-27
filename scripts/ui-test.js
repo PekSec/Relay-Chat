@@ -160,9 +160,9 @@ try {
         const person = page.getByRole('article').filter({ hasText: b.fullName });
         await person.getByRole('button', { name: 'Arkadaş ekle', exact: true }).click();
         await peer.getByRole('button', { name: 'Kişiler', exact: true }).click();
-        await peer.getByRole('button', { name: 'Gelen', exact: true }).click();
+        await peer.getByRole('tab', { name: 'Gelen', exact: true }).click();
         await peer.getByRole('article').filter({ hasText: a.fullName }).getByRole('button', { name: 'Kabul et', exact: true }).click();
-        await peer.getByRole('button', { name: 'Tümü', exact: true }).click();
+        await peer.getByRole('tab', { name: 'Tümü', exact: true }).click();
         check(`${label}: user search and friend acceptance work through the UI`, await visible(peer.getByRole('article').filter({ hasText: a.fullName })));
         await api(context, server.base, `/messages/send/${b._id}`, "POST", { message: "Merhaba! Yeni sohbet alanımıza hoş geldin 👋" });
         await api(peerContext, server.base, `/messages/send/${a._id}`, "POST", { message: "Merhaba Deniz! Burada olmak güzel." });

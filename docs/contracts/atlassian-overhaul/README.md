@@ -1,6 +1,6 @@
 # Atlassian geçiş kontratları
 
-Bu alan sonraki oturumların başlangıç noktasıdır. **01 Ayarlar ve Kişiselleştirme**, **02 Giriş ve oturum**, **03 Kayıt**, **04 Ana sohbet** ve **04a–c modal/emoji akışları** tamamlandı. Diğer ekranlar ayrı onay-uygulama döngüleriyle ilerler. Mevcut kısmi geçişler de yeniden değerlendirilir.
+Bu alan sonraki oturumların başlangıç noktasıdır. **01 Ayarlar ve Kişiselleştirme**, **02 Giriş ve oturum**, **03 Kayıt**, **04 Ana sohbet**, **04a–c modal/emoji akışları** ve **05 Arkadaşlar** tamamlandı. Diğer ekranlar ayrı onay-uygulama döngüleriyle ilerler. Mevcut kısmi geçişler de yeniden değerlendirilir.
 
 ## Kararlar ve durum
 
@@ -16,7 +16,7 @@ Kullanıcı 25 Eylül 2026 tarihinde önceki plan için **“Implement the plan.
 | 03 | [Kayıt](./03-signup.md) | A — Tek sütun kart uygulandı; signup UI 38, API 29 kontrol geçti |
 | 04 | [Ana sohbet](./04-chat.md) | A — İki sütun düzen uygulandı; 45 yeni chat UI kontrolü ve store yarış testleri geçti |
 | 04a–c | [Mesaj silme, geçmiş temizleme, emoji popup](./04-dialogs.md) | 04a B ve 04b B uygulandı; ayrı ayrı 47 UI kontrolü geçti. 04c B + Frimousse tam katalog uygulandı; 69 UI kontrolü geçti |
-| 05 | [Arkadaşlar](./05-friends.md) | Tasarım seçimi bekliyor |
+| 05 | [Arkadaşlar](./05-friends.md) | A — Sekmeli kompakt satırlar ve çıkarma onayı uygulandı; 58 UI kontrolü geçti |
 | 06 | [Yeni sohbet / kişi bulma](./06-new-chat.md) | Tasarım seçimi bekliyor |
 | 07 | [Mesaj istekleri](./07-requests.md) | Tasarım seçimi bekliyor |
 | 08 | [Bildirimler](./08-notifications.md) | Tasarım seçimi bekliyor |
@@ -47,3 +47,5 @@ Kullanıcı 04-dialogs ile devam etmeyi istedi; 04a için **B — Mesaj önizlem
 04b'de kullanıcı soru aracında **B — Kişi adı ve avatarı olan modal** seçti; uygulama ve backend görünürlük/yarış düzeltmeleri tamamlandı. Sonraki oturum önce bu belgeyi, shared/emoji/icons kontratlarını ve 04 kanıtını okur. 04c'nin geçici Unicode seçicisi, kullanıcının yeni kararıyla 26 Eylül'de Frimousse'a taşındı: her iki alanda tam İngilizce katalog/arama ve ten rengi; Türkçe arayüz, yerel veri, tema uyumu ve genişletilmiş sunucu doğrulaması. 69 UI kontrolü, build/lint, emoji backend/store ve Docker doğrulaması geçti; güncel kapsam [emoji kontratındadır](./emoji.md). Bu kayıttan sonra 04 kararı aşağıdaki gibi ayrıca alındı. Lucide ihtiyacı henüz yok.
 
 27 Eylül 2026: 04 için **A — İki sütunlu ana sohbet** onaylandı ve uygulandı. Atlaskit geçişi, çok satırlı düzenleme, hata/taslak korunması, geçmiş retry/scroll/reconnect ve gecikmiş yanıt tutarlılığı tamamlandı. [04 kontratı](./04-chat.md) ve [doğrulama kaydı](../../VERIFICATION.md) güncel devirdir. Sonraki tasarım seçimi 05 arkadaşlar içindir.
+
+27 Eylül 2026: 05 için kullanıcı **A — Sekmeli kompakt satırlar** ve **kısa çıkarma onayı** seçti; ardından planı uygulamaya açtı. 58 UI kontrolü, store/36 backend yarış turu ve hata kurtarma kontrolleri geçti; tam regresyon/build/lint başarılı. Son `react-icons` kullanımı ve bağımlılığı kaldırıldı. [05 kontratı](./05-friends.md) güncel devirdir; sonraki seçim **06 — Yeni sohbet / kişi bulma** içindir. 06–08 açıklamalarındaki mevcut değişiklikler korundu.
