@@ -54,9 +54,21 @@ username conflicts.
 | DELETE | `/friends/cancel/:id`    | Cancel a sent request      |
 | DELETE | `/friends/remove/:id`    | Remove a friend            |
 
+Search accepts 1–20 ASCII letters, digits or underscores and returns at most 20
+public profiles (`_id`, `fullName`, `username`, `profilePic`, `friendCode`), excluding
+the authenticated user. Matching is by username or friend code, not full name.
+The New chat UI trims whitespace and starts after 2 characters and 350 ms;
+`#` is not accepted. Opening a result selects a conversation/draft without sending.
+
+Sending a request shares the existing in-process pair guard with acceptance and
+removal. Concurrent same-direction or opposite-direction sends cannot create two
+pending requests in the supported single-instance server. Existing friends or
+pending requests return 400; an active pair operation returns 409. No schema or
+response-envelope changes were introduced.
+
 Accept/reject/cancel compete for the pending request. Once acceptance starts,
 rejection and cancellation return 400; a failed acceptance remains in the pending
-list and can be retried to finish its idempotent writes. An overlapping acceptance
+list and can be retried to finish its idempotent writes. An overlapping send, acceptance
 or removal for the same pair returns 409 in the supported single-instance server.
 Removal retires unfinished acceptance for that pair, so retrying an older request
 cannot restore a removed friendship. Friendship removal preserves conversation

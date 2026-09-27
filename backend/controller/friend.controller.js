@@ -61,11 +61,14 @@ export const searchUsers = async (req, res) => {
 // Akış: Kontroller → FriendRequest oluştur → Socket.IO bildirimi
 // ═══════════════════════════════════════════════════════════════
 export const sendFriendRequest = async (req, res) => {
+    const { receiverId } = req.params;
+    const senderId = req.userId;
+    if (!validId(receiverId) || !validId(senderId)) return res.status(400).json({ message: "Invalid id" });
+    if (receiverId.toLowerCase() === senderId.toLowerCase()) return res.status(400).json({ message: "Cannot add yourself" });
+    const key = friendshipKey(senderId, receiverId);
+    if (activeFriendChanges.has(key)) return res.status(409).json({ message: "Friendship change in progress" });
+    activeFriendChanges.add(key);
     try {
-        const { receiverId } = req.params; // URL'den alıcı ID'si → /send/675abc123 → receiverId = "675abc123"
-        const senderId = req.userId;       // protectRoute'dan → isteği yapan kullanıcı
-
-        if (receiverId === senderId) return res.status(400).json({ message: "Cannot add yourself" });
         // Her iki kullanıcıyı da DB'den çek
         const sender = await User.findById(senderId);
         const receiver = await User.findById(receiverId);
@@ -73,7 +76,7 @@ export const sendFriendRequest = async (req, res) => {
         // ═══ GÜVENLİK KONTROLLERİ ═══
 
         // 1. Alıcı var mı?
-        if (!receiver) {
+        if (!sender || !receiver) {
             return res.status(404).json({ message: "Receiver not found" });
         }
 
@@ -105,7 +108,7 @@ export const sendFriendRequest = async (req, res) => {
 
         if (existingRequest) {
             // Karşı taraf sana istek göndermişse → "Pending'lerine bak" mesajı ver
-            if (existingRequest.senderId.toString() === receiverId) { //toString() kullanmamızın sebebi mongodb de ref olarak oldugundan object id olarak tutuluyor onu stringe çeviriyoruz
+            if (existingRequest.senderId.equals(receiver._id)) { //toString() kullanmamızın sebebi mongodb de ref olarak oldugundan object id olarak tutuluyor onu stringe çeviriyoruz
                 return res.status(400).json({
                     message: "This user has already sent you a friend request. Check your pendings"
                 });
@@ -142,7 +145,7 @@ export const sendFriendRequest = async (req, res) => {
     } catch (error) {
         console.error("Error sending friend request:", error);
         res.status(500).json({ message: "Internal Server Error" });
-    }
+    } finally { activeFriendChanges.delete(key); }
 };
 
 // ═══════════════════════════════════════════════════════════════
