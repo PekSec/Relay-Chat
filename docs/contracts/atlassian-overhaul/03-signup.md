@@ -1,5 +1,7 @@
 # 03 — Kayıt
 
+> Önceki ekran görüntüleri kullanıcı isteğiyle kaldırıldı. Aşağıdaki eski doğrulama kayıtları tarihseldir; güncel görseller [koyu masaüstü / açık mobil galerisindedir](../../screenshots/README.md).
+
 **Durum: uygulandı ve doğrulandı.** Kullanıcı 25 Eylül 2026'da soru aracında **A — Tek sütun kart** seçti ve ardından “Implement the plan.” ile uygulamayı onayladı.
 
 | Seçenek | Tasarım | Karar |
@@ -33,6 +35,6 @@ Kabul: minimum/maksimum uzunluk, çok baytlı şifre, uyuşmayan tekrar, kullan�
 - `npm run test:signup`: **38 kontrol**, production Chromium. Boş/geçersiz alanlar, parola değişimi/tekrar, iki görünürlük düğmesi, klavyeli radio/focus, gerçek kullanılan kullanıcı adı, HTTP 429/500/503/offline, çift submit, açık/koyu, 320×480 kısa ekran, varsayılan tercihler ve login bağlantısı. Ara adım assertion'ları kontrol sayısına ayrıca eklenmez.
 - Smoke **41**, security **37**, realtime **8**, login **48**, genel UI **56**, ayarlar **106** geçti. Build/lint, syntax, CI YAML ve diff kontrolleri geçti. Yeni testler CI ve `test:all` kapsamına eklendi.
 - SignUp JS **7,03 kB / 3,29 kB gzip**; ortak form/ikon/Textfield chunk'ları ayrıca yüklenir. Ana JS **617,86 kB / 188,75 kB gzip**; mevcut Vite >500 kB uyarısı devam ediyor. Bu değerler ağ performansı ölçümü değildir.
-- Gerçek test ekranları: [masaüstü](../../screenshots/signup-desktop.png), [mobil](../../screenshots/signup-mobile.png), [koyu hata durumu](../../screenshots/signup-mobile-dark.png). Görseller incelendi.
+- Gerçek test ekranları: masaüstü, mobil, koyu hata durumu. Görseller incelendi.
 
 Sonraki adım **04 ana sohbet için ayrı tasarım seçimi**. Emoji sağlayıcısı/asset lisansı araştırması o adımda başlar; bu teslimatta emoji entegrasyonu veya Lucide gereksinimi yok.

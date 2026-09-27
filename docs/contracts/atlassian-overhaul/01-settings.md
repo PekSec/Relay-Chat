@@ -1,5 +1,7 @@
 # 01 — Ayarlar ve kişiselleştirme
 
+> Önceki ekran görüntüleri kullanıcı isteğiyle kaldırıldı. Aşağıdaki eski doğrulama kayıtları tarihseldir; güncel görseller [koyu masaüstü / açık mobil galerisindedir](../../screenshots/README.md).
+
 **Durum: uygulandı ve doğrulandı; ayarlar UI 106 kontrol geçti.** Onay kaydı: kullanıcı önceki planı “Implement the plan.” ile uygulamaya açtı. Kapsam [shared](./shared.md) tercih tablosunun tamamıdır.
 
 ## Tasarım seçimi
@@ -47,6 +49,6 @@ Testler mevcut `.env` veritabanı yerine disposable Docker Mongo üzerinde yür�
 
 Hesaplanan tarayıcı renklerinde 14 accent × 2 tema = **28 eşleşmede** normal/hover/pressed buton yazısı, link ve seçili alan yazısı en az **4,5:1**; focus en az **3:1** sağlıyor. En düşük metin oranı açık tema/turuncu normal butonda **4,506:1**. Ayrıntı üretimi [ayarlar UI testinde](../../../scripts/settings-ui-test.js); ölçümler `test-results/settings-contrast.json`, rol bazında minimumlar [shared kanıt tablosunda](./shared.md).
 
-Son ayarlar UI koşusu **106 kontrol, exit 0** ile geçti: masaüstü/mobil; klavye focus, Kaydet/Vazgeç/Escape/overlay; başarısız kayıtta taslak; yeniden yükleme; hızlı tema seçimi ardından kapatma; farklı hesaba geçtikten sonra gecikmiş kaydın yeni hesabı değiştirmemesi; iki ses türünün açık/kapalı davranışı; önizleme; gerçek satır padding/yazı büyüklüğü; Enter/Ctrl/Cmd/Shift/IME. Ekran kanıtları: [masaüstü](../../screenshots/settings-desktop.png), [mobil](../../screenshots/settings-mobile.png).
+Son ayarlar UI koşusu **106 kontrol, exit 0** ile geçti: masaüstü/mobil; klavye focus, Kaydet/Vazgeç/Escape/overlay; başarısız kayıtta taslak; yeniden yükleme; hızlı tema seçimi ardından kapatma; farklı hesaba geçtikten sonra gecikmiş kaydın yeni hesabı değiştirmemesi; iki ses türünün açık/kapalı davranışı; önizleme; gerçek satır padding/yazı büyüklüğü; Enter/Ctrl/Cmd/Shift/IME. Ekran kanıtları: masaüstü, mobil.
 
 01 tamamlandı; sonraki iş **02 tasarım seçiminin soru aracıyla alınmasıdır**. Emoji ve diğer ekranların geçişi tamamlanmış değildir. Son toplu regresyonun ayrıntıları için `docs/VERIFICATION.md` esas alınır. Kullanıcının sonraki commit talebi için çalışma ve metin düzeltmeleri `codex/settings-copy-contracts` dalında toplandı; push istenmedi.

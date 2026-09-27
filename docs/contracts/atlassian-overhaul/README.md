@@ -1,6 +1,6 @@
 # Atlassian geçiş kontratları
 
-Bu alan sonraki oturumların başlangıç noktasıdır. **01 Ayarlar ve Kişiselleştirme**, **02 Giriş ve oturum**, **03 Kayıt**, **04 Ana sohbet**, **04a–c modal/emoji akışları** ve **05 Arkadaşlar** tamamlandı. Diğer ekranlar ayrı onay-uygulama döngüleriyle ilerler. Mevcut kısmi geçişler de yeniden değerlendirilir.
+Bu alan sonraki oturumların başlangıç noktasıdır. **01 Ayarlar ve Kişiselleştirme**, **02 Giriş ve oturum**, **03 Kayıt**, **04 Ana sohbet**, **04a–c modal/emoji akışları** **05 Arkadaşlar** ve **06 Yeni sohbet** tamamlandı. Diğer ekranlar ayrı onay-uygulama döngüleriyle ilerler. Mevcut kısmi geçişler de yeniden değerlendirilir.
 
 ## Kararlar ve durum
 
@@ -17,9 +17,9 @@ Kullanıcı 25 Eylül 2026 tarihinde önceki plan için **“Implement the plan.
 | 04 | [Ana sohbet](./04-chat.md) | A — İki sütun düzen uygulandı; 45 yeni chat UI kontrolü ve store yarış testleri geçti |
 | 04a–c | [Mesaj silme, geçmiş temizleme, emoji popup](./04-dialogs.md) | 04a B ve 04b B uygulandı; ayrı ayrı 47 UI kontrolü geçti. 04c B + Frimousse tam katalog uygulandı; 69 UI kontrolü geçti |
 | 05 | [Arkadaşlar](./05-friends.md) | A — Sekmeli kompakt satırlar ve çıkarma onayı uygulandı; 58 UI kontrolü geçti |
-| 06 | [Yeni sohbet / kişi bulma](./06-new-chat.md) | Tasarım seçimi bekliyor |
-| 07 | [Mesaj istekleri](./07-requests.md) | Tasarım seçimi bekliyor |
-| 08 | [Bildirimler](./08-notifications.md) | Tasarım seçimi bekliyor |
+| 06 | [Yeni sohbet / kişi bulma](./06-new-chat.md) | B — Açılır arama penceresi görsel geri bildirimle yenilendi; kod # olmadan aranır; 80 UI kontrolü geçti |
+| 07 | [Mesaj istekleri](./07-requests.md) | Ortak boşluk/popup düzeltmesi uygulandı; adıma özel tasarım seçimi bekliyor |
+| 08 | [Bildirimler](./08-notifications.md) | Ortak boşluk/popup düzeltmesi uygulandı; adıma özel tasarım seçimi bekliyor |
 
 Her birim: mevcut veri akışını oku → 2–3 seçeneği soru aracında sun → açık seçimi buraya kaydet → uygula ve ilgili ölü kodu kaldır → gerçek test sonuçlarını kaydet → sonraki birime geç. `ask_user_input_v0` bulunmuyorsa mevcut soru aracı kullanılır; öneri kendiliğinden onaya dönüşmez. Backend sorunları aynı adımda, bağımsızsa paralel çözülür; doğrulanmış hata ayrı backlog'a ertelenmez.
 
@@ -49,3 +49,7 @@ Kullanıcı 04-dialogs ile devam etmeyi istedi; 04a için **B — Mesaj önizlem
 27 Eylül 2026: 04 için **A — İki sütunlu ana sohbet** onaylandı ve uygulandı. Atlaskit geçişi, çok satırlı düzenleme, hata/taslak korunması, geçmiş retry/scroll/reconnect ve gecikmiş yanıt tutarlılığı tamamlandı. [04 kontratı](./04-chat.md) ve [doğrulama kaydı](../../VERIFICATION.md) güncel devirdir. Sonraki tasarım seçimi 05 arkadaşlar içindir.
 
 27 Eylül 2026: 05 için kullanıcı **A — Sekmeli kompakt satırlar** ve **kısa çıkarma onayı** seçti; ardından planı uygulamaya açtı. 58 UI kontrolü, store/36 backend yarış turu ve hata kurtarma kontrolleri geçti; tam regresyon/build/lint başarılı. Son `react-icons` kullanımı ve bağımlılığı kaldırıldı. [05 kontratı](./05-friends.md) güncel devirdir; sonraki seçim **06 — Yeni sohbet / kişi bulma** içindir. 06–08 açıklamalarındaki mevcut değişiklikler korundu.
+
+27 Eylül 2026: 06 için **B — Açılır arama penceresi**, arkadaş kodu için **# olmadan giriş** seçildi ve uygulama onaylandı. Arama/ilişki durumları, satıra özel istek gönderme, sohbet/taslak seçimi, modal odağı ve eşzamanlı gönderim koruması tamamlandı. [06 kontratı](./06-new-chat.md) güncel devirdir; sonraki seçim **07 — Mesaj istekleri** içindir.
+
+27 Eylül 2026: kullanıcı bütün popuplar için 06 görsel yönünü, mobilde **ortalanmış kartı**, boşluk düzeltmesinde **tüm uygulamayı** onayladı. Ortak başlık, ekran sınırı, kaydırma ve boşluk ölçüleri uygulandı; [ortak kontrat](./shared.md#ortak-popup-ve-boşluk-düzeni--27-eylül-2026) güncel ölçüleri belirtir. 07/08 işlev kapsamı genişletilmedi.

@@ -1,5 +1,7 @@
 # 04 — Ana sohbet
 
+> Önceki ekran görüntüleri kullanıcı isteğiyle kaldırıldı. Aşağıdaki eski doğrulama kayıtları tarihseldir; güncel görseller [koyu masaüstü / açık mobil galerisindedir](../../screenshots/README.md).
+
 **Durum: A onaylandı ve uygulandı — 27 Eylül 2026.** Kullanıcı iki sütunlu düzeni seçti ve “Implement the plan.” ile uygulamayı istedi. Masaüstünde 320 px sohbet listesi ve esnek mesaj alanı; 768 px altında liste/sohbet arasında geçiş. 04a–c'nin mevcut modal ve Frimousse kararları korunur. 05–08 ekranlarının içeriği bu onayın kapsamına girmez.
 
 ## Arayüz
@@ -29,10 +31,6 @@ Mevcut UI **56**, ayarlar **106**, emoji **69**, silme **47** ve temizleme **47*
 
 Salt okunur son incelemede iki önceden var olan tutarlılık sorunu kaydedildi (gecikmiş gönderim önizlemesi, eski yüklenmiş sayfanın reconnect yenilemesi). Bu adımın veri kapsamına dahil edilip başarısız olan testlerle doğrulandı ve düzeltildi. Ertelenmiş inceleme bulgusu yok.
 
-| Görünüm | Açık | Koyu |
-|---|---|---|
-| Masaüstü | [Ekran](../../screenshots/desktop-chat.png) | [Ekran](../../screenshots/desktop-chat-dark.png) |
-| Mobil | [Ekran](../../screenshots/mobile-chat.png) | [Ekran](../../screenshots/mobile-chat-dark.png) |
-| Büyük yazı / sıkışık / mor | [Masaüstü](../../screenshots/chat-desktop-light-preferences.png) | [Mobil](../../screenshots/chat-mobile-dark-preferences.png) |
+Güncel ekran görüntüleri: [koyu masaüstü / açık mobil galerisi](../../screenshots/README.md).
 
 Sonraki modül 05 arkadaşlar için ayrı tasarım seçimiyle ilerler. Kalıcı taslak, sunucu genel araması ve yeni gezinme şeridi eklenmedi.

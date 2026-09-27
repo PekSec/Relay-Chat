@@ -1,6 +1,6 @@
 # 07 — Mesaj istekleri
 
-**Durum: tasarım seçilmedi, uygulama başlamadı.** 27 Eylül 2026'da yalnızca açıklamalar detaylandırıldı. Kullanıcının isteği gereği bu açıklama aşamasında soru sorulmaz; tasarım seçimi plan modundaki görüşmeye bırakılır. A seçeneği öneridir, onaylanmış karar değildir.
+**Durum: adıma özel tasarım seçilmedi.** Ortak popup/boşluk planı kapsamında mevcut görünüm düzeltildi; aşağıdaki işlev seçenekleri ayrıca bekliyor. İlk açıklama aşamasından sonra 27 Eylül 2026 ortak görsel düzeltmeleri onaylandı ve uygulandı. Aşağıdaki adıma özel A seçeneği ise öneridir, onaylanmış karar değildir.
 
 ## Bu adım hangi ekranı değiştiriyor?
 

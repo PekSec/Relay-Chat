@@ -1,7 +1,195 @@
 # Verification record
 
+> Önceki ekran görüntüleri kullanıcı isteğiyle kaldırıldı. Aşağıdaki eski doğrulama kayıtları tarihseldir; güncel görseller [koyu masaüstü / açık mobil galerisindedir](screenshots/README.md).
+
 The newest entry describes the current implementation. Older entries record the
 scope and checks performed at the time; their pending-work notes are historical.
+
+## Meaningful action icons — 27 September 2026
+
+Functional buttons now use the installed Atlaskit core icons consistently across
+friend acceptance/rejection/cancellation, New Chat, navigation, save/cancel,
+confirmation dialogs, retry/reconnect, older messages and authentication. Clickable
+conversation/request/notification rows gain a navigation chevron. Existing emoji,
+color selectors and preview-only buttons retain their own visual treatment. Icon
+labels are decorative alongside the existing accessible text; loading indicators
+and action guards are preserved. No dependency or behavior change was added.
+
+Icon and label slots stay centered as a group. New Chat allows wrapped labels and
+reserves enough action width on desktop. Navigation padding was adjusted after
+visual inspection found the request badge wrapping at 320 px with large text;
+a new geometry check reproduced that failure before the correction. The existing
+horizontal alignment checks now also cover navigation, New Chat and modal footers.
+The [56 paired screenshots](screenshots/README.md) were refreshed for this change.
+
+Final production build, lint, syntax and diff checks passed. The six-viewport layout
+run passed **606 checks** and paired screenshot generation passed **282 checks**.
+The general UI, settings, login, signup, delete/clear dialogs, emoji, chat, friends
+and New Chat suites all exited **0**. The friends/New Chat commands also ran their
+existing state/API checks. Logs: ignored `test-results/icons-ui-final.log`,
+`icons-layout-final.log` and `icons-screenshots-final.log`. An initial test run on
+port 5040 could not reach the app because a Windows service also listened there;
+the successful run used the suites' default ports. Tests used disposable MongoDB
+data. The existing main-chunk size advisory remains; remote CI was not run.
+
+## Button text alignment and replacement screenshots — 27 September 2026
+
+The previous spacing checks missed the reported defect: they measured button
+containers, not their labels. The installed button uses baseline alignment; after
+enlarging it to 40 px, label whitespace measured 6 px above and 14 px below, while
+the icon was centered. A new label-center assertion failed on the original CSS
+for New Chat, navigation and logout before the shared alignment correction.
+
+Buttons now center their contents vertically. Friend actions, logout and friend
+code copy center the icon and label together; settings navigation and color
+options align text to the left. Count badges center their numbers. These are
+shared CSS corrections without new components or dependencies.
+
+The layout suite passed **516 checks across six viewport configurations**. It now
+measures actual label boxes and icon/text groups as well as existing gutters,
+modal geometry, overflow, control sizes and focus behavior. The screenshot mode
+covers additional settings sections, incoming/outgoing requests, message request
+details, search and editing, with **232 checks** across its two configurations.
+
+All 234 previous image files under `docs/screenshots` and `test-results` were
+removed at the user's request. The replacement [gallery](screenshots/README.md)
+contains **56 captures: 28 areas × dark desktop (1440×960) / light mobile
+(390×844)**. Historical screenshot links were retired. The checked-in gallery
+documents `npm run screenshots`; naming, dimensions and documentation links are
+checked. Browser captures were visually reviewed for text alignment and spacing;
+a separate read-only review found no actionable alignment issue in its samples.
+
+Final `npm run test:all` exited **0**, including the production build, API/state/
+concurrency coverage, all UI suites and the 516 layout checks. Final screenshot
+generation exited **0** with 232 checks. `npm run lint`, JavaScript syntax and
+`git diff --check` passed. Tests used disposable MongoDB 7 databases; the temporary
+container and transient test screenshots were removed afterward. Logs remain in
+ignored `test-results/type-final-all.log` and `type-final-screenshots.log`.
+The existing >500 kB build chunk advisory remains. No physical phone or remote CI
+run is claimed.
+
+## Shared popup character and application spacing — 27 September 2026
+
+The approved scope extends the balanced Relay visual direction to every existing
+popup and fixes spacing throughout the application. Mobile dialogs are centered
+cards with 16 px viewport gutters. Shared heading/body/footer insets are 24 px on
+desktop and 16 px on mobile; button targets are 40/44 px. Short confirmations stay
+content sized, while settings/search scroll within the available height. Existing
+Atlaskit focus and pending-action guards remain in place.
+
+`PopupHeading` shares presentation only. Notifications now use the installed Popup
+with a named dialog and viewport positioning. Emoji has one inset and a scrolling
+catalog. Settings select menus use fixed positioning inside the modal to escape
+the scroll-body clip; Escape closes an open menu before the modal. Sidebar and
+chat gutters remain 16 px even with large text, auth cards use 24/16 px padding,
+and the composer helper follows the field column. Existing row/bubble density,
+accent choices and semantic danger colors are retained. No dependency, endpoint
+or model was added for this visual work; 07/08 feature decisions remain separate.
+
+Validation: **336 layout checks** and **80 new-chat UI checks** passed on the final
+layout. The layout suite captures 320×650, 390×844, 768×900, 1024×600, 1440×960 and
+390×480, mixing light/dark, standard/large type and comfortable/compact density.
+Assertions cover modal gutters/centering, consistent insets, target sizes, sidebar
+and chat gutters, composer alignment, menu hit-testing, notification semantics
+and focus return, action-toolbar containment and reachable auth footers.
+
+`npm run test:all` exited 0, including all API/state/concurrency suites, 56 general
+UI, 106 settings, 48 login, 38 signup, 47 delete, 47 clear-history, 69 emoji,
+45 chat, 58 friends, 80 new-chat and the then-current 330 layout checks. Afterward,
+a final New Chat bottom-inset specificity correction was verified by rebuilding
+and rerunning **336 layout checks** plus **80 new-chat UI checks**. Final lint,
+JavaScript syntax and CI YAML parsing passed. The existing >500 kB main-chunk build
+advisory remains. Tests used explicit disposable MongoDB 7 databases with normal
+production rate limits enabled; no existing user data was used.
+
+Before/after 320 px captures were inspected at the same dimensions; the original
+mobile confirmation and emoji layout failed the gutter/content-size checks. Fresh
+captures of settings (including appearance/menus), all confirmations, new chat,
+notifications, emoji/reactions, sidebar/friends/requests, chat and auth were also
+inspected. Short-screen menu clipping was found visually, then covered by checking
+that each option is hit-testable, not merely within the viewport. Review caught
+missing notification dialog semantics; corrected and checked. The emoji theme
+assertion now measures the visible modal surface, and focus assertions wait for
+the installed library's asynchronous focus restoration.
+
+Güncel ekran görüntüleri: [koyu masaüstü / açık mobil galerisi](screenshots/README.md).
+
+Historical logs remain in ignored `test-results/popup-all-verified.log`,
+`test-results/popup-final-layout.log` and `test-results/popup-final-new-chat.log`. Physical
+phone keyboards and full accessibility compliance were not certified. No remote
+CI, deployment, commit or push was performed for this step.
+
+## New chat visual revision — 27 September 2026
+
+The user rejected the initial alignment, mobile layout and flat presentation,
+then selected the balanced visual direction. Functional tests had not established
+visual quality. Fresh before/after captures exposed inconsistent button placement,
+24 px compact targets and a bottom close action isolated from the content.
+
+The modal now uses the Relay logo, a stronger heading and an accent-tinted search
+section. Dedicated grid rows separate identity/status from equal-width actions;
+below 768 px every row puts actions beneath the identity. Action targets are at
+least 40 px on desktop and 44 px on mobile. Close is in the header. Empty and
+no-result states use existing icons and concise functional copy.
+
+Validation on the final revision: **80/80 new-chat UI checks**, **56/56 general UI
+checks**, lint and build passed. The new geometry check failed on the previous
+layout and passes now. The earlier full regression/API results below predate this
+visual revision; backend behavior was not changed. Focus/action-condition review
+found no additional issues. Existing main-bundle size advisory remains.
+
+Fresh empty/result captures were inspected at 320, 390, 768 and 1440 px. Production
+Chromium also covered large text, dark/light theme and the shortened viewport.
+Physical phone keyboard behavior and full accessibility compliance were not
+certified. Audit notes and before/after images remain in ignored
+`test-results/design-audit/` and `test-results/design-after/`.
+
+Final captures: desktop,
+tablet, phone,
+small phone.
+
+## New chat / contract step 06 — 27 September 2026
+
+The user selected B (modal search) and explicitly chose friend codes without `#`.
+The existing entry point now opens the installed Atlaskit modal with compact rows,
+safe avatars, target-specific request states, relationship status and chat/draft
+selection. No new dependency, endpoint, schema or migration was introduced.
+
+Search trims whitespace, debounces 350 ms and validates 2–20 ASCII letters,
+digits/underscores in the UI. The API's existing 1–20 range remains compatible.
+Stale query/session responses are discarded. Send mutations refresh canonical
+lists instead of appending late HTTP snapshots. The shared header hook also uses
+session cancellation and per-person duplicate protection. The existing server
+pair guard now includes sending, retaining the single-instance deployment limit.
+
+| Check | Observed result |
+| --- | --- |
+| New chat Chromium | **78 checks passed**, 1440 px desktop and 320 px mobile |
+| Backend | **24 concurrent send rounds** (same/opposite direction), injected write failure/retry, invalid/self/already-friend rejection passed |
+| Search data | One find, at most 20 public profiles, own account excluded; username/code matching and invalid queries checked |
+| Query evidence | 2,387 JSON characters in this run; existing username/code IXSCAN paths have broad regex bounds, not a selective prefix index |
+| Full regression | `npm run test:all` exited 0, including all 78 new-chat UI checks and 58 friends UI checks |
+| Build / lint / syntax | Passed; existing >500 kB main-chunk advisory remains |
+| CI configuration | `test:new-chat` added with a separate disposable database/port; YAML parses |
+| Review | Repeated incoming-tab navigation finding reproduced by a failing test, fixed and rechecked; no remaining findings |
+
+Browser coverage includes validation, empty/loading/error/retry, delayed search,
+retained query, pending/failed sending, live relationship updates, two tabs, late
+send responses across account changes, unknown relationship retry, modal focus
+and keyboard trapping, repeated incoming navigation, draft opening without a
+message, real first send and existing history. Light/dark themes, purple accent,
+compact/large text, long names and a shortened mobile viewport were exercised.
+The shortened viewport simulates keyboard space; no physical phone keyboard test
+is claimed. Existing friends regression also verifies reconnect list refresh.
+
+Tests ran against explicit disposable MongoDB 7 databases with production IP
+limits enabled. Logs are in ignored `test-results/new-chat-all.log`; the expected
+injected write failures in that log are recovery tests. No remote CI, deployment,
+commit or push was performed for this step.
+
+Inspected screenshots: desktop light,
+mobile dark. Handoff:
+[06 contract](contracts/atlassian-overhaul/06-new-chat.md). Next design decision: 07.
 
 ## Friends / contract step 05 — 27 September 2026
 
@@ -45,8 +233,8 @@ unfinished acceptance. All were fixed. Local evidence is in ignored
 `test-results/friends-*.log`; tests use an explicit disposable MongoDB 7 database.
 No deployment, push or remote CI result is claimed.
 
-Inspected screenshots: [desktop light](screenshots/friends-desktop.png),
-[mobile dark](screenshots/friends-mobile.png). Implementation/handoff:
+Inspected screenshots: desktop light,
+mobile dark. Implementation/handoff:
 [05 contract](contracts/atlassian-overhaul/05-friends.md). Next design decision is 06.
 
 ## Main chat / contract step 04 — 27 September 2026
@@ -99,11 +287,7 @@ Local Windows port 5040 was occupied by a system service; completed tests used
 ports 5029–5033. The temporary MongoDB container is removed after verification.
 No deployment is claimed.
 
-| Chat                                       | Light                                                     | Dark                                                   |
-| ------------------------------------------ | --------------------------------------------------------- | ------------------------------------------------------ |
-| Desktop                                    | [View](screenshots/desktop-chat.png)                      | [View](screenshots/desktop-chat-dark.png)              |
-| Mobile                                     | [View](screenshots/mobile-chat.png)                       | [View](screenshots/mobile-chat-dark.png)               |
-| Purple accent, large type, compact density | [Desktop](screenshots/chat-desktop-light-preferences.png) | [Mobile](screenshots/chat-mobile-dark-preferences.png) |
+Güncel ekran görüntüleri: [koyu masaüstü / açık mobil galerisi](screenshots/README.md).
 
 Implementation and next-step handoff: [04 chat contract](contracts/atlassian-overhaul/04-chat.md).
 
@@ -147,10 +331,7 @@ The browser test regenerates composer and reaction captures in both themes and
 devices under `test-results/`; representative captures are checked into
 `docs/screenshots/`. Length-limit captures remain separate test artifacts.
 
-| Flow            | Desktop light                                        | Desktop dark                                        | Mobile light                                        | Mobile dark                                        |
-| --------------- | ---------------------------------------------------- | --------------------------------------------------- | --------------------------------------------------- | -------------------------------------------------- |
-| Composer        | [View](screenshots/emoji-desktop-light.png)          | [View](screenshots/emoji-desktop-dark.png)          | [View](screenshots/emoji-mobile-light.png)          | [View](screenshots/emoji-mobile-dark.png)          |
-| Reaction search | [View](screenshots/emoji-reaction-desktop-light.png) | [View](screenshots/emoji-reaction-desktop-dark.png) | [View](screenshots/emoji-reaction-mobile-light.png) | [View](screenshots/emoji-reaction-mobile-dark.png) |
+Güncel ekran görüntüleri: [koyu masaüstü / açık mobil galerisi](screenshots/README.md).
 
 Behavior, data provenance and update instructions: [emoji contract](contracts/atlassian-overhaul/emoji.md).
 
@@ -197,7 +378,7 @@ Reproduce with `npm run test:clear-history` and `npm run test:clear-dialog`, bot
 included in `test:all` and CI. Set an explicit disposable `MONGO_URI`; the browser
 suite requires a build and defaults to port 5028. Local tests used disposable
 MongoDB 7 on port 27018 and Chromium. Inspected screenshots:
-[desktop light](screenshots/clear-desktop-light.png), [mobile dark](screenshots/clear-mobile-dark.png).
+desktop light, mobile dark.
 
 ClearHistoryModal JS: 2.28 kB / 1.20 kB gzip, plus shared Avatar
 19.15 kB / 6.93 kB gzip and Modal 76.88 kB / 24.60 kB gzip. Main JS:
@@ -239,8 +420,8 @@ Browser coverage includes light/dark, large text, grapheme boundaries, focus tra
 and return, cancel/desktop overlay, 403/404/non-JSON server/network failures,
 duplicate submit, latest/older message previews, HTTP-only filtered deletion focus,
 conversation change with a delayed response, and logout. Mobile uses the installed
-Modal's full-screen layout. Screenshots inspected: [desktop](screenshots/delete-desktop-light.png),
-[mobile dark](screenshots/delete-mobile-dark.png). Unicode is preserved; the official
+Modal's full-screen layout. Screenshots inspected: desktop,
+mobile dark. Unicode is preserved; the official
 emoji provider/asset work remains in 04c.
 
 `npm run test:delete-message` and `npm run test:delete-dialog` are included in
@@ -284,8 +465,8 @@ New tests run through `npm run test:signup-api` and `npm run test:signup`; both 
 an explicitly supplied disposable `MONGO_URI`. The browser test needs a build and
 defaults to port 5020. CI and `test:all` include both tests.
 
-Screenshots inspected: [desktop](screenshots/signup-desktop.png),
-[mobile](screenshots/signup-mobile.png), [dark error](screenshots/signup-mobile-dark.png).
+Screenshots inspected: desktop,
+mobile, dark error.
 SignUp JS is 7.03 kB / 3.29 kB gzip plus shared form/icon/Textfield chunks.
 Main JS is 617.86 kB / 188.75 kB gzip; the existing Vite >500 kB advisory remains.
 No network timing claim or remote CI execution is implied by these local checks.
@@ -319,10 +500,10 @@ or slogans appear in the UI. Step 03 remains unapproved.
 - Run `npm run test:session-errors` without Mongo, and `npm run test:login` after
   a build with explicit disposable `MONGO_URI` (default app port 5013). Both are
   included in `test:all` and CI. Local evidence is in `test-results/login*.log`.
-- Screenshots inspected: [desktop](screenshots/login-desktop.png),
-  [mobile](screenshots/login-mobile.png),
-  [light error](screenshots/login-desktop-light.png),
-  [dark error](screenshots/login-mobile-dark.png).
+- Screenshots inspected: desktop,
+  mobile,
+  light error,
+  dark error.
 
 Implementation and handoff: [02 contract](contracts/atlassian-overhaul/02-login.md).
 No remote CI run, deployment or push was performed.
@@ -350,8 +531,8 @@ atomic bounded preview update now fixes that race. Before the fix 18/20 parallel
 sends failed; after it 40/40 succeeded. No public message API changed.
 
 Tests used disposable MongoDB 7 databases on local port 27018, separate app ports,
-and Chromium. Settings screenshots: [desktop](screenshots/settings-desktop.png),
-[mobile](screenshots/settings-mobile.png). Reproducible checks are `npm run
+and Chromium. Settings screenshots: desktop,
+mobile. Reproducible checks are `npm run
 test:preferences`, `npm run test:settings`, and `npm run test:message-concurrency`;
 set `MONGO_URI` to a disposable database first. Browser tests require `npm run build`.
 Detailed contrast JSON and test logs are in ignored `test-results/` and uploaded
@@ -409,7 +590,7 @@ Tests used explicitly selected disposable MongoDB databases and separate app por
 Existing local data was backed up before updating the local Compose stack; no
 public deployment or GitHub push was performed.
 
-The [desktop](screenshots/desktop-chat.png) and [mobile](screenshots/mobile-chat.png)
+The desktop and mobile
 images are actual browser captures using test accounts. Browser traces and scan
 reports are local ignored artifacts. Future GitHub runs upload fresh evidence.
 

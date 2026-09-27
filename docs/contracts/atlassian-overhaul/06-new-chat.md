@@ -1,12 +1,14 @@
 # 06 — Yeni sohbet / kişi bulma
 
-**Durum: tasarım seçilmedi, uygulama başlamadı.** 27 Eylül 2026'da yalnızca açıklamalar detaylandırıldı. Kullanıcının isteği gereği bu açıklama aşamasında soru sorulmaz; tasarım seçimi plan modundaki görüşmeye bırakılır. A seçeneği öneridir, onaylanmış karar değildir.
+> Önceki ekran görüntüleri kullanıcı isteğiyle kaldırıldı. Aşağıdaki eski doğrulama kayıtları tarihseldir; güncel görseller [koyu masaüstü / açık mobil galerisindedir](../../screenshots/README.md).
+
+**Durum: B — Açılır arama penceresi onaylandı ve uygulandı.** 27 Eylül 2026'da kullanıcı B seçeneğini ve arkadaş kodunun **# olmadan** girilmesini seçti; ardından uygulama planını onayladı. Aşağıdaki A/B/C açıklamaları karar geçmişi olarak korunur; uygulanan davranış sondaki kayıttadır.
 
 ## Bu adım hangi ekranı değiştiriyor?
 
 **Yeni sohbet** düğmesine basınca açılan kişi bulma ekranını ele alıyoruz. Burada kullanıcı adı veya arkadaş kodu girerek uygulamadaki birini bulur, ona arkadaşlık isteği gönderir ya da sohbetini açarsın. [05 — Arkadaşlar](./05-friends.md) içindeki arama yalnızca mevcut listeleri filtreler; buradaki arama sunucudan kullanıcı sonuçları getirir.
 
-Bugün arama sol panelin içinde açılıyor. Sonuç kartında kişinin avatarı, tam adı, kullanıcı adı, arkadaş kodu ve **Arkadaş ekle / Mesaj gönder** düğmeleri bulunuyor. Bu adım, ekranın nerede açılacağını ve sonuçların nasıl sunulacağını belirler.
+Uygulama öncesinde arama sol panelin içinde açılıyordu. Sonuç kartında kişinin avatarı, tam adı, kullanıcı adı, arkadaş kodu ve **Arkadaş ekle / Mesaj gönder** düğmeleri bulunuyor. Bu adım, ekranın nerede açılacağını ve sonuçların nasıl sunulacağını belirler.
 
 **“Mesaj gönder” düğmesi mevcut davranışta yalnızca sohbet alanını açar.** Hazır bir mesaj göndermez. Kişiyle sohbetin varsa mevcut geçmiş açılır; yoksa ilk mesajı yazabileceğin taslak sohbet seçilir. Taslağı açıp çıkmak, tek başına karşı tarafa mesaj veya arkadaşlık isteği göndermez. Görünen düğme metni de bu ayrımı açık anlatmalıdır.
 
@@ -108,9 +110,9 @@ Arama, avatarlar, düğmeler, sonuç yüzeyleri ve varsa pencere açık/koyu tem
 
 Kullanıcı hızlıca farklı bir isim yazarsa eski aramanın geç gelen sonucu yeni sonuçları değiştirmemelidir. Klavyeyle arama alanından sonuç eylemlerine geçilebilmeli, odak görünür kalmalı ve hesap değişiminde önceki hesabın sonuçları taşınmamalıdır.
 
-## Uygulama sırasında bakılacak mevcut parçalar
+## Uygulama öncesi inceleme notları
 
-Bu bölüm geliştirme notudur; uygulama veya test sonucu değildir.
+Bu bölüm karar öncesindeki dosya ve davranışları kaydeder; güncel uygulama aşağıdadır.
 
 - Ekran `frontend/src/components/sidebar/views/AddFriend.jsx`, giriş noktası `Sidebar.jsx` içindedir. A'da mevcut alan dönüştürülür; B veya C'de seçilen yerleşime taşınır.
 - `hooks/friends/useSearchUsers.js`: 350 ms bekleme, trim edilmiş en az 2 karakter, eski isteğin iptali ve `GET /api/friends/search?query=…`. Arayüz durumlarının da aynı normalize edilmiş sorguyu esas alması kontrol edilir.
@@ -129,3 +131,36 @@ Bu bölüm geliştirme notudur; uygulama veya test sonucu değildir.
 6. Build/lint ve ilgili smoke/UI kontrolleri; seçilen ekranın masaüstü/mobil görüntüleri ve gerçek sonuçların kaydı.
 
 Tasarım seçimi ve uygulama ayrı aşamalardır. 06 tamamlanıp doğrulandıktan sonra 07'ye geçilir.
+
+## Uygulanan B tasarımı — 27 Eylül 2026
+
+- Mevcut Yeni sohbet düğmesi, tembel yüklenen `NewChatModal.jsx` bileşenini açar. Eski `AddFriend.jsx` paneli kaldırıldı. Yeni bağımlılık, giriş noktası veya arama endpoint'i yoktur.
+- 680 px genişlikte Atlaskit Modal içinde arama, kişi satırları ve üst köşede Kapat bulunur. Mobilde tek ekranı kullanır; arama kaydırmada üstte kalır. İlk odak aramada; Tab içeride, Escape/dışarı tıklama/kapatma odağı tetikleyiciye döndürür. Her açılış yeni sorguyla başlar.
+- Baş/son boşluklar temizlenir; arayüz 2–20 ASCII harf/rakam/alt çizgi ve 350 ms bekleme uygular. Kod # olmadan girilir. API'nin mevcut 1–20 karakter kabulü uyumluluk için korunur; arayüz tek karakterle istek atmaz. Türkçe harf ve tam ad araması eklenmedi.
+- Geçersiz giriş, kısa/boş giriş, aranıyor, sonuç yok ve hata/yeniden deneme ayrı gösterilir. Sorgu/oturum anahtarı ve AbortController eski yanıtların yeni sonuçları ezmesini engeller. En fazla 20 sonuç gösterildiği belirtilir.
+- İlişki durumu 05'in kanonik listelerinden gelir: Arkadaşın, İstek gönderildi, Gelen istek var. Bilinmeyen/yüklenemeyen ilişki eklenebilir sayılmaz; liste hatası tekrar denenebilir. Gelen isteklere git, pencereyi kapatıp Gelen sekmesine gider; tekrar yönlendirmelerde de hedef sekme açılır.
+- İstek gönderme satıra bağlıdır, sorguyu silmez. İşlem bitene kadar kapatma ve başka görünüme geçiş kapalıdır; diğer kişilere istek gönderilebilir. Hata hedefe bağlı Türkçe metindir. Ortak hook sohbet başlığını da korur; tekrar tıklama ve hesap değişimi güvenliği paylaşılır. Başarı, eski HTTP verisini listeye eklemek yerine listeleri yeniler.
+- Sohbet aç, mevcut konuşmayı veya ilk mesaj taslağını seçer; odak mesaj alanına geçer. Açılış kendi başına mesaj, arkadaşlık isteği veya konuşma oluşturmaz. Kapatma önceki görünümü korur; sohbet seçimi sol paneli Sohbetler'e döndürür.
+- Sunucunun mevcut kişi çifti kilidi gönderme işlemine de uygulandı. Aynı/ters yönde eşzamanlı gönderimler tek bekleyen kayıt bırakır; çakışma 409 döner. Yazma hatasında kilit bırakılır ve yeniden deneme mümkündür. Şema/migrasyon yoktur; mevcut tek süreç sınırı sürer, çoğaltılmış uygulama için dağıtık eşgüdüm gerekir.
+
+Doğrulama: `npm run test:new-chat`; tam regresyon: `npm run test:all`. Ölçülen sonuçlar [VERIFICATION](../../VERIFICATION.md) kaydında tutulur. Sonraki tasarım seçimi **07 — Mesaj istekleri** içindir.
+
+### Doğrulama sonucu
+
+`npm run test:all`, lint ve build geçti. Yeni sohbet paketi **78 masaüstü/mobil UI kontrolü**, **24 eşzamanlı gönderim turu**, yazma hatası sonrası retry, giriş sınırları ve genel profil alanı kontrollerini içerir. Kod incelemesinde bulunan tekrarlı Gelen sekmesi yönlendirmesi, önce başarısız testle doğrulanıp düzeltildi. Yeni bağımlılık eklenmedi. Mevcut >500 kB ana paket uyarısı sürer.
+
+Gerçek tarayıcı görüntüleri: masaüstü, mobil. Fiziksel telefon klavyesi yerine daraltılmış viewport doğrulandı; uzak CI veya dağıtım çalıştırılmadı.
+
+### Görsel revizyon — kullanıcı geri bildirimi
+
+İlk uygulamanın işlevsel testleri, satırların görsel kalitesini yeterince kapsamıyordu. Kullanıcı hizalamayı, mobil düzeni ve düz görünümü reddetti; **dengeli ama karakterli** yönü seçti.
+
+- Relay logosu ve belirgin başlık; üst köşede erişilebilir kapatma. Mobilde ekranın dibine düşen alt kapatma satırı kaldırıldı.
+- Seçili vurgu rengini kullanan hafif renkli arama alanı; boş durumda mevcut ikon seti ve işlemi açıklayan kısa metin.
+- Sidebar'dan ödünç alınan esnek satır yerine bu modalın genişliğine uygun grid: avatar, kimlik/durum ve sabit eylem sütunları. Kullanıcı adı ve kod ayrı, taşmadan sarılır; ilişki durumu kişinin altında yer alır.
+- 767 px ve altında bütün satırlar aynı iki kademeli düzene geçer. Eylemler eşit genişlikte ve en az 44 px yükseklikte; masaüstünde en az 40 px. Sohbet aç her satırda aynı sütundadır.
+- Gerçek arayüz 320, 390, 768 ve 1440 px genişlikte, boş ve sonuçlu durumlarda yeniden görüntülendi. Eski tasarımda başarısız olan eylem hizası/dokunma boyutu kontrolü regresyon paketine eklendi.
+
+Güncel görseller: masaüstü, tablet, mobil, 320 px.
+
+Görsel revizyonun son kontrolü: **80/80 yeni sohbet UI**, **56/56 genel UI**, lint ve build geçti. Son görsel inceleme 320/390/768/1440 px görüntülerini kapsar.

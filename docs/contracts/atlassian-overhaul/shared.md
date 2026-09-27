@@ -30,6 +30,20 @@ Paketler kullanılacakları adımda eklenir; React 19 peer aralığı ve portal/
 
 04c iki yerde aynı Frimousse panelini kullanır: masaüstü Popup, mobil Modal; mesaj alanı ve tepkilerde tam İngilizce katalog/arama ve ten rengi seçimi. Türkçe arayüz metinleri, Relay/ADS tema tokenları, yerel Emojibase 17.0.0 verisi ve Unicode gösterimi kullanıcı tarafından onaylıdır. Klavye dolaşımı, kısa Türkçe hata/yeniden deneme, grapheme güvenli imlece ekleme ve odak dönüşü doğrulandı. Tepki grid'i geçerli `aria-selected`, rozetler seçili durum/sayı adı taşır; HTTP ve socket aynı sürümlü state güncellemesini kullanır. Ürün metninde altyapı adı yoktur.
 
+## Ortak popup ve boşluk düzeni — 27 Eylül 2026
+
+Gerçek işlem ve gezinme düğmeleri mevcut Atlaskit core ikon ailesinden anlamlı ikon taşır: kabul/kaydet için onay, reddet/vazgeç için çarpı, ekleme için kişi+, sohbet için konuşma, tekrar deneme için yenileme, silme için çöp kutusu. İkon metinle aynı işlemi anlattığında dekoratiftir; erişilebilir ad metinden gelir. Yüklenirken mevcut spinner korunur. Renk/tema seçenekleri ve örnek önizleme düğmesi seçim/örnek sunumlarını korur; emoji ve tepki seçenekleri kendi görsellerini kullanır. Sohbet, istek ve bildirim satırlarında sağ ok gezinmeyi belirtir.
+
+Buton yüksekliği kadar iç yazı hizası da doğrulanır: büyütülmüş kontrollerde Atlaskit'in baseline hizası ortak `align-items: center` ile düzeltilir. İkonlu arkadaşlık/çıkış/kod kopyalama eylemlerinde ikon ve etiket tek grup olarak ortalanır; ayarlar gezinmesi ve renk seçenekleri sola hizalanır. `test:layout` gerçek metin kutularının dikey merkezini ve bu grupların yatay konumunu ölçer. Güncel [28 alanın koyu masaüstü / açık mobil görüntüleri](../../screenshots/README.md) aynı üretim build'inden alınır.
+
+Kullanıcı 06'nın **dengeli ama karakterli** yönünü bütün açılır yüzeylere yaymayı ve boşluk sorunlarını **tüm uygulamada** düzeltmeyi onayladı. Mobil kısa pencereler **ortalanmış kart** olarak açılır; ekran kenarında en az 16 px kalır. Başlık/içerik/alt eylem kenarı masaüstünde 24, mobilde 16 px'tir. 4/8/12/16/24/32 px boşluk ölçeği, güçlü başlık, hafif vurgu alanı ve sağ üst kapatma ortak dildir. Ayarlar/yeni sohbette Relay logosu; silme/çıkarma/emoji/bildirimlerde bağlama uygun mevcut ikon kullanılır. Tehlike rengi kişisel vurguya dönüştürülmez.
+
+Yalnız sunum paylaşan `PopupHeading` kullanılır; yeni modal çerçevesi veya bağımlılık eklenmez. Mevcut modalın odak, katman ve işlem korumaları korunur. Onaylar en fazla 480, ayarlar 880, yeni sohbet 680 px genişliktedir. Kısa onay içerik boyundadır; uzun içerik gövdede kayar, başlık ve alt eylemler görünür kalır. Kontroller masaüstünde en az 40, mobilde 44 px'tir. Ayarlarda açık seçim menüsünün Escape'i önce menüyü kapatır.
+
+Emoji paneli masaüstünde düğmeye bağlı, mobilde ortalanmış karttır; tek iç boşluk ve yalnız katalog kaydırması kullanır. Bildirimler mevcut Popup ile ekrana sığar; mevcut iki istek kaynağı ve yönlendirme korunur. Küçük tooltip/seçim menülerine logo eklenmez. Sidebar bölümlerinin etkili yatay kenarı 16 px; giriş/kayıt kartı içi 24/16 px'tir. Composer açıklaması alan sütunuyla hizalanır; büyük yazı gezinme etiketlerini kesmez. Yoğunluk satır/mesaj içini değiştirir, kenar payı ve dokunma hedeflerini küçültmez.
+
+07/08 için bu ortak görsel düzeltmeler uygulanmıştır; kendi işlev/tasarım seçimleri ayrıca bekler. Yeni ekranlarda bu ortak düzen esas alınır. Tekrarlanabilir geometri ve ekran kaydı: `npm run test:layout`; sonuç ve görseller [doğrulama kaydındadır](../../VERIFICATION.md).
+
 ## Tercih API'si
 
 `PATCH /api/auth/preferences` oturum cookie'si ile çalışır. Düz, kısmi bir tercih nesnesi alır; `{ preferences: <tam normalize edilmiş tercihler> }` döndürür. Kimlik body'den alınmaz. Enum/boolean tipleri sunucuda doğrulanır; bilinmeyen alanlar ve geçersiz değerler reddedilir. Mevcut auth user yanıtlarına `preferences` eklenir; endpointlerin mevcut dış zarfı korunur.

@@ -1,5 +1,7 @@
 # 04 alt kararları — Onay modalları ve emoji popup
 
+> Önceki ekran görüntüleri kullanıcı isteğiyle kaldırıldı. Aşağıdaki eski doğrulama kayıtları tarihseldir; güncel görseller [koyu masaüstü / açık mobil galerisindedir](../../screenshots/README.md).
+
 **04a B, 04b B ve 04c B + Frimousse onaylandı ve uygulandı.** Birini sor → uygula → test et → diğerini sor. Kullanıcının isteğiyle bu alt kararlar ana sohbet tasarımından önce ele alınıyor; ana sohbet hâlâ onaysız.
 
 ## 04a — Mesaj silme
@@ -21,7 +23,7 @@ Backend sahiplik kontrolü korunur; kendi silinmiş mesajını tekrar silme **20
 - `npm run test:delete-dialog`: masaüstü/mobil **47** kontrol geçti; açık/koyu tema, büyük yazı, grapheme, odak/iptal, HTTP/ağ hataları, çift submit, diğer hesap ve gönderenin ikinci sekmesi, önizlemeler, filtre sonrası odak, sohbet değişiminden sonra geciken yanıt ve hesap değişimi.
 - Build/lint ve mevcut smoke **41**, security **37**, realtime **8**, UI **56**, settings **106** geçti; sohbet sorgusu kontrolü en fazla **iki okuma** sınırını korudu.
 - Yerel geçici MongoDB 7 ve Chromium kullanıldı. Testler npm `test:all` ve CI akışına eklendi; uzak CI çalıştırıldığı iddia edilmez.
-- İncelenen gerçek görüntüler: [masaüstü açık](../../screenshots/delete-desktop-light.png), [mobil koyu](../../screenshots/delete-mobile-dark.png). Bundle ve doğrulama ayrıntıları [VERIFICATION](../../VERIFICATION.md) içinde.
+- İncelenen gerçek görüntüler: masaüstü açık, mobil koyu. Bundle ve doğrulama ayrıntıları [VERIFICATION](../../VERIFICATION.md) içinde.
 
 Temizlik: Message içindeki confirm, toast kullanan eski silme hook akışı ve `IoTrashOutline` kaldırıldı. Silme düğmesi `IconButton` + core `delete` kullanır. Geçmiş temizleme confirm'i 04b'ye, diğer mesaj ikonları kendi onaylı adımlarına aittir; `react-icons` henüz kaldırılmaz.
 
@@ -45,7 +47,7 @@ HTTP/socket aynı state güncellemesini paylaşır. Sınırlar hesap reset'ine k
 - `npm run test:clear-dialog`: masaüstü/mobil **47** kontrol geçti. Kişi/işlem açıklaması, odak, iptal, açık/koyu, büyük yazı, 404/500/ağ hatası, çift gönderim, hesap sekmeleri, karşı tarafın geçmişi, eşzamanlı yeni mesaj, tekrar temizleme, arama sıfırlama, reload, pending istek/yeni istek, geciken unread ve iptal edilmiş yanıt kapsandı.
 - `npm run test:clear-history`: pending/active görünürlük ayrımı, olmayan konuşma, tekrar, update sırasında mesaj gelişi ve iki tarafın temizliği; store'da eski history/list/null preview, yeni istek, başka sohbet, ters olay ve hesap reset'i geçti. İlk backend testi pending mesajın karşı taraftan silindiğini göstererek başarısızdı.
 - Regresyonlar: 04a UI **47** ve silme backend/store; smoke **41**, security **37**, realtime **8**, UI **56**, settings **106**; conversation sorgularında en fazla **iki okuma** geçti. Build/lint, JS syntax ve CI YAML doğrulandı.
-- Testler `test:all` ve CI'a eklendi. Geçici MongoDB 7/Chromium kullanıldı; uzak CI çalıştırılmadı. [Masaüstü açık](../../screenshots/clear-desktop-light.png), [mobil koyu](../../screenshots/clear-mobile-dark.png) görüntüleri incelendi; ayrıntı [VERIFICATION](../../VERIFICATION.md) içinde.
+- Testler `test:all` ve CI'a eklendi. Geçici MongoDB 7/Chromium kullanıldı; uzak CI çalıştırılmadı. Masaüstü açık, mobil koyu görüntüleri incelendi; ayrıntı [VERIFICATION](../../VERIFICATION.md) içinde.
 
 Temizlik: MessageContainer confirm'i ve `IoTrashOutline`, hook içindeki toast/ölü yorumlar kaldırıldı; bu dosyanın Button import'u doğrudan güncel giriş noktasına taşındı. Genel emoji/diğer ikon geçişi tamamlandı denmez; sıradaki bağımsız karar 04c'dir.
 
@@ -68,7 +70,7 @@ Atomik tepki güncellemesi, artan `reactionVersion`, iki hesabın tüm sekmeleri
 - `test:emoji`: Unicode imleç/seçim/sınır, ters olay/geç history/reset, tam katalog örnekleri/ten rengi/ZWJ, geçersiz girdiler, eski kayıt uyumluluğu ve 20 tur eşzamanlı katılımcı/toggle/silme geçti.
 - `test:emoji-ui`: **69 kontrol** geçti; masaüstü/mobil arama, klavye/odak, ten rengi, API/veri hataları ve retry, seçili grid erişilebilirliği, açık/koyu tema, canlı vurgu rengi, 320 px ekranda 44 px hedefler, iki hesap/ikinci sekme ve aynı origin veri istekleri.
 - Build/lint, Docker build ve Node 22 runtime içinde katalog doğrulaması geçti. Ayrıntı: [VERIFICATION](../../VERIFICATION.md).
-- Composer: [masaüstü açık](../../screenshots/emoji-desktop-light.png), [masaüstü koyu](../../screenshots/emoji-desktop-dark.png), [mobil açık](../../screenshots/emoji-mobile-light.png), [mobil koyu](../../screenshots/emoji-mobile-dark.png).
-- Tepki araması: [masaüstü açık](../../screenshots/emoji-reaction-desktop-light.png), [masaüstü koyu](../../screenshots/emoji-reaction-desktop-dark.png), [mobil açık](../../screenshots/emoji-reaction-mobile-light.png), [mobil koyu](../../screenshots/emoji-reaction-mobile-dark.png).
+- Composer: masaüstü açık, masaüstü koyu, mobil açık, mobil koyu.
+- Tepki araması: masaüstü açık, masaüstü koyu, mobil açık, mobil koyu.
 
 Ana sohbet (04) tasarım seçimi ayrı kalır. Favoriler, son kullanılanlar, özel emoji yükleme ve kalıcı ten rengi tercihi bu kapsamda değildir.

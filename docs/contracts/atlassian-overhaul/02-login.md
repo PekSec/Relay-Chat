@@ -1,5 +1,7 @@
 # 02 — Giriş ve oturum durumları
 
+> Önceki ekran görüntüleri kullanıcı isteğiyle kaldırıldı. Aşağıdaki eski doğrulama kayıtları tarihseldir; güncel görseller [koyu masaüstü / açık mobil galerisindedir](../../screenshots/README.md).
+
 **Durum: uygulandı ve doğrulandı.** 25 Eylül 2026 tarihinde kullanıcı soru aracında **A — Ortalanmış kart** seçti; ardından “Implement the plan.” ile uygulamayı onayladı.
 
 | Seçenek | Tasarım | Karar |
@@ -35,5 +37,5 @@ Login sorgusu parola, token ve mevcut public kullanıcı yanıtı için gereken 
 - `npm run test:login`: **48 kontrol**; masaüstü/mobil, bekleyen kontrol/401/503/offline/yeniden deneme, boş alan/focus, yanlış parola, 429/500, çift submit, Enter, parola görünürlüğü, açık/koyu tema, kayıt bağlantısı, reload, gerçek iki sekmede çıkış ve ikinci hesap, hesap tercihleri ve tarayıcı hataları.
 - `npm run test:session-errors`: geçersiz/eksik oturum, DB hatası, silinmiş/geçerli kullanıcı; socket kimlik/servis hata ayrımı ve doğrulanmamış paketin reddi geçti. Mongo olmadan çalışır; yalnız DB sınırı hata enjeksiyonuyla değiştirilir, gerçek middleware/socket kullanılır.
 - Smoke **41**, security **37**, realtime **8**, mevcut UI **56**, ayarlar UI **106** geçti. Disposable MongoDB 7 ve production Chromium kullanıldı. Yeni testler npm scriptlerine ve CI'a bağlandı.
-- [Masaüstü](../../screenshots/login-desktop.png), [mobil](../../screenshots/login-mobile.png); hata durumları [açık](../../screenshots/login-desktop-light.png) / [koyu](../../screenshots/login-mobile-dark.png). Görseller gerçek test çıktılarıdır.
+- Masaüstü, mobil; hata durumları açık / koyu. Görseller gerçek test çıktılarıdır.
 - Emoji sağlayıcısı/asset lisansı çalışması **04'te**; Lucide gereksinimi çıkmadı. Sonraki adım **03-kayıt için ayrı tasarım seçimi**; mevcut onay 03'ü kapsamaz.

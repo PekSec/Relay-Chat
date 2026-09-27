@@ -1,5 +1,7 @@
 # 05 — Arkadaşlar
 
+> Önceki ekran görüntüleri kullanıcı isteğiyle kaldırıldı. Aşağıdaki eski doğrulama kayıtları tarihseldir; güncel görseller [koyu masaüstü / açık mobil galerisindedir](../../screenshots/README.md).
+
 **Durum: A — Sekmeler ve kompakt kişi satırları onaylandı ve uygulandı — 27 Eylül 2026.** Kullanıcı soru aracında A düzenini ve arkadaşlıktan çıkarmada kısa onay penceresini seçti; ardından “Implement the plan.” ile uygulamayı istedi. Aşağıdaki seçenek açıklamaları korunmuştur; B/C uygulanmadı. Gerçek uygulama ve doğrulama kaydı belgenin sonundadır.
 
 ## Bu adım hangi ekranı değiştiriyor?
@@ -172,6 +174,6 @@ Bu bölüm geliştirme notudur; seçenekleri anlamak için teknik adları bilmek
 - **36 eşzamanlı backend turu:** kabul/kabul, kabul/ret ve kabul/iptal; sahiplik ve girdi doğrulaması. Arkadaşlık ve konuşma yazmalarına hata enjeksiyonu, kabulün yeniden denenmesi, kısmi kabulden sonra çıkarma ve aktif kabul/çıkarma çakışması ayrıca geçti.
 - Store testi eski liste yanıtı, çift kayıt ve hesap reset'ini doğruladı. Üç liste için en fazla iki DB okuması ve public kişi alanları; gelen/giden sorgularında `IXSCAN` doğrulandı. Payload uzunlukları test çıktısında ölçülür; sentetik kayıt ölçümüdür, üretim performans iddiası değildir.
 - Build/lint ve `npm run test:all` geçti. Tam zincir 57 arkadaşlık UI kontrolünü içerdi; son hedefe bağlı sohbet hatası kontrolü eklendikten sonra UI **58/58**, son backend kurtarma kontrolleri de tekrar geçti. Mevcut >500 kB ana bundle uyarısı sürer; uzak CI/deploy çalıştırılmadı.
-- İncelenen görüntüler: [masaüstü açık](../../screenshots/friends-desktop.png), [mobil koyu](../../screenshots/friends-mobile.png). Mobil klavye/gerçek cihaz testi iddia edilmez.
+- İncelenen görüntüler: masaüstü açık, mobil koyu. Mobil klavye/gerçek cihaz testi iddia edilmez.
 
 05 tamamlandı. Sonraki modül **06 — Yeni sohbet / kişi bulma** için ayrı tasarım seçimidir.
