@@ -1,3 +1,16 @@
+# Dependencies
+node_modules
+
+# Build outputs
+dist
+dist-ssr
+
+# Environment and local configuration
+.env
+.env.*
+!.env.example
+*.local
+
 # Logs
 logs
 *.log
@@ -7,35 +20,30 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-*.local
-
+# Local notes and backups
 notes.md
+backups/
 
-.env
+# Test coverage and verification artifacts
+coverage
+.artifacts/
+test-results/
+playwright-report/
 
-# Editor directories and files
+# Graphify: keep the portable graph and report
+/graphify-out/*
+!/graphify-out/graph.json
+!/graphify-out/GRAPH_REPORT.md
+
+# Editor files
 .vscode/*
 !.vscode/extensions.json
 .idea
-.DS_Store
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
 
-# Additional ignores
-.env.*
-!.env.example
-**/node_modules
-frontend/dist
-coverage
-
-# Local browser reports and disposable verification artifacts
-.artifacts/
-test-results/
-playwright-report/
-backups/
+# Operating system files
+.DS_Store
