@@ -1,3 +1,4 @@
+import CrossIcon from '@atlaskit/icon/core/cross';
 import PopupHeading from '../PopupHeading';
 import DeleteIcon from '@atlaskit/icon/core/delete';
 import { useMemo, useRef } from 'react';
@@ -32,8 +33,8 @@ export default function DeleteMessageModal({ target, onClose }) {
             {error && <div role="alert"><SectionMessage appearance="error">{error}</SectionMessage></div>}
         </ModalBody>
         <ModalFooter>
-            <Button ref={cancelRef} onClick={close} isDisabled={loading}>Vazgeç</Button>
-            <Button appearance="danger" onClick={confirm} isDisabled={loading}>
+            <Button iconBefore={CrossIcon} ref={cancelRef} onClick={close} isDisabled={loading}>Vazgeç</Button>
+            <Button iconBefore={loading ? undefined : DeleteIcon} appearance="danger" onClick={confirm} isDisabled={loading}>
                 {loading ? <span className="auth-progress"><Spinner size="small" />Siliniyor</span> : 'Sil'}
             </Button>
         </ModalFooter>

@@ -1,3 +1,4 @@
+import CrossIcon from '@atlaskit/icon/core/cross';
 import PopupHeading from '../PopupHeading';
 import PersonRemoveIcon from '@atlaskit/icon/core/person-remove';
 import { useMemo, useRef } from 'react';
@@ -20,8 +21,8 @@ export default function RemoveFriendModal({ target, onClose, focusFallback }) {
             {error && <div role="alert" className="mt-4"><SectionMessage appearance="error">{error}</SectionMessage></div>}
         </ModalBody>
         <ModalFooter>
-            <Button ref={cancelRef} isDisabled={loading} onClick={onClose}>Vazgeç</Button>
-            <Button appearance="danger" isDisabled={loading} onClick={async () => { if (await handleRemoveFriend(target._id)) onClose(); }}>
+            <Button iconBefore={CrossIcon} ref={cancelRef} isDisabled={loading} onClick={onClose}>Vazgeç</Button>
+            <Button iconBefore={loading ? undefined : PersonRemoveIcon} appearance="danger" isDisabled={loading} onClick={async () => { if (await handleRemoveFriend(target._id)) onClose(); }}>
                 {loading ? <span className="auth-progress"><Spinner size="small" />Çıkarılıyor</span> : 'Çıkar'}
             </Button>
         </ModalFooter>

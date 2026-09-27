@@ -1,3 +1,4 @@
+import RefreshIcon from '@atlaskit/icon/core/refresh';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import useAuth from './zustand/useAuth';
@@ -66,7 +67,7 @@ function App() {
                     <div className="auth-brand"><img src="/favicon.svg" alt="" width="32" height="32" />Relay</div>
                     {error ? <>
                         <div role="alert"><SectionMessage appearance="error">{error}</SectionMessage></div>
-                        <div className="auth-submit"><Button appearance="primary" onClick={retry}>Tekrar dene</Button></div>
+                        <div className="auth-submit"><Button iconBefore={RefreshIcon} appearance="primary" onClick={retry}>Tekrar dene</Button></div>
                     </> : <p className="auth-progress" role="status"><Spinner size="small" />Oturum kontrol ediliyor…</p>}
                 </section>
             ) : (

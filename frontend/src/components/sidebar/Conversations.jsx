@@ -1,3 +1,4 @@
+import RefreshIcon from '@atlaskit/icon/core/refresh';
 import Conversation from './Conversation';
 import useGetConversations from '../../hooks/conversation/useGetConversations';
 import useUnread from '../../zustand/useUnread';
@@ -16,7 +17,7 @@ const Conversations = ({ filter = '' }) => {
     if (loading && !conversations.length) return <div className="flex justify-center py-6"><Spinner label="Sohbetler yükleniyor" /></div>;
     return <>
         {error && <div role="alert" className="p-3"><SectionMessage appearance="error">
-            Sohbetler yüklenemedi. <Button appearance="link" onClick={retry}>Tekrar dene</Button>
+            Sohbetler yüklenemedi. <Button iconBefore={RefreshIcon} appearance="link" onClick={retry}>Tekrar dene</Button>
         </SectionMessage></div>}
         {!visible.length ? <div className="px-4 py-8 text-center text-sm text-[color:var(--text-secondary)]">
             <p>{filter ? 'Eşleşen sohbet yok' : 'Henüz sohbet yok'}</p>

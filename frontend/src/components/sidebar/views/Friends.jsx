@@ -1,3 +1,9 @@
+import ArrowUpIcon from '@atlaskit/icon/core/arrow-up';
+import ArrowDownIcon from '@atlaskit/icon/core/arrow-down';
+import PeopleIcon from '@atlaskit/icon/core/people-group';
+import CheckIcon from '@atlaskit/icon/core/check-mark';
+import CrossIcon from '@atlaskit/icon/core/cross';
+import RefreshIcon from '@atlaskit/icon/core/refresh';
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import Button from '@atlaskit/button/default/button';
 import Tabs, { Tab, TabList, TabPanel } from '@atlaskit/tabs';
@@ -15,6 +21,7 @@ import useCancelRequest from '../../../hooks/friends/useCancelRequest';
 
 const RemoveFriendModal = lazy(() => import('../../modals/RemoveFriendModal'));
 const labels = ['Tümü', 'Gelen', 'Giden'];
+const tabIcons = [PeopleIcon, ArrowDownIcon, ArrowUpIcon];
 const empty = ['Henüz arkadaşın yok.', 'Gelen arkadaşlık isteği yok.', 'Gönderilmiş arkadaşlık isteği yok.'];
 const failed = ['Arkadaşlar yüklenemedi.', 'Gelen istekler yüklenemedi.', 'Giden istekler yüklenemedi.'];
 
@@ -51,7 +58,7 @@ export default function Friends({ onBack, initialTab, lists }) {
         <div className="friends-search"><Textfield type="search" aria-label="Arkadaşlarda ara" placeholder="İsim veya kullanıcı adı"
             value={query} onChange={event => setQuery(event.target.value)} /></div>
         {status.error && <div role="alert" className="friends-status"><SectionMessage appearance="error">
-            <p>{failed[tab]}</p><Button appearance="link" onClick={status.refresh}>Tekrar dene</Button>
+            <p>{failed[tab]}</p><Button iconBefore={RefreshIcon} appearance="link" onClick={status.refresh}>Tekrar dene</Button>
         </SectionMessage></div>}
         {status.loading && <div role="status" className="friends-status"><Spinner size="small" /> Liste yükleniyor…</div>}
         <div className="friends-list scroll-slim">
@@ -74,9 +81,9 @@ export default function Friends({ onBack, initialTab, lists }) {
                                 setSelectedConversation(conversations.find(conversation => conversation._id === person._id) || person); onBack();
                             }}>Mesaj</Button>
                         </> : tab === 1 ? <>
-                            <Button appearance="subtle" isDisabled={respond.loading} onClick={() => respond.respondToRequest(item._id, 'reject')}>Reddet</Button>
-                            <Button appearance="primary" isDisabled={respond.loading} onClick={() => respond.respondToRequest(item._id, 'accept')}>Kabul et</Button>
-                        </> : <Button appearance="subtle" isDisabled={cancel.loading} onClick={() => cancel.cancelRequest(item._id)}>İsteği iptal et</Button>}
+                            <Button iconBefore={CrossIcon} appearance="subtle" isDisabled={respond.loading} onClick={() => respond.respondToRequest(item._id, 'reject')}>Reddet</Button>
+                            <Button iconBefore={CheckIcon} appearance="primary" isDisabled={respond.loading} onClick={() => respond.respondToRequest(item._id, 'accept')}>Kabul et</Button>
+                        </> : <Button iconBefore={CrossIcon} appearance="subtle" isDisabled={cancel.loading} onClick={() => cancel.cancelRequest(item._id)}>İsteği iptal et</Button>}
                         {tab !== 0 && pending && <span role="status"><Spinner size="small" /> İşleniyor…</span>}
                     </div>
                     {tab !== 0 && mutation.errorId === item._id && <div role="alert" className="friend-error"><SectionMessage appearance="error">{mutation.error}</SectionMessage></div>}
@@ -86,7 +93,7 @@ export default function Friends({ onBack, initialTab, lists }) {
     </div>;
     return <section ref={root} className="friends-view" aria-label="Arkadaşlar">
         <Tabs id="friends-tabs" selected={tab} onChange={index => { focused.current = null; setTab(index); }} shouldUnmountTabPanelOnChange>
-            <TabList>{labels.map(label => <Tab key={label}>{label}</Tab>)}</TabList>
+            <TabList>{labels.map((label, index) => { const Icon = tabIcons[index]; return <Tab key={label}><span className="friend-tab-label"><Icon label="" />{label}</span></Tab>; })}</TabList>
             {labels.map((label, index) => <TabPanel key={label}>{tab === index ? content : null}</TabPanel>)}
         </Tabs>
         {target && <Suspense fallback={<span role="status" className="friends-status">Onay açılıyor…</span>}>

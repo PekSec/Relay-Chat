@@ -1,3 +1,4 @@
+import CrossIcon from '@atlaskit/icon/core/cross';
 import { useEffect, useState } from 'react';
 import Modal, { ModalBody, ModalFooter, ModalHeader, ModalTitle } from '@atlaskit/modal-dialog';
 import Button from '@atlaskit/button/default/button';
@@ -244,11 +245,11 @@ export default function SettingsModal({ onClose }) {
             <div className="settings-footer">
                 <p>{dirty ? 'Kaydedilmemiş tercihler var.' : 'Tercihlerin hesabında saklanır.'}</p>
                 <div>
-                    <Button onClick={close} isDisabled={busy}>Vazgeç</Button>
-                    {personalizing ? <Button appearance="primary" onClick={savePreferences} isLoading={saving} isDisabled={busy || !dirty}>Tercihleri kaydet</Button>
-                        : section === 'profile' ? <Button type="submit" form="settings-profile" appearance="primary" isLoading={savingProfile}
+                    <Button iconBefore={CrossIcon} onClick={close} isDisabled={busy}>Vazgeç</Button>
+                    {personalizing ? <Button iconBefore={CheckIcon} appearance="primary" onClick={savePreferences} isLoading={saving} isDisabled={busy || !dirty}>Tercihleri kaydet</Button>
+                        : section === 'profile' ? <Button iconBefore={CheckIcon} type="submit" form="settings-profile" appearance="primary" isLoading={savingProfile}
                             isDisabled={busy || !nameValid || !picValid || !profileChanged}>Değişiklikleri kaydet</Button>
-                            : <Button type="submit" form="settings-password" appearance="primary" isLoading={savingPassword}
+                            : <Button iconBefore={LockIcon} type="submit" form="settings-password" appearance="primary" isLoading={savingPassword}
                                 isDisabled={busy || !currentPassword || !passwordValid || !passwordsMatch}>Şifreyi değiştir</Button>}
                 </div>
             </div>

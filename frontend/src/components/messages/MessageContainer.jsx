@@ -1,3 +1,6 @@
+import PersonAddIcon from '@atlaskit/icon/core/person-add';
+import CheckIcon from '@atlaskit/icon/core/check-mark';
+import RefreshIcon from '@atlaskit/icon/core/refresh';
 import Avatar from '../ChatAvatar';
 import Button from '@atlaskit/button/default/button';
 import IconButton from '@atlaskit/button/icon/button';
@@ -181,13 +184,13 @@ const MessageContainer = () => {
                 )}
 
                 {!isConnected && <div className="chat-notice" role="status"><SectionMessage appearance="warning">
-                    Bağlantı yeniden kuruluyor… <Button appearance="link" onClick={() => socket?.connect()}>Tekrar bağlan</Button>
+                    Bağlantı yeniden kuruluyor… <Button iconBefore={RefreshIcon} appearance="link" onClick={() => socket?.connect()}>Tekrar bağlan</Button>
                 </SectionMessage></div>}
                 {isPending && isReceiver && <div className="chat-notice"><SectionMessage title="Yeni mesaj isteği">
                     <p>{selectedConversation.fullName} seninle sohbet etmek istiyor.</p>
                     <div className="flex flex-wrap gap-2 mt-2">
-                        <Button onClick={() => acceptRequest(selectedConversation.conversationId)} isDisabled={actionLoading} appearance="primary">Kabul et ve sohbet et</Button>
-                        <Button onClick={() => declineRequest(selectedConversation._id)} isDisabled={actionLoading} appearance="subtle">Reddet</Button>
+                        <Button iconBefore={CheckIcon} onClick={() => acceptRequest(selectedConversation.conversationId)} isDisabled={actionLoading} appearance="primary">Kabul et ve sohbet et</Button>
+                        <Button iconBefore={CrossIcon} onClick={() => declineRequest(selectedConversation._id)} isDisabled={actionLoading} appearance="subtle">Reddet</Button>
                     </div>
                 </SectionMessage></div>}
 
@@ -198,9 +201,9 @@ const MessageContainer = () => {
                                 ? `${selectedConversation.fullName} sana istek gönderdi` : `Arkadaş değilsiniz: ${selectedConversation.fullName}`}</p>
                             <div className="flex items-center gap-2">
                                 {respondFriendError && respondFriendErrorId === incomingRequest?._id && <p role="alert">{respondFriendError}</p>}
-                                {incomingRequest && <Button onClick={() => respondToRequest(incomingRequest._id, 'accept')} isDisabled={respondFriendLoading} appearance="primary">İsteği kabul et</Button>}
+                                {incomingRequest && <Button iconBefore={CheckIcon} onClick={() => respondToRequest(incomingRequest._id, 'accept')} isDisabled={respondFriendLoading} appearance="primary">İsteği kabul et</Button>}
                                 {sendFriendErrors[selectedConversation._id] && <p role="alert">{sendFriendErrors[selectedConversation._id]}</p>}
-                                {!sentRequest && !incomingRequest && <Button onClick={handleAddFriend} isDisabled={sendingFriendIds.includes(selectedConversation._id)} appearance="primary">Arkadaş ekle</Button>}
+                                {!sentRequest && !incomingRequest && <Button iconBefore={PersonAddIcon} onClick={handleAddFriend} isDisabled={sendingFriendIds.includes(selectedConversation._id)} appearance="primary">Arkadaş ekle</Button>}
                                 <Tooltip content="Kapat"><IconButton icon={CrossIcon} label="Kapat" appearance="subtle" onClick={() => setIsBannerDismissed(true)} /></Tooltip>
                             </div>
                         </div>

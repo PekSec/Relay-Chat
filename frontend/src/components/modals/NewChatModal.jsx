@@ -1,3 +1,7 @@
+import CommentIcon from '@atlaskit/icon/core/comment';
+import PersonAddIcon from '@atlaskit/icon/core/person-add';
+import InboxIcon from '@atlaskit/icon/core/inbox';
+import RefreshIcon from '@atlaskit/icon/core/refresh';
 import { useMemo, useRef, useState } from 'react';
 import Modal, { ModalBody, ModalHeader, ModalTitle } from '@atlaskit/modal-dialog';
 import Button from '@atlaskit/button/default/button';
@@ -39,12 +43,12 @@ export default function NewChatModal({ trigger, lists, onClose, onConversation, 
                 <p id="new-chat-help">En az 2 karakter yaz. Arkadaş kodunu # olmadan gir.</p>
             </div>
             {failed.length > 0 && <div role="alert"><SectionMessage appearance="error">Arkadaşlık durumu yüklenemedi.
-                <Button appearance="link" onClick={() => failed.forEach(list => list.refresh())}>Tekrar dene</Button>
+                <Button iconBefore={RefreshIcon} appearance="link" onClick={() => failed.forEach(list => list.refresh())}>Tekrar dene</Button>
             </SectionMessage></div>}
             <div className="new-chat-results" aria-busy={search.loading}>
                 {search.validation ? <p id="new-chat-validation" role="alert" className="new-chat-feedback">{search.validation}</p>
                     : search.error ? <div role="alert"><SectionMessage appearance="error">{search.error}
-                        <Button appearance="link" onClick={search.retry}>Tekrar dene</Button></SectionMessage></div>
+                        <Button iconBefore={RefreshIcon} appearance="link" onClick={search.retry}>Tekrar dene</Button></SectionMessage></div>
                     : search.loading ? <div role="status" className="new-chat-empty"><Spinner size="large" /><p>Kişiler aranıyor…</p></div>
                     : search.query.length < 2 ? <div className="new-chat-empty">
                         <span className="new-chat-empty-icon"><PeopleIcon label="" size="medium" /></span>
@@ -74,15 +78,15 @@ export default function NewChatModal({ trigger, lists, onClose, onConversation, 
                                     </p>
                                 </div>
                                 <div className="new-chat-actions">
-                                    {relationshipsReady && received && !isFriend && <Button isDisabled={loading}
+                                    {relationshipsReady && received && !isFriend && <Button iconBefore={InboxIcon} isDisabled={loading}
                                         aria-label="Gelen isteklere git" onClick={() => {
                                             destination.current = '[role="tab"][aria-selected="true"]'; onIncoming();
                                         }}>İsteklere git</Button>}
                                     {(sending || (relationshipsReady && !isFriend && !received && !sent)) &&
-                                        <Button isDisabled={sending} onClick={() => sendFriendRequest(person._id)}>
+                                        <Button iconBefore={PersonAddIcon} isDisabled={sending} onClick={() => sendFriendRequest(person._id)}>
                                             {sending ? 'Gönderiliyor' : 'Arkadaş ekle'}
                                         </Button>}
-                                    <div className="new-chat-open"><Button appearance="primary" isDisabled={loading} onClick={() => {
+                                    <div className="new-chat-open"><Button iconBefore={CommentIcon} appearance="primary" isDisabled={loading} onClick={() => {
                                         const state = useConversation.getState();
                                         state.setSelectedConversation(state.conversations.find(item => item._id === person._id) || person);
                                         destination.current = 'textarea[aria-label="Mesaj"]'; onConversation();

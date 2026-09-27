@@ -1,3 +1,4 @@
+import CrossIcon from '@atlaskit/icon/core/cross';
 import PopupHeading from '../PopupHeading';
 import DeleteIcon from '@atlaskit/icon/core/delete';
 import { useMemo, useRef } from 'react';
@@ -29,8 +30,8 @@ export default function ClearHistoryModal({ target, onClose, onCleared }) {
             {error && <div className="mt-4" role="alert"><SectionMessage appearance="error">{error}</SectionMessage></div>}
         </ModalBody>
         <ModalFooter>
-            <Button ref={cancelRef} onClick={onClose} isDisabled={loading}>Vazgeç</Button>
-            <Button appearance="danger" onClick={confirm} isDisabled={loading}>
+            <Button iconBefore={CrossIcon} ref={cancelRef} onClick={onClose} isDisabled={loading}>Vazgeç</Button>
+            <Button iconBefore={loading ? undefined : DeleteIcon} appearance="danger" onClick={confirm} isDisabled={loading}>
                 {loading ? <span className="auth-progress"><Spinner size="small" />Temizleniyor</span> : 'Geçmişi temizle'}
             </Button>
         </ModalFooter>

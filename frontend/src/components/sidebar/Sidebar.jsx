@@ -1,3 +1,8 @@
+import InboxIcon from '@atlaskit/icon/core/inbox';
+import PeopleIcon from '@atlaskit/icon/core/people-group';
+import CommentIcon from '@atlaskit/icon/core/comment';
+import CommentAddIcon from '@atlaskit/icon/core/comment-add';
+import RefreshIcon from '@atlaskit/icon/core/refresh';
 import { lazy, Suspense, useEffect, useState } from 'react';
 import Button from '@atlaskit/button/default/button';
 import SearchIcon from '@atlaskit/icon/core/search';
@@ -43,17 +48,17 @@ export default function Sidebar() {
     return (
         <aside className="relay-sidebar" aria-label="Sohbet ve kişi listesi">
             <div className="relay-brand"><img src="/favicon.svg" alt="" width="28" height="28" /><span>Relay</span></div>
-            <div className="sidebar-heading"><h1>{titles[view]}</h1><Button appearance="subtle" onClick={event => { setNewChatTrigger(event.currentTarget); useFriendStore.getState().invalidateFriendLists(); }}>Yeni sohbet</Button></div>
+            <div className="sidebar-heading"><h1>{titles[view]}</h1><Button iconBefore={CommentAddIcon} appearance="subtle" onClick={event => { setNewChatTrigger(event.currentTarget); useFriendStore.getState().invalidateFriendLists(); }}>Yeni sohbet</Button></div>
             <nav className="sidebar-nav" aria-label="Ana gezinme">
-                <Button appearance="subtle" aria-current={view === 'conversations' ? 'page' : undefined} onClick={back}>Sohbetler</Button>
-                <Button appearance="subtle" aria-current={view === 'friends' ? 'page' : undefined} onClick={() => openFriends()}>Kişiler</Button>
-                <Button appearance="subtle" aria-current={view === 'requests' ? 'page' : undefined} onClick={() => setView('requests')}>İstekler{messageRequests.length > 0 && <span className="count-badge">{messageRequests.length}</span>}</Button>
+                <Button iconBefore={CommentIcon} appearance="subtle" aria-current={view === 'conversations' ? 'page' : undefined} onClick={back}>Sohbetler</Button>
+                <Button iconBefore={PeopleIcon} appearance="subtle" aria-current={view === 'friends' ? 'page' : undefined} onClick={() => openFriends()}>Kişiler</Button>
+                <Button iconBefore={InboxIcon} appearance="subtle" aria-current={view === 'requests' ? 'page' : undefined} onClick={() => setView('requests')}>İstekler{messageRequests.length > 0 && <span className="count-badge">{messageRequests.length}</span>}</Button>
             </nav>
             {view === 'conversations' && <>
                 <div className="sidebar-search"><div><Textfield elemBeforeInput={<span className="pl-2 flex"><SearchIcon label="" /></span>} type="search" value={filter} onChange={event => setFilter(event.target.value)} placeholder="Sohbetlerde ara…" aria-label="Sohbetlerde ara" /></div></div>
                 <div className="sidebar-list-label"><span>TÜM SOHBETLER</span><span>{friends.filter(user => onlineUsers.includes(user._id)).length} çevrimiçi</span></div>
             </>}
-            {failedLists.length > 0 && <div role="alert" className="px-4 py-3 text-sm" style={{ color: 'var(--danger)' }}><SectionMessage appearance="error">Bazı listeler yüklenemedi. <Button appearance="link" onClick={() => failedLists.forEach(list => list.refresh())}>Tekrar dene</Button></SectionMessage></div>}
+            {failedLists.length > 0 && <div role="alert" className="px-4 py-3 text-sm" style={{ color: 'var(--danger)' }}><SectionMessage appearance="error">Bazı listeler yüklenemedi. <Button iconBefore={RefreshIcon} appearance="link" onClick={() => failedLists.forEach(list => list.refresh())}>Tekrar dene</Button></SectionMessage></div>}
             <div className="flex-1 min-h-0 overflow-hidden">
                 <div className={view === 'conversations' ? 'h-full flex flex-col' : 'hidden'}><Conversations filter={filter} /></div>
                 {view === 'requests' && <div className="h-full overflow-y-auto scroll-slim"><Requests /></div>}

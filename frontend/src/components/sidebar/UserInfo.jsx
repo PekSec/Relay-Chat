@@ -1,3 +1,4 @@
+import ChevronRightIcon from '@atlaskit/icon/core/chevron-right';
 import { lazy, Suspense, useState } from 'react';
 import Popup from '@atlaskit/popup';
 import PopupHeading from '../PopupHeading';
@@ -41,6 +42,7 @@ export default function UserInfo({ onNotificationClick }) {
                             {count === 0 ? <div className="notification-empty"><NotificationIcon label="" /><p>Yeni bildirim yok</p></div> : notifications.map(item => <button key={`${item.destination}-${item.id}`} className="notification-row" onClick={() => { setShowNotifications(false); onNotificationClick(item.destination); }}>
                                 <Avatar name={item.person?.fullName} src={item.person?.profilePic} alt="" className="w-8 h-8 avatar-ring" />
                                 <span className="min-w-0"><span className="block text-sm font-medium break-words">{item.person?.fullName || item.person?.username || 'Kullanıcı'}</span><span className="block text-xs text-[color:var(--text-muted)]">{item.label}</span></span>
+                                <ChevronRightIcon label="" />
                             </button>)}
                         </div>
                     </section>}

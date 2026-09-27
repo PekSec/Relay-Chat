@@ -1,3 +1,5 @@
+import CrossIcon from '@atlaskit/icon/core/cross';
+import RefreshIcon from '@atlaskit/icon/core/refresh';
 import { useState } from 'react';
 import PopupHeading from '../PopupHeading';
 import EmojiIcon from '@atlaskit/icon/core/emoji';
@@ -44,7 +46,7 @@ export default function EmojiPanel({ mobile, reaction, selected, onSelect, onClo
         </Frimousse.Root>
         {dataError && <div role="alert"><SectionMessage appearance="error">
             <p>Emojiler yüklenemedi.</p>
-            <Button onClick={() => { setDataError(false); setAttempt(value => value + 1); }}>Tekrar dene</Button>
+            <Button iconBefore={RefreshIcon} onClick={() => { setDataError(false); setAttempt(value => value + 1); }}>Tekrar dene</Button>
         </SectionMessage></div>}
         {loading && <div role="status" className="auth-progress"><Spinner size="small" />Tepki kaydediliyor</div>}
         {error && <div role="alert"><SectionMessage appearance="error">{error}</SectionMessage></div>}
@@ -52,6 +54,6 @@ export default function EmojiPanel({ mobile, reaction, selected, onSelect, onClo
     return mobile ? <Modal width={400} testId="relay-modal-emoji" onClose={onClose} shouldReturnFocus={false} autoFocus={false}>
         <ModalHeader>{heading}</ModalHeader>
         <ModalBody>{content}</ModalBody>
-        <ModalFooter><Button onClick={onClose} isDisabled={loading}>Vazgeç</Button></ModalFooter>
+        <ModalFooter><Button iconBefore={CrossIcon} onClick={onClose} isDisabled={loading}>Vazgeç</Button></ModalFooter>
     </Modal> : content;
 }

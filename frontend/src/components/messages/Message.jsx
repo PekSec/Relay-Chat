@@ -1,3 +1,5 @@
+import CheckIcon from '@atlaskit/icon/core/check-mark';
+import CrossIcon from '@atlaskit/icon/core/cross';
 import Avatar from '../ChatAvatar';
 import EditIcon from '@atlaskit/icon/core/edit';
 import Textarea from '@atlaskit/textarea';
@@ -116,8 +118,8 @@ const Message = ({ message, searchTerm = "", showAvatar = true, onRequestDelete 
                     />
                     {editError && <div id={`edit-error-${message._id}`} role="alert"><SectionMessage appearance="error">{editError}</SectionMessage></div>}
                     <div className='flex gap-2 justify-end'>
-                        <Button onClick={handleEditCancel} appearance="subtle" isDisabled={loading}>Vazgeç</Button>
-                        <Button onClick={handleEditSave} appearance="primary" isDisabled={loading || !editedText.trim()}>
+                        <Button iconBefore={CrossIcon} onClick={handleEditCancel} appearance="subtle" isDisabled={loading}>Vazgeç</Button>
+                        <Button iconBefore={CheckIcon} onClick={handleEditSave} appearance="primary" isDisabled={loading || !editedText.trim()}>
                             {loading ? 'Kaydediliyor…' : 'Kaydet'}
                         </Button>
                     </div>

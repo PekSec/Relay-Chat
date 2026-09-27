@@ -1,3 +1,4 @@
+import ChevronRightIcon from '@atlaskit/icon/core/chevron-right';
 import Avatar from '../ChatAvatar';
 import useConversation from "../../zustand/useConversation";
 import useSocket from "../../zustand/useSocket";
@@ -101,6 +102,7 @@ const Conversation = (props) => {
           )}
         </div>
       </div>
+      <ChevronRightIcon label="" />
     </button>
   );
 };

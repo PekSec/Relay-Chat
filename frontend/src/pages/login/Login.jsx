@@ -1,3 +1,5 @@
+import PersonAddIcon from '@atlaskit/icon/core/person-add';
+import LogInIcon from '@atlaskit/icon/core/log-in';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Form, { Field, ErrorMessage } from '@atlaskit/form';
@@ -40,11 +42,11 @@ export default function Login() {
                     </>}
                 </Field>
                 <div className="auth-submit">
-                    <Button type="submit" appearance="primary" shouldFitContainer isDisabled={loading}>
+                    <Button iconBefore={loading ? undefined : LogInIcon} type="submit" appearance="primary" shouldFitContainer isDisabled={loading}>
                         {loading ? <span className="auth-progress"><Spinner size="small" />Giriş yapılıyor</span> : 'Giriş yap'}
                     </Button>
                 </div>
-                <Link to="/signup" className="auth-signup">Kayıt ol</Link>
+                <Link to="/signup" className="auth-signup"><PersonAddIcon label="" />Kayıt ol</Link>
             </form>}
         </Form>
     </section>;
