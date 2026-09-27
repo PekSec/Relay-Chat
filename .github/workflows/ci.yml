@@ -191,6 +191,18 @@ jobs:
           MONGO_URI: mongodb://127.0.0.1:27017/ci_friends
           PORT: 5033
 
+      - name: New chat modal and send concurrency
+        run: npm run test:new-chat
+        env:
+          MONGO_URI: mongodb://127.0.0.1:27017/ci_new_chat
+          PORT: 5034
+
+      - name: Check shared popup layout and spacing
+        run: npm run test:layout 2>&1 | tee test-results/layout.log
+        env:
+          MONGO_URI: mongodb://127.0.0.1:27017/ci_layout
+          PORT: 5035
+
       - name: Save test evidence
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

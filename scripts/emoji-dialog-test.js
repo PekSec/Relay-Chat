@@ -96,8 +96,11 @@ try {
             await page.screenshot({ path: `test-results/emoji-limit-${device}-${theme}.png`, fullPage: true, animations: 'disabled' });
             check(`${device}: ${theme} fits viewport`, await dialog.evaluate(el => el.getBoundingClientRect().width <= innerWidth));
             check(`${device}: ${theme} inherits theme surface`, await dialog.locator('.emoji-panel').evaluate(el => {
-                const probe = document.createElement('span'); probe.style.background = 'var(--bg-elevated)'; el.append(probe);
-                const matches = getComputedStyle(el).backgroundColor === getComputedStyle(probe).backgroundColor;
+                // Mobile uses the modal surface; the nested panel no longer paints a second card.
+                const surface = el.closest('[data-testid="relay-modal-emoji"]') || el;
+                const probe = document.createElement('span');
+                probe.style.background = surface === el ? 'var(--bg-elevated)' : 'var(--ds-surface-overlay)'; el.append(probe);
+                const matches = getComputedStyle(surface).backgroundColor === getComputedStyle(probe).backgroundColor;
                 probe.remove(); return matches;
             }));
         }
