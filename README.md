@@ -130,6 +130,7 @@ npm run test:all
 | `npm test` | HTTP auth, friends, messaging, profiles and clearing |
 | `npm run test:realtime` | Real Socket.IO delivery between authenticated clients |
 | `npm run test:security` | Impersonation, revocation, origin/ownership/input checks, pagination |
+| `npm run test:chat` | Cursor retry/scroll, reconnect, edit/send races, multiline keyboard behavior and chat themes |
 | `npm run test:ui` | Real Chromium: desktop/mobile chat, settings, failed sends and logout |
 | `npm run test:emoji` | Unicode insertion, reaction state, catalog validation and concurrent updates |
 | `npm run test:emoji-ui` | Desktop/mobile picker, themes, accessibility, retries and synchronized reactions |

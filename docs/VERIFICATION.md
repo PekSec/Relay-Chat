@@ -3,6 +3,64 @@
 The newest entry describes the current implementation. Older entries record the
 scope and checks performed at the time; their pending-work notes are historical.
 
+## Main chat / contract step 04 — 27 September 2026
+
+The user selected A: a 320 px conversation list and flexible chat on desktop,
+with list/chat navigation below 768 px. Chat controls now use the installed
+Atlassian components and theme tokens. Textarea 10.2.7 and Tooltip 24.3.6 are
+pinned direct dependencies with React 19-compatible peer ranges. The existing
+safe avatar renderer, Frimousse selectors and destructive dialogs are preserved.
+
+Composer and edit both support multiline text, the account send-key preference,
+IME and the 2,000 UTF-16-unit limit. Errors appear inline and preserve drafts.
+Shared timestamp-aware edit state updates message text and previews without
+rolling back newer changes; deletion and clearing retain precedence. History
+retry uses the failed older cursor. Reconnect refreshes the already-loaded range,
+including older pages, and preserves the visible data if any refresh page fails.
+Late send responses cannot replace newer previews. Backend payloads, schemas
+and the two-read conversation aggregation remain unchanged.
+
+| Check | Observed result |
+| --- | --- |
+| New chat Chromium | **45 checks passed** across desktop and mobile |
+| New store regression | Edit before history, ordered updates, previews, late send, deletion, clearing and account reset passed |
+| Existing chat / settings UI | **56 / 106 passed** |
+| Emoji / delete / clear UI | **69 / 47 / 47 passed** |
+| Full regression | `npm run test:all` passed, including auth/session, realtime, security, conversations, preferences, message concurrency and all dialogs |
+| Build / lint | Passed; the existing >500 kB main-chunk advisory remains |
+| CI | `test:chat` added; remote CI was not run in this session |
+
+The full suite included the first 41 chat checks. Four subsequent long-name and
+maximum unbroken-message layout checks were added and the complete chat suite
+was rerun: **45/45**. Tests use Chromium and an explicitly supplied disposable
+MongoDB 7 database. The reduced mobile keyboard height is a 320×500 viewport
+simulation, not a claim of physical-device keyboard testing.
+
+A read-only final review identified two pre-existing races relevant to this
+step: a delayed send overwriting a newer preview, and offline edits/deletions to
+older loaded pages remaining stale after reconnect. Both were reproduced by
+failing tests and fixed in the shared state/history paths. No review findings
+were deferred. Browser checks also caught invisible message actions intercepting
+the jump-to-latest control; inactive hit targets and stacking were corrected.
+
+Legacy tests were updated to use the searchbox role and the full emoji catalog:
+thumbs-up search accepts its Unicode presentation selector, and the smoke test
+rejects a non-emoji string instead of a now-supported catalog emoji.
+
+Reproduce with `npm run build`, `npm run lint`, `npm run test:chat` and
+`npm run test:all`, using an explicit disposable `MONGO_URI` and free `PORT`.
+Local Windows port 5040 was occupied by a system service; completed tests used
+ports 5029–5033. The temporary MongoDB container is removed after verification.
+No deployment is claimed.
+
+| Chat | Light | Dark |
+| --- | --- | --- |
+| Desktop | [View](screenshots/desktop-chat.png) | [View](screenshots/desktop-chat-dark.png) |
+| Mobile | [View](screenshots/mobile-chat.png) | [View](screenshots/mobile-chat-dark.png) |
+| Purple accent, large type, compact density | [Desktop](screenshots/chat-desktop-light-preferences.png) | [Mobile](screenshots/chat-mobile-dark-preferences.png) |
+
+Implementation and next-step handoff: [04 chat contract](contracts/atlassian-overhaul/04-chat.md).
+
 ## Frimousse emoji picker / contract step 04c — 26 September 2026
 
 The user approved replacing the temporary 13-choice/six-reaction selectors with

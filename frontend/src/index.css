@@ -65,8 +65,7 @@ button:focus:not(:focus-visible) { outline:none; }
 .sidebar-heading { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:12px 20px; }
 .sidebar-heading h1 { font-size:21px; line-height:1.4; font-weight:650; letter-spacing:-.4px; }
 .sidebar-nav { display:flex; gap:4px; padding:0 16px 12px; border-bottom:1px solid var(--border-subtle); }
-.sidebar-nav button { display:flex; align-items:center; gap:6px; min-height:36px; padding:6px 10px; border-radius:4px; color:var(--text-secondary); font-size:13px; }
-.sidebar-nav button:hover { background:var(--bg-hover); }
+.sidebar-nav button { flex:1; min-width:0; }
 .sidebar-nav button[aria-current="page"] { background:var(--accent-soft); color:var(--ds-text-selected, var(--accent-hover)); font-weight:600; }
 .count-badge { background:var(--ds-background-neutral, #dcdfe4); color:var(--text-secondary); border-radius:4px; padding:0 5px; font-size:11px; }
 .sidebar-list-label { display:flex; justify-content:space-between; padding:12px 24px 8px; font-size:10px; letter-spacing:.5px; color:var(--text-muted); }
@@ -74,7 +73,6 @@ button:focus:not(:focus-visible) { outline:none; }
 .notification-count { position:absolute; top:-3px; right:-3px; min-width:16px; padding:0 4px; border-radius:8px; background:var(--accent); color:var(--text-inverse); font-size:10px; }
 .notification-panel { position:absolute; right:0; bottom:calc(100% + 12px); width:min(288px,calc(100vw - 32px)); background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:8px; box-shadow:var(--ds-shadow-overlay); z-index:50; }
 .sidebar-preferences { display:flex; align-items:center; justify-content:space-between; padding:0 20px 12px; gap:8px; }
-.sidebar-preferences>button { width:auto; font-size:11px; padding:6px; }
 .theme-control { display:flex; align-items:center; gap:8px; font-size:12px; color:var(--text-secondary); }
 .theme-control>div { min-width:120px; }
 .skeleton { background:var(--ds-background-neutral, #dcdfe4); border-radius:4px; }
@@ -101,6 +99,9 @@ button:focus:not(:focus-visible) { outline:none; }
 .tile-active:focus-visible { outline-offset:-2px; }
 .composer { padding-bottom:max(16px,env(safe-area-inset-bottom)); background:var(--bg-panel); }
 .chat-header { background:var(--bg-panel); min-height:76px; }
+.chat-notice { flex-shrink:0; padding:8px 16px; overflow-wrap:anywhere; }
+.composer textarea { font-size:.875rem; }
+@media (max-width:767px) { .panel-chat textarea, #chat-search input { font-size:1rem; } }
 .scroll-slim { scrollbar-width:thin; scrollbar-color:var(--border-strong) transparent; }
 .scroll-slim::-webkit-scrollbar { width:6px; }
 .scroll-slim::-webkit-scrollbar-thumb { background:var(--border-strong); border-radius:6px; }

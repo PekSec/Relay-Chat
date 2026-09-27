@@ -1,21 +1,9 @@
-import { BiLogOut } from 'react-icons/bi';
+import Button from '@atlaskit/button/default/button';
+import LogOutIcon from '@atlaskit/icon/core/log-out';
 import useLogout from '../../hooks/auth/useLogout';
 
-const LogoutButton = () => {
+export default function LogoutButton() {
     const { loading, handleLogout } = useLogout();
-
-    return (
-        // Ortalanmış logout butonu - hover'da yumuşak kırmızı geçiş efekti
-        <button
-            className="w-full flex items-center justify-center gap-2 p-3 text-sm rounded-lg transition-colors duration-200 disabled:opacity-50 hover:bg-red-500/15"
-            style={{ color: 'var(--text-secondary)' }}
-            onClick={handleLogout}
-            disabled={loading}
-        >
-            <BiLogOut className="text-lg" />
-            {/* Loading durumunda spinner, normal durumda logout metni */}
-            {loading ? "Çıkılıyor..." : "Çıkış yap"}
-        </button>
-    );
+    return <Button appearance="subtle" shouldFitContainer iconBefore={LogOutIcon}
+        onClick={handleLogout} isDisabled={loading}>{loading ? 'Çıkılıyor…' : 'Çıkış yap'}</Button>;
 }
-export default LogoutButton;

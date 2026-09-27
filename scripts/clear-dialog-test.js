@@ -96,11 +96,11 @@ try {
         await visible(page.getByText('Temizlemeden sonra', { exact: true }).last());
         check(`${device}: cleared history stays hidden after reload`, await page.getByText('Eski mesaj', { exact: true }).count() === 0);
         await page.getByTitle('Mesajlarda ara').click();
-        await page.getByRole('textbox', { name: 'Bu sohbette ara', exact: true }).fill('Temizlemeden sonra');
+        await page.getByRole('searchbox', { name: 'Bu sohbette ara', exact: true }).fill('Temizlemeden sonra');
         await open(); await modal.getByRole('button', { name: 'Geçmişi temizle', exact: true }).click();
         await modal.waitFor({ state: 'hidden' });
         await page.locator('.bubble').waitFor({ state: 'hidden' });
-        check(`${device}: empty clear resets search and preview`, await page.getByRole('textbox', { name: 'Bu sohbette ara', exact: true }).count() === 0 &&
+        check(`${device}: empty clear resets search and preview`, await page.getByRole('searchbox', { name: 'Bu sohbette ara', exact: true }).count() === 0 &&
             !(await page.locator('.relay-sidebar').innerText()).includes('Temizlemeden sonra'));
         await open(); await modal.getByRole('button', { name: 'Geçmişi temizle', exact: true }).click();
         await modal.waitFor({ state: 'hidden' });

@@ -1,7 +1,7 @@
-import Avatar from '../Avatar';
+import Avatar from '../ChatAvatar';
 import useConversation from "../../zustand/useConversation";
 import useSocket from "../../zustand/useSocket";
-import { FaClock } from "react-icons/fa";
+import ClockIcon from '@atlaskit/icon/core/clock';
 import useTheme from '../../zustand/useTheme';
 
 // Son mesaj zamanını kısa biçimde göster: bugünse saat, dünse "dün", öncesi tarih
@@ -48,11 +48,11 @@ const Conversation = (props) => {
           name={props.conversation.fullName}
           src={props.conversation.profilePic}
           alt=''
-          className="w-11 h-11 avatar-ring"
+          size="large"
         />
         {isOnline && (
           <span
-            className='absolute bottom-0 right-0 w-3 h-3 rounded-full'
+            aria-label='Çevrimiçi' role='img' className='absolute bottom-0 right-0 w-3 h-3 rounded-full'
             style={{ background: 'var(--online)', border: '2px solid var(--bg-panel)' }}
           />
         )}
@@ -72,7 +72,7 @@ const Conversation = (props) => {
 
           <span className='text-[11px] flex-shrink-0' style={{ color: 'var(--text-muted)' }}>
             {isPending
-              ? <FaClock className='text-amber-500' title='Yanıt bekleniyor' />
+              ? <ClockIcon label="Yanıt bekleniyor" color="var(--ds-icon-warning)" size="small" />
               : shortTime(lastMessage?.createdAt || lastMessage?.timestamp)}
           </span>
         </div>
@@ -82,7 +82,7 @@ const Conversation = (props) => {
             {isThisUserTyping ? (
               <span className='italic' style={{ color: 'var(--online)' }}>yazıyor...</span>
             ) : isPending ? (
-              <span className='italic text-amber-500'>Yanıt bekleniyor</span>
+              <span className='italic' style={{ color: 'var(--ds-text-warning)' }}>Yanıt bekleniyor</span>
             ) : lastMessage?.message ? (
               !showPreviews ? 'Mesaj önizlemesi gizli' : lastMessage.isDeleted ? <span className='italic'>Bu mesaj silindi</span> : lastMessage.message
             ) : (
@@ -92,7 +92,7 @@ const Conversation = (props) => {
 
           {/* Okunmamış mesaj rozeti */}
           {unread > 0 && (
-            <span
+            <span aria-label={`${unread} okunmamış mesaj`}
               className='flex-shrink-0 min-w-[20px] h-5 px-1.5 rounded-full text-[11px] font-semibold flex items-center justify-center animate-badge'
               style={{ background: 'var(--accent)', color: 'var(--text-inverse)' }}
             >

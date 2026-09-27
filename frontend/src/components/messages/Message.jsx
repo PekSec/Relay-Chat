@@ -1,5 +1,8 @@
-import Avatar from '../Avatar';
-import { IoPencilOutline } from 'react-icons/io5';
+import Avatar from '../ChatAvatar';
+import EditIcon from '@atlaskit/icon/core/edit';
+import Textarea from '@atlaskit/textarea';
+import Tooltip from '@atlaskit/tooltip';
+import useTheme from '../../zustand/useTheme';
 import { useState, useEffect, useRef } from 'react';
 import useAuth from "../../zustand/useAuth";
 import useConversation from "../../zustand/useConversation";
@@ -29,7 +32,8 @@ const Message = ({ message, searchTerm = "", showAvatar = true, onRequestDelete 
     const { authUser } = useAuth();
     const { selectedConversation } = useConversation();
 
-    const { editMessage, loading } = useEditMessage();
+    const { editMessage, loading, error: editError, clearError: clearEditError } = useEditMessage();
+    const sendKey = useTheme(state => state.preferences.sendKey);
     const rowRef = useRef(null);
     const { react, loading: reactionLoading, error: reactionError, clearError } = useReactToMessage();
 
@@ -67,18 +71,24 @@ const Message = ({ message, searchTerm = "", showAvatar = true, onRequestDelete 
         return date.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
     };
 
+    const finishEdit = () => {
+        setIsEditing(false);
+        requestAnimationFrame(() => rowRef.current?.focus());
+    };
     const handleEditSave = async () => {
+        if (loading || !editedText.trim()) return;
         if (editedText.trim() === message.message) {
-            setIsEditing(false);
+            finishEdit();
             return;
         }
         const success = await editMessage(message._id, editedText);
-        if (success) setIsEditing(false);
+        if (success) finishEdit();
     };
 
     const handleEditCancel = () => {
         setEditedText(message.message);
-        setIsEditing(false);
+        clearEditError();
+        finishEdit();
     };
 
     // Aynı emojiye basanları tek rozette topla
@@ -91,28 +101,25 @@ const Message = ({ message, searchTerm = "", showAvatar = true, onRequestDelete 
         return (
             <div className={`flex ${fromMe ? 'justify-end' : 'justify-start'} px-4 py-1`}>
                 <div className='flex flex-col gap-2 w-full max-w-md'>
-                    <input
-                        type='text'
+                    <Textarea minimumRows={2} resize="smart" maxHeight="128px"
                         aria-label='Mesajı düzenle'
                         maxLength={2000}
                         value={editedText}
-                        onChange={(e) => setEditedText(e.target.value)}
+                        onChange={(e) => { setEditedText(e.target.value); clearEditError(); }}
                         onKeyDown={(e) => {
-                            if (e.key === 'Enter') handleEditSave();
-                            if (e.key === 'Escape') handleEditCancel();
+                            if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing &&
+                                (sendKey === 'enter' || e.ctrlKey || e.metaKey)) { e.preventDefault(); handleEditSave(); }
+                            if (e.key === 'Escape' && !loading && !e.nativeEvent.isComposing) handleEditCancel();
                         }}
-                        className='field'
-                        disabled={loading}
+                        isDisabled={loading} isInvalid={Boolean(editError)} aria-describedby={editError ? `edit-error-${message._id}` : undefined}
                         autoFocus
                     />
+                    {editError && <div id={`edit-error-${message._id}`} role="alert"><SectionMessage appearance="error">{editError}</SectionMessage></div>}
                     <div className='flex gap-2 justify-end'>
-                        <button onClick={handleEditCancel} className='text-xs px-3 py-1.5 rounded-lg'
-                            style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }} disabled={loading}>
-                            Vazgeç
-                        </button>
-                        <button onClick={handleEditSave} className='primary-button text-xs px-3 py-1.5' disabled={loading}>
-                            Kaydet
-                        </button>
+                        <Button onClick={handleEditCancel} appearance="subtle" isDisabled={loading}>Vazgeç</Button>
+                        <Button onClick={handleEditSave} appearance="primary" isDisabled={loading || !editedText.trim()}>
+                            {loading ? 'Kaydediliyor…' : 'Kaydet'}
+                        </Button>
                     </div>
                 </div>
             </div>
@@ -133,13 +140,13 @@ const Message = ({ message, searchTerm = "", showAvatar = true, onRequestDelete 
                             name={selectedConversation?.fullName}
                             src={profilePic}
                             alt=''
-                            className='w-8 h-8 avatar-ring'
+                            size="medium"
                         />
                     )}
                 </div>
             )}
 
-            <div className={`flex flex-col min-w-0 max-w-[min(34rem,calc(100%-3.5rem))] ${fromMe ? 'items-end' : 'items-start'}`}>
+            <div className={`flex flex-col min-w-0 max-w-[min(34rem,calc(100%-3.5rem))] md:max-w-[min(34rem,calc(100%-7rem))] ${fromMe ? 'items-end' : 'items-start'}`}>
                 <div className='relative' ref={pickerRef}>
                     <div
                         ref={rowRef} tabIndex={-1}
@@ -157,8 +164,8 @@ const Message = ({ message, searchTerm = "", showAvatar = true, onRequestDelete 
                             // Dar ekranda balonun yanında yer yok; butonlar balonun
                             // üstüne alınır. Geniş ekranda yanda durmaya devam eder.
                             className={`absolute z-10 flex items-center gap-0.5 transition-opacity
-                                        ${showActions || showPicker ? 'opacity-100' : 'opacity-0'} group-hover:opacity-100
-                                        focus-within:opacity-100
+                                        ${showActions || showPicker ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'} group-hover:opacity-100 group-hover:pointer-events-auto
+                                        focus-within:opacity-100 focus-within:pointer-events-auto
                                         bottom-full mb-1 md:bottom-auto md:top-1/2 md:mb-0 md:-translate-y-1/2
                                         ${fromMe ? 'right-0 md:right-full md:mr-1.5' : 'left-0 md:left-full md:ml-1.5'}`}
                         >
@@ -168,18 +175,11 @@ const Message = ({ message, searchTerm = "", showAvatar = true, onRequestDelete 
                                 onSelect={emoji => react(message._id, emoji)} />
                             {fromMe && (
                                 <>
-                                    <button
-                                        onClick={() => setIsEditing(true)}
-                                        className='w-7 h-7 rounded-full flex items-center justify-center text-xs'
-                                        style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}
-                                        title='Düzenle'
-                                        aria-label='Düzenle'
-                                    >
-                                        <IoPencilOutline />
-                                    </button>
-                                    <IconButton icon={DeleteIcon} label="Sil" appearance="subtle"
+                                    <Tooltip content="Düzenle"><IconButton icon={EditIcon} label="Düzenle" title="Düzenle" appearance="subtle"
+                                        onClick={() => { setEditedText(message.message); clearEditError(); setIsEditing(true); }} /></Tooltip>
+                                    <Tooltip content="Sil"><IconButton icon={DeleteIcon} label="Sil" appearance="subtle"
                                         onClick={event => onRequestDelete({ id: message._id, text: message.message,
-                                            trigger: event.currentTarget, row: rowRef.current })} />
+                                            trigger: event.currentTarget, row: rowRef.current })} /></Tooltip>
                                 </>
                             )}
                         </div>
@@ -210,20 +210,20 @@ const Message = ({ message, searchTerm = "", showAvatar = true, onRequestDelete 
                     <div role="alert"><SectionMessage appearance="error">{reactionError}</SectionMessage></div>}
 
                 <div className='flex items-center gap-1.5 mt-0.5 px-1'>
-                    <span className='text-[11px]' style={{ color: 'var(--text-muted)' }}>{formatTime()}</span>
+                    <time dateTime={message.createdAt || message.timestamp} className='text-[11px]' style={{ color: 'var(--text-muted)' }}>{formatTime()}</time>
 
                     {message.isEdited && !message.isDeleted && (
                         <span className='text-[11px] italic' style={{ color: 'var(--text-muted)' }}>düzenlendi</span>
                     )}
 
                     {fromMe && !message.isDeleted && (
-                        <span title={message.isRead ? 'Okundu' : 'İletildi'}>
+                        <span role="img" aria-label={message.isRead ? 'Okundu' : 'İletildi'} title={message.isRead ? 'Okundu' : 'İletildi'}>
                             {message.isRead ? (
-                                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 16 15">
+                                <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 16 15">
                                     <path fill="var(--accent-hover)" d="M15.01 3.316l-.478-.372a.365.365 0 0 0-.51.063L8.666 9.88a.32.32 0 0 1-.484.033l-.358-.325a.32.32 0 0 0-.484.032l-.378.483a.418.418 0 0 0 .036.54l1.32 1.267a.32.32 0 0 0 .484-.034l6.272-8.048a.366.366 0 0 0-.064-.512zm-4.1 0l-.478-.372a.365.365 0 0 0-.51.063L4.566 9.88a.32.32 0 0 1-.484.033L1.891 7.769a.366.366 0 0 0-.515.006l-.423.433a.364.364 0 0 0 .006.514l3.258 3.185c.143.14.361.125.484-.033l6.272-8.048a.365.365 0 0 0-.063-.51z" />
                                 </svg>
                             ) : (
-                                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 16 15">
+                                <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 16 15">
                                     <path fill="var(--text-muted)" d="M10.91 3.316l-.478-.372a.365.365 0 0 0-.51.063L4.566 9.88a.32.32 0 0 1-.484.033L1.891 7.769a.366.366 0 0 0-.515.006l-.423.433a.364.364 0 0 0 .006.514l3.258 3.185c.143.14.361.125.484-.033l6.272-8.048a.365.365 0 0 0-.063-.51z" />
                                 </svg>
                             )}

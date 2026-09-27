@@ -1,10 +1,16 @@
-import Avatar from '../Avatar';
+import Avatar from '../ChatAvatar';
 import Button from '@atlaskit/button/default/button';
 import IconButton from '@atlaskit/button/icon/button';
 import DeleteIcon from '@atlaskit/icon/core/delete';
 import Messages from "./Messages";
 import MessageInput from "./MessageInput";
-import { TiMessages } from "react-icons/ti";
+import ChatIcon from '@atlaskit/icon/core/comment';
+import SearchIcon from '@atlaskit/icon/core/search';
+import ArrowLeftIcon from '@atlaskit/icon/core/arrow-left';
+import CrossIcon from '@atlaskit/icon/core/cross';
+import Textfield from '@atlaskit/textfield';
+import Tooltip from '@atlaskit/tooltip';
+import SectionMessage from '@atlaskit/section-message';
 import useConversation from "../../zustand/useConversation";
 import useSocket from "../../zustand/useSocket";
 import useListenTyping from "../../hooks/socket/useListenTyping";
@@ -15,18 +21,10 @@ import useListenReactions from "../../hooks/socket/useListenReactions";
 import useUnread from "../../zustand/useUnread";
 import useAuth from "../../zustand/useAuth";
 import useRespondToMessageRequests from "../../hooks/friends/useRespondToMessageRequests";
-import { lazy, Suspense, useEffect, useState } from "react";
-import { IoClose, IoSearch, IoArrowBack } from "react-icons/io5";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import useFriendStore from "../../zustand/useFriend";
 import useSendFriendRequest from "../../hooks/friends/useSendFriendRequest";
 import useRespondToFriendRequests from "../../hooks/friends/useRespondToFriendRequests";
-
-// MessageContainer Bileşeni - Mesaj görüntüleme alanı
-// Bu bileşen arkadaşlık sistemiyle yoğun şekilde entegre çalışır:
-// 1. Mesaj isteği Banner'ı → pending conversation'da alıcıya Accept/Delete seçenekleri sunar
-// 2. Arkadaşlık durumu Banner'ı → arkadaş değilse "Arkadaş ekle" / "İsteği kabul et" banner'ı gösterir
-// 3. Online/offline durumu → sadece seçili sohbetin kişisi için gösterilir
-// 4. chatOpened event → sadece gerçek conversation'lar için emit edilir (draft'lar için değil)
 
 const DeleteMessageModal = lazy(() => import('../modals/DeleteMessageModal'));
 const ClearHistoryModal = lazy(() => import('../modals/ClearHistoryModal'));
@@ -41,24 +39,21 @@ const MessageContainer = () => {
     const { authUser } = useAuth();
     const { acceptRequest, declineRequest, loading: actionLoading } = useRespondToMessageRequests();
 
-    // ═══════════ MESAJ İSTEĞİ DURUMU ═══════════
-    // isPending → Conversation status'u "pending" mi? (arkadaş olmayan birinden gelen ilk mesaj)
     const isPending = selectedConversation?.status === "pending";
-    // isReceiver → Son mesajı BİZ mi gönderdik, yoksa karşı taraf mı?
-    // Sadece alıcıysak Accept/Delete banner'ını göster (gönderen kendi isteğini kabul edemez)
+
     const isReceiver = selectedConversation?.lastMessage && selectedConversation?.lastMessage?.senderId !== authUser?._id;
 
-    // ═══════════ ARKADAŞLIK DURUMU BANNER LOGIC ═══════════
     const [isBannerDismissed, setIsBannerDismissed] = useState(false);
     const [deleteTarget, setDeleteTarget] = useState(null);
     const [clearTarget, setClearTarget] = useState(null);
     const [searchTerm, setSearchTerm] = useState("");   // sohbet içi mesaj arama
     const [showSearch, setShowSearch] = useState(false);
+    const searchTrigger = useRef(null);
+    const closeSearch = () => { setShowSearch(false); setSearchTerm(''); searchTrigger.current?.focus(); };
     const { friends, incomingFriendRequests, sentFriendRequests } = useFriendStore();
     const { sendFriendRequest, loading: sendFriendLoading } = useSendFriendRequest();
     const { respondToRequest, loading: respondFriendLoading } = useRespondToFriendRequests();
 
-    // Sohbet değişince banner görünürlüğünü sıfırla (her kişi için yeni şans)
     useEffect(() => {
         setIsBannerDismissed(false);
         setDeleteTarget(null);
@@ -67,14 +62,12 @@ const MessageContainer = () => {
         setShowSearch(false);
     }, [selectedConversation?._id]);
 
-    // Seçili kişi arkadaş mı? → friends dizisinde ID'si var mı kontrol et
     const isFriend = selectedConversation && friends.some(f => f._id === selectedConversation._id);
-    // Seçili kişiye zaten istek göndermişiz mi? → sentFriendRequests'te kontrol et
+
     const sentRequest = selectedConversation && sentFriendRequests.find(r => r.receiverId?._id === selectedConversation._id || r._id === selectedConversation._id);
-    // Seçili kişi bize istek göndermiş mi? → incomingFriendRequests'te kontrol et
+
     const incomingRequest = selectedConversation && incomingFriendRequests.find(r => r.senderId?._id === selectedConversation._id || r._id === selectedConversation._id);
 
-    // Arkadaş ekle butonuna basıldığında
     const handleAddFriend = async () => {
         await sendFriendRequest(selectedConversation._id);
     };
@@ -84,11 +77,6 @@ const MessageContainer = () => {
     useListenDeletedMessages(); // Silinen mesajları dinle
     useListenReactions(); // Emoji tepkilerini dinle
 
-    // ═══════════ CHAT AÇILMA BİLDİRİMİ ═══════════
-    // Backend'e "bu sohbeti açtım" bilgisi gönder (okundu bilgisi için)
-    // ⚠️ conversations.some kontrolü → Sadece sidebar'da OLAN (gerçek) konuşmalar için emit et
-    // AddFriend'den "Mesaj Gönder" denildiğinde selectedConversation set ediliyor
-    // ama henüz DB'de conversation yok. Backend'e gereksiz sinyal gitmemeli.
     useEffect(() => {
         const markVisibleChatRead = () => {
             if (document.visibilityState !== 'visible' || !socket?.connected || !selectedConversation) return;
@@ -106,7 +94,6 @@ const MessageContainer = () => {
         };
     }, [selectedConversation, socket, conversations, clearUnread, connectionVersion]);
 
-    // Sohbeti temizle butonuna tıklanınca
     const noChatSelected = !selectedConversation;
     const isOnline = selectedConversation && onlineUsers.includes(selectedConversation._id);
 
@@ -117,10 +104,9 @@ const MessageContainer = () => {
             {clearTarget?.peerId === selectedConversation?._id && clearTarget?.userId === authUser?._id && clearTarget &&
                 <Suspense fallback={null}><ClearHistoryModal target={clearTarget} onClose={() => setClearTarget(null)}
                     onCleared={() => { setClearTarget(null); setSearchTerm(''); setShowSearch(false); }} /></Suspense>}
-            {!isConnected && <div role="status" className="px-4 py-2 text-xs text-center flex-shrink-0" style={{ color: 'var(--ds-text-warning)', background: 'var(--ds-background-warning)' }}>Bağlantı yeniden kuruluyor… <button className="underline ml-2" onClick={() => socket?.connect()}>Tekrar bağlan</button></div>}
-            {noChatSelected ? <NoChatSelected /> : (<> {/* Sohbet seçilmemişse NoChatSelected, seçilmişse mesaj alanı */}
 
-                {/* ═══════════ HEADER ═══════════ */}
+            {noChatSelected ? <NoChatSelected /> : (<>
+
                 <div
                     className='flex items-center gap-3 px-4 py-3 flex-shrink-0 relative chat-header'
                     style={{
@@ -128,22 +114,15 @@ const MessageContainer = () => {
                         background: 'var(--bg-panel)'
                     }}
                 >
-                    {/* Dar ekranda listeye dön */}
-                    <button
-                        onClick={() => setSelectedConversation(null)}
-                        className='md:hidden w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0'
-                        style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}
-                        title='Geri'
-                    >
-                        <IoArrowBack />
-                    </button>
+
+                    <span className="md:hidden"><Tooltip content="Geri"><IconButton icon={ArrowLeftIcon} label="Geri" title="Geri" appearance="subtle" onClick={() => setSelectedConversation(null)} /></Tooltip></span>
 
                     <div className='relative flex-shrink-0'>
                         <Avatar
                             name={selectedConversation.fullName}
                             src={selectedConversation.profilePic}
                             alt=''
-                            className="w-10 h-10 avatar-ring"
+                            size="large"
                         />
                         {isOnline && (
                             <span
@@ -175,145 +154,62 @@ const MessageContainer = () => {
                         </div>
                     </div>
 
-                    <button
-                        onClick={() => setShowSearch(v => !v)}
-                        className='w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0'
-                        style={{
-                            background: showSearch ? 'var(--accent-soft)' : 'var(--bg-elevated)',
-                            color: showSearch ? 'var(--accent-hover)' : 'var(--text-secondary)'
-                        }}
-                        title='Mesajlarda ara'
-                    >
-                        <IoSearch />
-                    </button>
+                    <Tooltip content="Mesajlarda ara"><IconButton ref={searchTrigger} icon={SearchIcon} label="Mesajlarda ara" title="Mesajlarda ara"
+                        appearance="subtle" isSelected={showSearch} aria-expanded={showSearch} aria-controls="chat-search"
+                        onClick={() => showSearch ? closeSearch() : setShowSearch(true)} /></Tooltip>
 
-                    <IconButton icon={DeleteIcon} label="Sohbeti temizle" appearance="subtle"
+                    <Tooltip content="Sohbeti temizle"><IconButton icon={DeleteIcon} label="Sohbeti temizle" appearance="subtle"
                         onClick={event => setClearTarget({ peerId: selectedConversation._id, userId: authUser._id,
                             fullName: selectedConversation.fullName, profilePic: selectedConversation.profilePic,
-                            trigger: event.currentTarget })} />
+                            trigger: event.currentTarget })} /></Tooltip>
                 </div>
 
-                {/* Sohbet içi arama çubuğu */}
                 {showSearch && (
-                    <div className='px-4 py-2 flex-shrink-0' style={{ borderBottom: '1px solid var(--border-subtle)' }}>
-                        <input
+                    <div id="chat-search" className='px-4 py-2 flex-shrink-0' style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                        <Textfield
                             autoFocus
-                            type='text'
+                            type='search'
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             placeholder='Bu sohbette ara...'
                             aria-label='Bu sohbette ara'
-                            onKeyDown={event => { if (event.key === 'Escape') { setShowSearch(false); setSearchTerm(''); } }}
-                            className='field text-sm'
+                            onKeyDown={event => { if (event.key === 'Escape') closeSearch(); }}
+                            aria-describedby="chat-search-scope"
                         />
+                        <p id="chat-search-scope" className="mt-1 text-xs text-[color:var(--text-muted)]">Yalnızca yüklenen mesajlarda ara.</p>
                     </div>
                 )}
 
-                {/* ═══════════ MESAJ İSTEĞİ BANNER'I ═══════════ */}
-                {/* Gösterilme koşulları:
-                    1. isPending → Conversation status "pending" olmalı
-                    2. isReceiver → Son mesajı karşı taraf göndermiş olmalı (biz alıcıyız)
-                    Bu banner sadece ALICIYA gösterilir → "Kabul et ve sohbet et" veya "Delete" */}
-                {isPending && isReceiver && (
-                    <div className="bg-[color:var(--bg-sunken)] p-5 border-b border-[color:var(--border-subtle)] flex flex-col items-center gap-3">
-                        <div className="text-center px-4">
-                            <h3 className="text-base font-semibold flex items-center gap-2 justify-center">
-                                📩 Yeni mesaj isteği
-                            </h3>
-                            <p className="text-sm text-[color:var(--text-muted)] mt-1">
-                                {selectedConversation.fullName} seninle sohbet etmek istiyor.
-                            </p>
-                        </div>
-                        <div className="flex gap-4 w-full max-w-xs justify-center">
-                            {/* Kabul → acceptRequest(conversationId) → conversation status "active" olur */}
-                            <Button
-                                onClick={() => acceptRequest(selectedConversation.conversationId)}
-                                isDisabled={actionLoading}
-                                appearance="primary"
-                            >
-                                {actionLoading ? 'İşleniyor…' : "Kabul et ve sohbet et"}
-                            </Button>
-                            {/* İsteği yalnız kendi hesabından gizle. */}
-                            <Button
-                                onClick={() => declineRequest(selectedConversation._id)}
-                                isDisabled={actionLoading}
-                                appearance="subtle"
-                            >
-                                Reddet
-                            </Button>
-                        </div>
+                {!isConnected && <div className="chat-notice" role="status"><SectionMessage appearance="warning">
+                    Bağlantı yeniden kuruluyor… <Button appearance="link" onClick={() => socket?.connect()}>Tekrar bağlan</Button>
+                </SectionMessage></div>}
+                {isPending && isReceiver && <div className="chat-notice"><SectionMessage title="Yeni mesaj isteği">
+                    <p>{selectedConversation.fullName} seninle sohbet etmek istiyor.</p>
+                    <div className="flex flex-wrap gap-2 mt-2">
+                        <Button onClick={() => acceptRequest(selectedConversation.conversationId)} isDisabled={actionLoading} appearance="primary">Kabul et ve sohbet et</Button>
+                        <Button onClick={() => declineRequest(selectedConversation._id)} isDisabled={actionLoading} appearance="subtle">Reddet</Button>
                     </div>
-                )}
+                </SectionMessage></div>}
 
-                {/* ═══════════ ARKADAŞLIK DURUMU BANNER'I ═══════════ */}
-                {/* Gösterilme koşulları:
-                    1. !isPending → Conversation pending DEĞİL (active veya draft)
-                    2. !isFriend → Bu kişi arkadaş listende DEĞİL
-                    3. !isBannerDismissed → Kullanıcı X ile kapatmamış
-                    4. conversations.some → Sidebar'da olan gerçek bir conversation (draft değil)
-                    
-                    Banner 3 farklı durum gösterir:
-                    - sentRequest var → "İstek zaten gönderildi"
-                    - incomingRequest var → "X sana istek gönderdi" + Accept butonu
-                    - İkisi de yok → "Arkadaş değilsiniz: X" + Add Friend butonu */}
                 {!isPending && !isFriend && !isBannerDismissed && conversations.some(c => c._id === selectedConversation._id) && (
-                    <div className="bg-[color:var(--accent-soft)] p-3 border-b border-[color:var(--border-subtle)] flex flex-wrap items-center justify-between gap-3">
-                        <div className="flex items-center gap-3 ml-2">
-                            <TiMessages className="text-[color:var(--accent-hover)] text-xl" />
-                            <div>
-                                <span className="text-xs font-semibold text-[color:var(--accent-hover)] block uppercase tracking-wider">Arkadaşlık durumu</span>
-                                <p className="text-sm text-[color:var(--text-secondary)]">
-                                    {sentRequest
-                                        ? "İstek zaten gönderildi"
-                                        : incomingRequest
-                                            ? `${selectedConversation.fullName} sana istek gönderdi`
-                                            : `Arkadaş değilsiniz: ${selectedConversation.fullName}`}
-                                </p>
+                    <div className="chat-notice"><SectionMessage>
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                            <p className="min-w-0 break-words">{sentRequest ? 'İstek zaten gönderildi' : incomingRequest
+                                ? `${selectedConversation.fullName} sana istek gönderdi` : `Arkadaş değilsiniz: ${selectedConversation.fullName}`}</p>
+                            <div className="flex items-center gap-2">
+                                {incomingRequest && <Button onClick={() => respondToRequest(incomingRequest._id, 'accept')} isDisabled={respondFriendLoading} appearance="primary">İsteği kabul et</Button>}
+                                {!sentRequest && !incomingRequest && <Button onClick={handleAddFriend} isDisabled={sendFriendLoading} appearance="primary">Arkadaş ekle</Button>}
+                                <Tooltip content="Kapat"><IconButton icon={CrossIcon} label="Kapat" appearance="subtle" onClick={() => setIsBannerDismissed(true)} /></Tooltip>
                             </div>
                         </div>
-
-                        <div className="flex items-center gap-2">
-                            {/* Gelen istek varsa → Accept Request butonu */}
-                            {incomingRequest && (
-                                <Button
-                                    onClick={() => respondToRequest(incomingRequest._id, "accept")}
-                                    isDisabled={respondFriendLoading}
-                                    appearance="primary" spacing="compact"
-                                >
-                                    {respondFriendLoading ? "..." : "İsteği kabul et"}
-                                </Button>
-                            )}
-
-                            {/* Ne gönderilen ne gelen istek varsa → Add Friend butonu */}
-                            {!sentRequest && !incomingRequest && (
-                                <Button
-                                    onClick={handleAddFriend}
-                                    isDisabled={sendFriendLoading}
-                                    appearance="primary" spacing="compact"
-                                >
-                                    {sendFriendLoading ? "..." : "Arkadaş ekle"}
-                                </Button>
-                            )}
-
-                            {/* Banner'ı kapat (X butonu) */}
-                            <button
-                                onClick={() => setIsBannerDismissed(true)}
-                                className="p-1.5 icon-btn ml-2"
-                                title="Kapat"
-                            >
-                                <IoClose size={18} />
-                            </button>
-                        </div>
-                    </div>
+                    </SectionMessage></div>
                 )}
 
-                {/* ═══════════ MESAJLAR ═══════════ */}
                 <div className="flex-1 min-h-0 flex flex-col">
                     <Messages key={selectedConversation._id} searchTerm={searchTerm}
                         onRequestDelete={target => setDeleteTarget({ ...target, conversationId: selectedConversation._id, userId: authUser._id })} />
                 </div>
 
-                {/* ═══════════ MESAJ GİRİŞ ALANI ═══════════ */}
                 <div className="flex-shrink-0">
                     <MessageInput key={selectedConversation._id} />
                 </div>
@@ -323,14 +219,13 @@ const MessageContainer = () => {
 }
 export default MessageContainer;
 
-// Hiçbir sohbet seçilmediğinde gösterilecek bileşen
 const NoChatSelected = () => {
     const { authUser } = useAuth();
     return (
         <div className='flex flex-col items-center justify-center w-full h-full px-6'>
             <div className='px-8 py-9 text-center max-w-sm'>
                 <div className='w-16 h-16 rounded-lg flex items-center justify-center text-3xl mx-auto mb-4' style={{ background: 'var(--accent-soft)', color: 'var(--accent-hover)' }}>
-                    <TiMessages />
+                    <ChatIcon label="" size="medium" />
                 </div>
 
                 <h2 className='text-lg font-semibold mb-1.5' style={{ color: 'var(--text-primary)' }}>
@@ -340,7 +235,6 @@ const NoChatSelected = () => {
                     Mesajları görmek için listeden bir sohbet seç.
                 </p>
 
-                {/* Kendi arkadaş kodu: paylaşması kolay olsun */}
                 {authUser?.friendCode && (
                     <div
                         className='mt-5 pt-4 flex flex-col items-center gap-1.5'

@@ -1,68 +1,30 @@
-import Conversation from "./Conversation";
-import useGetConversations from "../../hooks/conversation/useGetConversations";
-import useUnread from "../../zustand/useUnread";
+import Conversation from './Conversation';
+import useGetConversations from '../../hooks/conversation/useGetConversations';
+import useUnread from '../../zustand/useUnread';
 import useGlobalTyping from '../../hooks/socket/useGlobalTyping';
+import Spinner from '@atlaskit/spinner';
+import SectionMessage from '@atlaskit/section-message';
+import Button from '@atlaskit/button/default/button';
 
-// Conversations Bileşeni - Sidebar'daki "Sohbetler" sekmesinin içeriği
-// useGetConversations hook'u ile backend'den çekilen sohbet listesini render eder.
-// Arkadaşlık sistemi ile bağlantısı:
-// - useGetConversations pending/active filtreleme yapar
-// - Boş durumda kullanıcıyı arkadaş eklemeye yönlendirir
-// - Yeni draft conversation'lar useSendMessage tarafından bu listeye eklenir
-
-const Conversations = ({ filter = "" }) => {
+const Conversations = ({ filter = '' }) => {
     const { loading, conversations, error, retry } = useGetConversations();
     const { counts } = useUnread();
     const { isUserTyping } = useGlobalTyping();
-
-    // Kenar çubuğundaki arama kutusuna göre isme/kullanıcı adına filtrele
-    const visible = filter
-        ? conversations.filter(c =>
-            c.fullName?.toLowerCase().includes(filter.toLowerCase()) ||
-            c.username?.toLowerCase().includes(filter.toLowerCase()))
-        : conversations;
-
-    if (loading && conversations.length === 0) {
-        return (
-            <div className='flex justify-center py-6'>
-                <span
-                    className='w-5 h-5 border-2 rounded-full animate-spin'
-                    style={{ borderColor: 'var(--border-subtle)', borderTopColor: 'var(--accent)' }}
-                />
-            </div>
-        );
-    }
-
-    if (error) return <div role="alert" className="p-6 text-center text-sm text-[color:var(--text-secondary)]">{error}<button onClick={retry} className="block mx-auto mt-3 text-[color:var(--accent-hover)]">Tekrar dene</button></div>;
-
-    if (visible.length === 0) {
-        return (
-            <div className='flex flex-col items-center gap-1.5 px-4 py-8 text-center'>
-                <span className='text-2xl opacity-60'>{filter ? '🔍' : '💬'}</span>
-                <span className='text-sm' style={{ color: 'var(--text-secondary)' }}>
-                    {filter ? 'Eşleşen sohbet yok' : 'Henüz sohbet yok'}
-                </span>
-                {!filter && (
-                    <span className='text-xs' style={{ color: 'var(--text-muted)' }}>
-                        Arkadaş ekleyerek sohbete başla
-                    </span>
-                )}
-            </div>
-        );
-    }
-
-    return (
-        <div className='flex flex-col gap-0.5 px-2 py-2 overflow-y-auto scroll-slim'>
-            {visible.map(conversation => (
-                <Conversation
-                    key={conversation._id}
-                    conversation={conversation}
-                    isTyping={isUserTyping(conversation._id)}
-                    unreadCount={counts[conversation._id] || 0}
-                />
-            ))}
-        </div>
-    );
+    const query = filter.toLocaleLowerCase('tr');
+    const visible = conversations.filter(c => !query ||
+        c.fullName?.toLocaleLowerCase('tr').includes(query) || c.username?.toLocaleLowerCase('tr').includes(query));
+    if (loading && !conversations.length) return <div className="flex justify-center py-6"><Spinner label="Sohbetler yükleniyor" /></div>;
+    return <>
+        {error && <div role="alert" className="p-3"><SectionMessage appearance="error">
+            Sohbetler yüklenemedi. <Button appearance="link" onClick={retry}>Tekrar dene</Button>
+        </SectionMessage></div>}
+        {!visible.length ? <div className="px-4 py-8 text-center text-sm text-[color:var(--text-secondary)]">
+            <p>{filter ? 'Eşleşen sohbet yok' : 'Henüz sohbet yok'}</p>
+            {!filter && <p className="mt-1 text-xs">Yeni sohbet ile birini bul ve mesaj gönder.</p>}
+        </div> : <div className="flex flex-col gap-0.5 px-2 py-2 overflow-y-auto scroll-slim">
+            {visible.map(conversation => <Conversation key={conversation._id} conversation={conversation}
+                isTyping={isUserTyping(conversation._id)} unreadCount={counts[conversation._id] || 0} />)}
+        </div>}
+    </>;
 };
-
 export default Conversations;

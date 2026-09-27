@@ -117,7 +117,7 @@ try {
         await page.getByRole('textbox', { name: 'Mesaj', exact: true }).fill('Filtreli hedef');
         await page.getByRole('button', { name: 'Gönder', exact: true }).click();
         await page.getByTitle('Mesajlarda ara').click();
-        await page.getByRole('textbox', { name: 'Bu sohbette ara', exact: true }).fill('Filtreli hedef');
+        await page.getByRole('searchbox', { name: 'Bu sohbette ara', exact: true }).fill('Filtreli hedef');
         await page.locator('.bubble').filter({ hasText: 'Filtreli hedef' }).click();
         await page.getByRole('button', { name: 'Sil', exact: true }).last().click();
         // No socket delivery: prove HTTP-only success restores focus after the filtered row disappears.
@@ -130,7 +130,7 @@ try {
         await page.waitForFunction(() => document.activeElement?.getAttribute('aria-label') === 'Mesaj');
         check(`${device}: filtered deletion focuses composer without socket delivery`, true);
         await page.unroute(`**/api/messages/${filtered._id}`);
-        await page.getByRole('textbox', { name: 'Bu sohbette ara', exact: true }).fill('');
+        await page.getByRole('searchbox', { name: 'Bu sohbette ara', exact: true }).fill('');
         await page.locator('.bubble').filter({ hasText: 'İlk mesaj' }).click();
         await page.getByRole('button', { name: 'Sil', exact: true }).first().click();
         await visible(modal);

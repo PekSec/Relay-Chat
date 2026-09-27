@@ -1,5 +1,4 @@
 import { useRef, useState } from 'react';
-import toast from 'react-hot-toast';
 import useConversation from '../../zustand/useConversation';
 import useFriendStore from '../../zustand/useFriend';
 import apiFetch from '../../utils/apiFetch';
@@ -7,11 +6,13 @@ import apiFetch from '../../utils/apiFetch';
 const useSendMessage = () => {
     const [loading, setLoading] = useState(false);
     const sending = useRef(false);
+    const [error, setError] = useState('');
     const sendMessage = async (message) => {
         const conversation = useConversation.getState().selectedConversation;
-        if (!conversation || sending.current || !message.trim()) return false;
+        if (!conversation || sending.current || !message.trim() || message.length > 2000) return false;
         sending.current = true;
         setLoading(true);
+        setError('');
         try {
             const res = await apiFetch(`/api/messages/send/${conversation._id}`, {
                 method: 'POST',
@@ -35,13 +36,13 @@ const useSendMessage = () => {
             if (state.selectedConversation?._id === conversation._id) state.setSelectedConversation(updated);
             return true;
         } catch (error) {
-            if (error.name !== 'AbortError') toast.error(error.message);
+            if (error.name !== 'AbortError') setError('Mesaj gönderilemedi. Tekrar dene.');
             return false;
         } finally {
             sending.current = false;
             setLoading(false);
         }
     };
-    return { loading, sendMessage };
+    return { loading, sendMessage, error, clearError: () => setError('') };
 };
 export default useSendMessage;

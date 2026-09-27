@@ -1,26 +1,14 @@
-import { useEffect } from "react";
-import useConversation from "../../zustand/useConversation";
-import useSocket from "../../zustand/useSocket";
+import { useEffect } from 'react';
+import useConversation from '../../zustand/useConversation';
+import useSocket from '../../zustand/useSocket';
 
 const useListenEditedMessages = () => {
-    const { socket } = useSocket();
-    const { setMessages } = useConversation();
-
+    const socket = useSocket(state => state.socket);
+    const setMessageEdited = useConversation(state => state.setMessageEdited);
     useEffect(() => {
         if (!socket) return;
-
-        socket.on("messageEdited", (editedMessage) => {
-            const { messageId, newMessage, isEdited, editedAt } = editedMessage;
-            setMessages(messages => messages.map(msg =>
-                msg._id === messageId && !msg.isDeleted
-                    ? { ...msg, message: newMessage, isEdited, editedAt }
-                    : msg
-            ));
-        });
-
-        return () => socket.off("messageEdited");
-
-    }, [socket, setMessages]);
+        socket.on('messageEdited', setMessageEdited);
+        return () => socket.off('messageEdited', setMessageEdited);
+    }, [socket, setMessageEdited]);
 };
-
 export default useListenEditedMessages;

@@ -179,6 +179,12 @@ jobs:
           MONGO_URI: mongodb://127.0.0.1:27017/ci_emoji_ui
           PORT: 5029
 
+      - name: Check chat history, editing and keyboard behavior
+        run: npm run test:chat 2>&1 | tee test-results/chat.log
+        env:
+          MONGO_URI: mongodb://127.0.0.1:27017/ci_chat
+          PORT: 5030
+
       - name: Save test evidence
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

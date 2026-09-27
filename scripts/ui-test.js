@@ -183,11 +183,12 @@ try {
 
         await showActions(page, mobile);
         await page.getByTitle("Tepki ver").last().click();
-        check(`${label}: reaction picker opens`, await visible(page.getByTitle("👍", { exact: true })));
-        await page.getByTitle("👍", { exact: true }).click();
+        await page.getByRole("searchbox", { name: "Emoji ara", exact: true }).fill("thumbs up");
+        check(`${label}: reaction picker opens`, await visible(page.getByTitle(/^👍\uFE0F?$/)));
+        await page.getByTitle(/^👍\uFE0F?$/).click();
         await eventually(async () => {
             const messages = await api(context, server.base, `/messages/${b._id}`);
-            assert.equal(messages.at(-1).reactions[0]?.emoji, "👍");
+            assert.equal(messages.at(-1).reactions[0]?.emoji.replaceAll("\uFE0F", ""), "👍");
         });
         check(`${label}: reaction is persisted`, true);
         await assertLayout(page, `${label} chat`);

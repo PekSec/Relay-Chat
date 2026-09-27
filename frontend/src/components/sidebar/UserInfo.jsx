@@ -1,6 +1,9 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
-import { FaBell } from 'react-icons/fa';
-import { IoSettingsOutline } from 'react-icons/io5';
+import NotificationIcon from '@atlaskit/icon/core/notification';
+import IconButton from '@atlaskit/button/icon/button';
+import Tooltip from '@atlaskit/tooltip';
+import ChatAvatar from '../ChatAvatar';
+import SettingsIcon from '@atlaskit/icon/core/settings';
 import Avatar from '../Avatar';
 import useAuth from '../../zustand/useAuth';
 import useFriendStore from '../../zustand/useFriend';
@@ -35,16 +38,15 @@ export default function UserInfo({ onNotificationClick }) {
 
     return (
         <div className="relative px-5 py-4 flex items-center gap-3">
-            <Avatar name={user?.fullName} src={user?.profilePic} alt="" className="w-9 h-9 avatar-ring flex-shrink-0" />
+            <ChatAvatar name={user?.fullName} src={user?.profilePic} size="medium" />
             <div className="min-w-0 flex-1">
                 <p className="text-sm font-semibold truncate">{user?.fullName}</p>
                 <p className="text-[11px] text-[color:var(--text-muted)] truncate">Arkadaş kodun: #{user?.friendCode}</p>
             </div>
-            <button className="w-8 h-8 icon-btn" title="Hesap ayarları" aria-label="Hesap ayarları" onClick={() => setShowSettings(true)}><IoSettingsOutline /></button>
+            <Tooltip content="Hesap ayarları"><IconButton icon={SettingsIcon} appearance="subtle" title="Hesap ayarları" label="Hesap ayarları" onClick={() => setShowSettings(true)} /></Tooltip>
             <div className="relative" ref={dropdown}>
-                <button ref={trigger} className="w-8 h-8 icon-btn relative" title="Bildirimler" aria-label={`Bildirimler${count ? ` (${count})` : ''}`} aria-expanded={showNotifications} aria-controls="notifications" onClick={() => setShowNotifications(value => !value)}>
-                    <FaBell />{count > 0 && <span className="notification-count">{count}</span>}
-                </button>
+                <Tooltip content="Bildirimler"><IconButton ref={trigger} icon={NotificationIcon} appearance="subtle" title="Bildirimler" label={`Bildirimler${count ? ` (${count})` : ''}`} aria-expanded={showNotifications} aria-controls="notifications" onClick={() => setShowNotifications(value => !value)} /></Tooltip>
+                {count > 0 && <span className="notification-count pointer-events-none" aria-hidden="true">{count}</span>}
                 {showNotifications && <section id="notifications" aria-label="Bildirimler" className="notification-panel">
                     <h2 className="p-4 font-semibold text-sm border-b border-[color:var(--border-subtle)]">Bildirimler ({count})</h2>
                     <div className="max-h-[50dvh] overflow-y-auto scroll-slim">

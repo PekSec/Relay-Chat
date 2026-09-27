@@ -3,7 +3,11 @@ import Message from './Message';
 import useGetMessages from '../../hooks/messages/useGetMessages';
 import MessageSkeleton from '../skeletons/MessageSkeleton';
 import useAuth from '../../zustand/useAuth';
-import { IoArrowDown } from 'react-icons/io5';
+import ArrowDownIcon from '@atlaskit/icon/core/arrow-down';
+import Button from '@atlaskit/button/default/button';
+import IconButton from '@atlaskit/button/icon/button';
+import Tooltip from '@atlaskit/tooltip';
+import SectionMessage from '@atlaskit/section-message';
 
 const dayLabel = date => {
     const today = new Date(), yesterday = new Date();
@@ -14,22 +18,25 @@ const dayLabel = date => {
 };
 
 const Messages = ({ searchTerm = '', onRequestDelete }) => {
-    const { loading, messages, hasMore, loadingOlder, error, retry, loadOlder } = useGetMessages();
+    const { loading, messages, hasMore, loadingOlder, error, olderError, retry, loadOlder } = useGetMessages();
     const userId = useAuth(state => state.authUser?._id);
     const listRef = useRef(null);
     const nearBottom = useRef(true);
     const historyPosition = useRef(null);
     const [showJump, setShowJump] = useState(false);
     const lastId = messages.at(-1)?._id;
+    const previousLastId = useRef(null);
     const lastSender = messages.at(-1)?.senderId;
 
     useLayoutEffect(() => {
         const list = listRef.current;
         if (!list || loadingOlder) return;
+        const ownNewMessage = lastId !== previousLastId.current && lastSender === userId;
+        previousLastId.current = lastId;
         if (historyPosition.current) {
             list.scrollTop = list.scrollHeight - historyPosition.current.height + historyPosition.current.top;
             historyPosition.current = null;
-        } else if (!searchTerm && (nearBottom.current || lastSender === userId)) {
+        } else if (!searchTerm && (nearBottom.current || ownNewMessage)) {
             list.scrollTop = list.scrollHeight;
         }
     }, [lastId, lastSender, userId, loading, loadingOlder, searchTerm]);
@@ -44,15 +51,15 @@ const Messages = ({ searchTerm = '', onRequestDelete }) => {
     if (loading && messages.length === 0) return <div className="flex-1 min-h-0 overflow-hidden py-3" role="status" aria-label="Mesajlar yükleniyor">{Array.from({ length: 4 }, (_, i) => <MessageSkeleton key={i} />)}</div>;
     return (
         <div className="relative flex-1 min-h-0 flex flex-col">
-            {error && <div className="px-4 py-2 text-xs text-center text-[color:var(--danger)]" role="alert">{error} <button className="underline ml-2" onClick={retry}>Tekrar dene</button></div>}
+            {error && <div className="px-4 py-2 text-xs text-center text-[color:var(--danger)]" role="alert"><SectionMessage appearance="error">{error} <Button appearance="link" onClick={olderError ? handleOlder : retry} isDisabled={loading || loadingOlder}>Tekrar dene</Button></SectionMessage></div>}
             <div ref={listRef} aria-label="Mesaj geçmişi" className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden scroll-slim py-3 flex flex-col"
                 onScroll={event => {
                     const el = event.currentTarget;
                     nearBottom.current = el.scrollHeight - el.scrollTop - el.clientHeight < 100;
                     setShowJump(!nearBottom.current);
                 }}>
-                {hasMore && <button className="self-center text-xs py-2 px-4 mb-3 rounded-full text-[color:var(--accent-hover)] bg-[color:var(--accent-soft)]"
-                    disabled={loadingOlder} onClick={handleOlder}>{loadingOlder ? 'Yükleniyor...' : 'Önceki mesajları yükle'}</button>}
+                {hasMore && <div className="self-center mb-3"><Button appearance="subtle"
+                    isDisabled={loading || loadingOlder} onClick={handleOlder}>{loadingOlder ? 'Yükleniyor…' : 'Önceki mesajları yükle'}</Button></div>}
                 {searchTerm && <p className="text-xs text-center mb-3 text-[color:var(--text-muted)]" role="status">{visible.length} sonuç · Yüklenen mesajlarda aranıyor</p>}
                 {visible.length === 0 ? (
                     <div className="flex-1 flex flex-col items-center justify-center gap-2 px-6 text-center">
@@ -76,7 +83,7 @@ const Messages = ({ searchTerm = '', onRequestDelete }) => {
                     })}
                 </div>}
             </div>
-            {showJump && !searchTerm && <button className="absolute bottom-3 right-4 icon-btn w-10 h-10 shadow-xl" title="Son mesaja git" aria-label="Son mesaja git" onClick={() => { listRef.current.scrollTop = listRef.current.scrollHeight; }}><IoArrowDown /></button>}
+            {showJump && !searchTerm && <div className="absolute bottom-3 right-4 z-20"><Tooltip content="Son mesaja git"><IconButton appearance="primary" icon={ArrowDownIcon} title="Son mesaja git" label="Son mesaja git" onClick={() => { listRef.current.scrollTop = listRef.current.scrollHeight; }} /></Tooltip></div>}
         </div>
     );
 };

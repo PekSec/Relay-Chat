@@ -270,7 +270,7 @@ async function run() {
         const badEmoji = await api(`/api/messages/react/${target._id}`, {
             method: "POST",
             cookie: cookieB,
-            body: { emoji: "\u{1F4A3}" }
+            body: { emoji: "not-an-emoji" }
         });
         check("unsupported reaction rejected", badEmoji.status === 400, `got ${badEmoji.status}`);
 
