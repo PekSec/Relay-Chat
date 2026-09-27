@@ -61,8 +61,8 @@ const MessageInput = () => {
     };
 
     return (
-        <form className="composer flex-shrink-0 px-3 sm:px-4 py-3" onSubmit={handleSubmit} style={{ borderTop: '1px solid var(--border-subtle)' }}>
-            <div className="flex items-end gap-2">
+        <form className="composer flex-shrink-0" onSubmit={handleSubmit} style={{ borderTop: '1px solid var(--border-subtle)' }}>
+            <div className="composer-fields">
                 <EmojiPicker isOpen={showEmoji} loading={loading} error={emojiError} selectionFocusRef={inputRef}
                     onOpen={() => {
                         selectionRef.current = { start: inputRef.current.selectionStart, end: inputRef.current.selectionEnd };
@@ -86,7 +86,7 @@ const MessageInput = () => {
                     isDisabled={loading || !message.trim()} /></Tooltip>
             </div>
             {error && <div id="send-error" role="alert" className="mt-2"><SectionMessage appearance="error">{error}</SectionMessage></div>}
-            <div className="flex justify-between pt-1.5 pl-12 text-[10px] text-[color:var(--text-muted)]">
+            <div className="composer-help text-[10px] text-[color:var(--text-muted)]">
                 <span className="hidden sm:inline">{sendKey === 'enter' ? 'Enter' : 'Ctrl / ⌘ + Enter'} ile gönder · Shift + Enter ile yeni satır</span>
                 {message.length > 1800 && <span className="ml-auto" aria-live="polite">{message.length}/{MAX_LENGTH}</span>}
             </div>

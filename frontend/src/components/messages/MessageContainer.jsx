@@ -51,7 +51,7 @@ const MessageContainer = () => {
     const searchTrigger = useRef(null);
     const closeSearch = () => { setShowSearch(false); setSearchTerm(''); searchTrigger.current?.focus(); };
     const { friends, incomingFriendRequests, sentFriendRequests } = useFriendStore();
-    const { sendFriendRequest, loading: sendFriendLoading } = useSendFriendRequest();
+    const { sendFriendRequest, pendingIds: sendingFriendIds, errors: sendFriendErrors } = useSendFriendRequest();
     const { respondToRequest, loading: respondFriendLoading, error: respondFriendError, errorId: respondFriendErrorId } = useRespondToFriendRequests();
 
     useEffect(() => {
@@ -108,7 +108,7 @@ const MessageContainer = () => {
             {noChatSelected ? <NoChatSelected /> : (<>
 
                 <div
-                    className='flex items-center gap-3 px-4 py-3 flex-shrink-0 relative chat-header'
+                    className='flex items-center gap-3 chat-gutter py-3 flex-shrink-0 relative chat-header'
                     style={{
                         borderBottom: '1px solid var(--border-subtle)',
                         background: 'var(--bg-panel)'
@@ -165,7 +165,7 @@ const MessageContainer = () => {
                 </div>
 
                 {showSearch && (
-                    <div id="chat-search" className='px-4 py-2 flex-shrink-0' style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                    <div id="chat-search" className='chat-gutter py-2 flex-shrink-0' style={{ borderBottom: '1px solid var(--border-subtle)' }}>
                         <Textfield
                             autoFocus
                             type='search'
@@ -199,7 +199,8 @@ const MessageContainer = () => {
                             <div className="flex items-center gap-2">
                                 {respondFriendError && respondFriendErrorId === incomingRequest?._id && <p role="alert">{respondFriendError}</p>}
                                 {incomingRequest && <Button onClick={() => respondToRequest(incomingRequest._id, 'accept')} isDisabled={respondFriendLoading} appearance="primary">İsteği kabul et</Button>}
-                                {!sentRequest && !incomingRequest && <Button onClick={handleAddFriend} isDisabled={sendFriendLoading} appearance="primary">Arkadaş ekle</Button>}
+                                {sendFriendErrors[selectedConversation._id] && <p role="alert">{sendFriendErrors[selectedConversation._id]}</p>}
+                                {!sentRequest && !incomingRequest && <Button onClick={handleAddFriend} isDisabled={sendingFriendIds.includes(selectedConversation._id)} appearance="primary">Arkadaş ekle</Button>}
                                 <Tooltip content="Kapat"><IconButton icon={CrossIcon} label="Kapat" appearance="subtle" onClick={() => setIsBannerDismissed(true)} /></Tooltip>
                             </div>
                         </div>

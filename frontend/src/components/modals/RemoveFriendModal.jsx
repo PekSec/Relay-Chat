@@ -1,3 +1,5 @@
+import PopupHeading from '../PopupHeading';
+import PersonRemoveIcon from '@atlaskit/icon/core/person-remove';
 import { useMemo, useRef } from 'react';
 import Modal, { ModalBody, ModalFooter, ModalHeader, ModalTitle } from '@atlaskit/modal-dialog';
 import Button from '@atlaskit/button/default/button';
@@ -10,8 +12,8 @@ export default function RemoveFriendModal({ target, onClose, focusFallback }) {
     const cancelRef = useRef(null);
     const returnRef = useMemo(() => ({ get current() { return target.trigger?.isConnected ? target.trigger : focusFallback(); } }), [target, focusFallback]);
     const { handleRemoveFriend, loading, error } = useRemoveFriend();
-    return <Modal width="small" autoFocus={cancelRef} shouldReturnFocus={returnRef} onClose={() => { if (!loading) onClose(); }}>
-        <ModalHeader><ModalTitle>Arkadaşlıktan çıkarılsın mı?</ModalTitle></ModalHeader>
+    return <Modal width={480} testId="relay-modal-remove" autoFocus={cancelRef} shouldReturnFocus={returnRef} onClose={() => { if (!loading) onClose(); }}>
+        <ModalHeader><PopupHeading icon={PersonRemoveIcon} danger onClose={onClose} disabled={loading}><ModalTitle>Arkadaşlıktan çıkarılsın mı?</ModalTitle></PopupHeading></ModalHeader>
         <ModalBody>
             <div className="friend-person mb-4"><Avatar name={target.fullName} src={target.profilePic} /><strong className="friend-name">{target.fullName}</strong></div>
             <p>Sohbet geçmişi korunacak.</p>

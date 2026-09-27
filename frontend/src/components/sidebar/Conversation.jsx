@@ -39,7 +39,7 @@ const Conversation = (props) => {
     <button
       type='button'
       aria-pressed={isSelected}
-      className={`conversation-row w-full text-left flex gap-3 items-center px-3 py-3 rounded-md ${isSelected ? 'tile-active' : ''}`}
+      className={`conversation-row w-full text-left flex gap-3 items-center py-3 rounded-md ${isSelected ? 'tile-active' : ''}`}
       onClick={() => setSelectedConversation(props.conversation)}
     >
       {/* Avatar - online göstergesi ile */}

@@ -10,6 +10,6 @@ export default function ThemeSelect() {
         <Label htmlFor="guest-theme">Tema</Label>
         <Select inputId="guest-theme" instanceId="guest-theme" options={options}
             value={options.find(option => option.value === preference)}
-            onChange={option => setPreference(option.value)} isSearchable={false} isDisabled={changing} />
+            onChange={option => setPreference(option.value)} isSearchable={false} menuPlacement="auto" maxMenuHeight={160} isDisabled={changing} />
     </div>;
 }

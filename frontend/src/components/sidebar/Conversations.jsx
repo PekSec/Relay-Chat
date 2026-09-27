@@ -21,7 +21,7 @@ const Conversations = ({ filter = '' }) => {
         {!visible.length ? <div className="px-4 py-8 text-center text-sm text-[color:var(--text-secondary)]">
             <p>{filter ? 'Eşleşen sohbet yok' : 'Henüz sohbet yok'}</p>
             {!filter && <p className="mt-1 text-xs">Yeni sohbet ile birini bul ve mesaj gönder.</p>}
-        </div> : <div className="flex flex-col gap-0.5 px-2 py-2 overflow-y-auto scroll-slim">
+        </div> : <div className="conversation-list flex flex-col gap-1 overflow-y-auto scroll-slim">
             {visible.map(conversation => <Conversation key={conversation._id} conversation={conversation}
                 isTyping={isUserTyping(conversation._id)} unreadCount={counts[conversation._id] || 0} />)}
         </div>}

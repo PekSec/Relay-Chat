@@ -1,13 +1,12 @@
 import { useEffect, useState } from 'react';
 import Modal, { ModalBody, ModalFooter, ModalHeader, ModalTitle } from '@atlaskit/modal-dialog';
 import Button from '@atlaskit/button/default/button';
-import IconButton from '@atlaskit/button/icon/button';
+import PopupHeading from '../PopupHeading';
 import Textfield from '@atlaskit/textfield';
 import Select from '@atlaskit/select';
 import Toggle from '@atlaskit/toggle';
 import Avatar from '@atlaskit/avatar';
 import { Label, HelperMessage, ErrorMessage } from '@atlaskit/form';
-import CrossIcon from '@atlaskit/icon/core/cross';
 import CopyIcon from '@atlaskit/icon/core/copy';
 import CheckIcon from '@atlaskit/icon/core/check-mark';
 import PersonIcon from '@atlaskit/icon/core/person';
@@ -29,12 +28,17 @@ const sections = [
     { value: 'messaging', label: 'Mesaj ve ses', icon: ChatIcon },
 ];
 
+// An open select consumes Escape before it reaches the modal's window listener.
+const containSelectEscape = event => {
+    if (event.key === 'Escape' && event.target.getAttribute('aria-expanded') === 'true') event.stopPropagation();
+};
+
 function PreferenceSelect({ id, label, value, options, onChange, disabled }) {
     const choices = options.map(([value, label]) => ({ value, label }));
     return <div className="settings-field">
         <Label htmlFor={id}>{label}</Label>
-        <Select inputId={id} instanceId={id} options={choices} value={choices.find(option => option.value === value)}
-            onChange={option => onChange(option.value)} isSearchable={false} isDisabled={disabled} />
+        <Select onKeyDown={containSelectEscape} inputId={id} instanceId={id} options={choices} value={choices.find(option => option.value === value)}
+            onChange={option => onChange(option.value)} isSearchable={false} menuPlacement="auto" menuPosition="fixed" maxMenuHeight={176} isDisabled={disabled} />
     </div>;
 }
 
@@ -110,12 +114,9 @@ export default function SettingsModal({ onClose }) {
         catch { setCopyState('Kopyalanamadı. Kodu seçip kopyalayabilirsin.'); }
     };
 
-    return <Modal onClose={close} width="large" testId="settings-modal">
+    return <Modal onClose={close} width={880} testId="relay-modal-settings">
         <ModalHeader>
-            <div className="settings-header">
-                <ModalTitle>Hesap ayarları</ModalTitle>
-                <IconButton icon={CrossIcon} label="Kapat" appearance="subtle" onClick={close} isDisabled={busy} />
-            </div>
+            <PopupHeading onClose={close} disabled={busy}><ModalTitle>Hesap ayarları</ModalTitle></PopupHeading>
         </ModalHeader>
         <ModalBody>
             <div className="settings-layout">
@@ -128,8 +129,8 @@ export default function SettingsModal({ onClose }) {
                 </nav>
                 <div className="settings-mobile-section">
                     <Label htmlFor="settings-section">Ayarlar bölümü</Label>
-                    <Select inputId="settings-section" instanceId="settings-section" options={sections}
-                        value={sections.find(item => item.value === section)} isSearchable={false}
+                    <Select onKeyDown={containSelectEscape} inputId="settings-section" instanceId="settings-section" options={sections}
+                        value={sections.find(item => item.value === section)} isSearchable={false} menuPlacement="auto" menuPosition="fixed" maxMenuHeight={176}
                         onChange={item => setSection(item.value)} />
                 </div>
                 <div className="settings-content">

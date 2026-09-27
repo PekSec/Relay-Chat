@@ -78,7 +78,7 @@ function App() {
                 </Routes></Suspense>
             )}
             {!userId && !checking && !error && <div className="auth-theme"><Suspense fallback={null}><ThemeSelect /></Suspense></div>}
-            <Toaster position="top-center" toastOptions={{ style: { background: 'var(--bg-elevated)', color: 'var(--text-primary)', border: '1px solid var(--border-strong)' } }} />
+            <Toaster position="top-center" toastOptions={{ style: { background: 'var(--bg-elevated)', color: 'var(--text-primary)', border: '1px solid var(--border-subtle)', borderRadius: '12px', padding: '12px 16px', maxWidth: 'calc(100vw - 32px)'  } }} />
         </main>
     );
 }

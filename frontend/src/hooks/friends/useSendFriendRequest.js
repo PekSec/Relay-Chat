@@ -1,53 +1,44 @@
+import { useEffect, useRef, useState } from 'react';
 import useFriendStore from '../../zustand/useFriend';
+import useAuth from '../../zustand/useAuth';
 import apiFetch from '../../utils/apiFetch';
-import { useState } from "react";
-import toast from "react-hot-toast";
 
-// useSendFriendRequest - Arkadaşlık isteği gönderme hook'u
-// AddFriend.jsx'te "Ekle" butonuna basıldığında çalışır.
-// Backend'e POST isteği atar ve FriendRequest belgesi oluşturur.
-// Başarılı olursa true, başarısız olursa false döner (çağıran yerde kontrol edilebilsin diye).
-
-const useSendFriendRequest = () => {
-    const [loading, setLoading] = useState(false);
-
-    const sendFriendRequest = async (userId) => {
-        setLoading(true);
+// Also guards the chat header while the search modal is mounted.
+const pendingTargets = new Set();
+export default function useSendFriendRequest() {
+    const session = useAuth(state => state.sessionVersion);
+    const requests = useRef(new Map());
+    const [pendingIds, setPendingIds] = useState([]);
+    const [errors, setErrors] = useState({});
+    useEffect(() => {
+        const active = requests.current;
+        setPendingIds([]); setErrors({});
+        return () => { for (const controller of active.values()) controller.abort(); active.clear(); };
+    }, [session]);
+    const sendFriendRequest = async id => {
+        const key = `${session}:${id}`;
+        if (pendingTargets.has(key)) return false;
+        const controller = new AbortController();
+        requests.current.set(id, controller); pendingTargets.add(key);
+        setPendingIds(ids => [...ids, id]); setErrors(errors => ({ ...errors, [id]: '' }));
+        const current = () => !controller.signal.aborted && session === useAuth.getState().sessionVersion;
         try {
-            // Backend'e POST isteği → /api/friends/send/:receiverId
-            // sendFriendRequest controller'ı çalışır:
-            // 1. Zaten arkadaş mı kontrol eder
-            // 2. Zaten bekleyen istek var mı kontrol eder
-            // 3. Yoksa yeni FriendRequest belgesi oluşturur (status: "pending")
-            // 4. Socket.IO ile karşı tarafa gerçek zamanlı bildirim gönderir
-            const res = await apiFetch(`/api/friends/send/${userId}`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            });
-
-            const data = await res.json();
-
-            // Sadece HTTP status code'a bak, message field'ına bakma (backend başarılı olsa bile message dönüyor)
-            if (!res.ok) {
-                throw new Error(data.message || "Arkadaşlık isteği gönderilemedi");
-            }
-
-            if (data.friendRequest) useFriendStore.getState().addSentFriendRequest(data.friendRequest);
-            toast.success("Arkadaşlık isteği gönderildi");
-            return true; // Başarılı → çağıran yerde aramayı temizlemek için kullanılır
-
+            const response = await apiFetch(`/api/friends/send/${id}`, { method: 'POST', signal: controller.signal });
+            await response.json();
+            if (!current()) return false;
+            // Refresh even after a conflict: another tab may have changed the relationship.
+            useFriendStore.getState().invalidateFriendLists();
+            if (!response.ok) throw new Error(response.status === 409 ? 'conflict' : 'send failed');
+            return true;
         } catch (error) {
-            if (error.name !== 'AbortError') toast.error(error.message);
-            return false; // Başarısız
-
+            if (current() && error.name !== 'AbortError') setErrors(errors => ({ ...errors,
+                [id]: error.message === 'conflict' ? 'Arkadaşlık durumu değişiyor. Tekrar dene.' : 'İstek gönderilemedi. Tekrar dene.' }));
+            return false;
         } finally {
-            setLoading(false);
+            pendingTargets.delete(key);
+            if (requests.current.get(id) === controller) requests.current.delete(id);
+            if (current()) setPendingIds(ids => ids.filter(value => value !== id));
         }
     };
-
-    return { sendFriendRequest, loading };
-};
-
-export default useSendFriendRequest;
+    return { sendFriendRequest, loading: pendingIds.length > 0, pendingIds, errors };
+}

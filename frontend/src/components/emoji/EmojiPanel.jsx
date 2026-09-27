@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import PopupHeading from '../PopupHeading';
+import EmojiIcon from '@atlaskit/icon/core/emoji';
 import { EmojiPicker as Frimousse, defaultEmojiDataResolver } from 'frimousse';
 import Button from '@atlaskit/button/default/button';
 import SectionMessage from '@atlaskit/section-message';
@@ -8,7 +10,11 @@ import Modal, { ModalHeader, ModalTitle, ModalBody, ModalFooter } from '@atlaski
 export default function EmojiPanel({ mobile, reaction, selected, onSelect, onClose, loading, error }) {
     const [dataError, setDataError] = useState(false);
     const [attempt, setAttempt] = useState(0);
+    const heading = <PopupHeading icon={EmojiIcon} onClose={onClose} disabled={loading}>
+        {mobile ? <ModalTitle>{reaction ? 'Tepki ver' : 'Emoji ekle'}</ModalTitle> : <h2>{reaction ? 'Tepki ver' : 'Emoji ekle'}</h2>}
+    </PopupHeading>;
     const content = <div className="emoji-panel">
+        {!mobile && heading}
         <Frimousse.Root key={attempt} locale="en" columns={mobile ? 5 : 6}
             emojibaseUrl="/emoji/17.0.0" aria-busy={loading}
             resolveEmojiData={async (locale, options) => {
@@ -43,8 +49,8 @@ export default function EmojiPanel({ mobile, reaction, selected, onSelect, onClo
         {loading && <div role="status" className="auth-progress"><Spinner size="small" />Tepki kaydediliyor</div>}
         {error && <div role="alert"><SectionMessage appearance="error">{error}</SectionMessage></div>}
     </div>;
-    return mobile ? <Modal width="small" onClose={onClose} shouldReturnFocus={false} autoFocus={false}>
-        <ModalHeader><ModalTitle>{reaction ? 'Tepki ver' : 'Emoji ekle'}</ModalTitle></ModalHeader>
+    return mobile ? <Modal width={400} testId="relay-modal-emoji" onClose={onClose} shouldReturnFocus={false} autoFocus={false}>
+        <ModalHeader>{heading}</ModalHeader>
         <ModalBody>{content}</ModalBody>
         <ModalFooter><Button onClick={onClose} isDisabled={loading}>Vazgeç</Button></ModalFooter>
     </Modal> : content;

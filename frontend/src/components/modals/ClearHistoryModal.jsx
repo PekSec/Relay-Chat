@@ -1,3 +1,5 @@
+import PopupHeading from '../PopupHeading';
+import DeleteIcon from '@atlaskit/icon/core/delete';
 import { useMemo, useRef } from 'react';
 import Modal, { ModalBody, ModalFooter, ModalHeader, ModalTitle } from '@atlaskit/modal-dialog';
 import Avatar from '@atlaskit/avatar';
@@ -15,9 +17,9 @@ export default function ClearHistoryModal({ target, onClose, onCleared }) {
     const confirm = async () => {
         if (await clearConversation(target.peerId)) onCleared();
     };
-    return <Modal width="small" autoFocus={cancelRef} shouldReturnFocus={returnRef}
-        onClose={() => { if (!loading) onClose(); }} testId="clear-history-modal">
-        <ModalHeader><ModalTitle>Sohbet geçmişi temizlensin mi?</ModalTitle></ModalHeader>
+    return <Modal width={480} testId="relay-modal-clear" autoFocus={cancelRef} shouldReturnFocus={returnRef}
+        onClose={() => { if (!loading) onClose(); }}>
+        <ModalHeader><PopupHeading icon={DeleteIcon} danger onClose={onClose} disabled={loading}><ModalTitle>Sohbet geçmişi temizlensin mi?</ModalTitle></PopupHeading></ModalHeader>
         <ModalBody>
             <div className="flex items-center gap-3 mb-4">
                 <Avatar src={target.profilePic || undefined} name={target.fullName} size="medium" />

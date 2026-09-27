@@ -99,7 +99,7 @@ const Message = ({ message, searchTerm = "", showAvatar = true, onRequestDelete 
 
     if (isEditing && !message.isDeleted) {
         return (
-            <div className={`flex ${fromMe ? 'justify-end' : 'justify-start'} px-4 py-1`}>
+            <div className={`flex ${fromMe ? 'justify-end' : 'justify-start'} chat-gutter py-1`}>
                 <div className='flex flex-col gap-2 w-full max-w-md'>
                     <Textarea minimumRows={2} resize="smart" maxHeight="128px"
                         aria-label='Mesajı düzenle'
@@ -128,7 +128,7 @@ const Message = ({ message, searchTerm = "", showAvatar = true, onRequestDelete 
 
     return (
         <div
-            className={`group flex gap-2 px-4 ${showAvatar ? 'mt-3' : 'mt-0.5'} ${fromMe ? 'flex-row-reverse' : 'flex-row'}`}
+            className={`group flex gap-2 chat-gutter ${showAvatar ? 'mt-3' : 'mt-0.5'} ${fromMe ? 'flex-row-reverse' : 'flex-row'}`}
         >
             {/* Avatar yalnızca karşı taraf için gösterilir; kendi mesajlarımızda
                 kim olduğumuz zaten belli, tekrar etmek yer kaplıyordu.
@@ -146,7 +146,7 @@ const Message = ({ message, searchTerm = "", showAvatar = true, onRequestDelete 
                 </div>
             )}
 
-            <div className={`flex flex-col min-w-0 max-w-[min(34rem,calc(100%-3.5rem))] md:max-w-[min(34rem,calc(100%-7rem))] ${fromMe ? 'items-end' : 'items-start'}`}>
+            <div className={`flex flex-col min-w-0 max-w-[min(34rem,calc(100%-3.5rem))] md:max-w-[min(34rem,calc(100%-9rem))] ${fromMe ? 'items-end' : 'items-start'}`}>
                 <div className='relative' ref={pickerRef}>
                     <div
                         ref={rowRef} tabIndex={-1}
@@ -163,7 +163,7 @@ const Message = ({ message, searchTerm = "", showAvatar = true, onRequestDelete 
                         <div
                             // Dar ekranda balonun yanında yer yok; butonlar balonun
                             // üstüne alınır. Geniş ekranda yanda durmaya devam eder.
-                            className={`absolute z-10 flex items-center gap-0.5 transition-opacity
+                            className={`message-actions absolute z-10 flex items-center gap-1 transition-opacity
                                         ${showActions || showPicker ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'} group-hover:opacity-100 group-hover:pointer-events-auto
                                         focus-within:opacity-100 focus-within:pointer-events-auto
                                         bottom-full mb-1 md:bottom-auto md:top-1/2 md:mb-0 md:-translate-y-1/2

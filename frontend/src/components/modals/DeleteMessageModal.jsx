@@ -1,3 +1,5 @@
+import PopupHeading from '../PopupHeading';
+import DeleteIcon from '@atlaskit/icon/core/delete';
 import { useMemo, useRef } from 'react';
 import Modal, { ModalBody, ModalFooter, ModalHeader, ModalTitle } from '@atlaskit/modal-dialog';
 import Button from '@atlaskit/button/default/button';
@@ -21,9 +23,9 @@ export default function DeleteMessageModal({ target, onClose }) {
     const confirm = async () => {
         if (await deleteMessage(target.id)) close();
     };
-    return <Modal width="small" autoFocus={cancelRef} shouldReturnFocus={returnRef}
-        onClose={() => { if (!loading) close(); }} testId="delete-message-modal">
-        <ModalHeader><ModalTitle>Mesaj silinsin mi?</ModalTitle></ModalHeader>
+    return <Modal width={480} testId="relay-modal-delete" autoFocus={cancelRef} shouldReturnFocus={returnRef}
+        onClose={() => { if (!loading) close(); }}>
+        <ModalHeader><PopupHeading icon={DeleteIcon} danger onClose={close} disabled={loading}><ModalTitle>Mesaj silinsin mi?</ModalTitle></PopupHeading></ModalHeader>
         <ModalBody>
             <p>Bu mesaj iki taraftan da silinecek. Bu işlem geri alınamaz.</p>
             <blockquote className="delete-message-preview">{preview}</blockquote>

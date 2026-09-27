@@ -51,7 +51,7 @@ const Messages = ({ searchTerm = '', onRequestDelete }) => {
     if (loading && messages.length === 0) return <div className="flex-1 min-h-0 overflow-hidden py-3" role="status" aria-label="Mesajlar yükleniyor">{Array.from({ length: 4 }, (_, i) => <MessageSkeleton key={i} />)}</div>;
     return (
         <div className="relative flex-1 min-h-0 flex flex-col">
-            {error && <div className="px-4 py-2 text-xs text-center text-[color:var(--danger)]" role="alert"><SectionMessage appearance="error">{error} <Button appearance="link" onClick={olderError ? handleOlder : retry} isDisabled={loading || loadingOlder}>Tekrar dene</Button></SectionMessage></div>}
+            {error && <div className="chat-gutter py-2 text-xs text-center text-[color:var(--danger)]" role="alert"><SectionMessage appearance="error">{error} <Button appearance="link" onClick={olderError ? handleOlder : retry} isDisabled={loading || loadingOlder}>Tekrar dene</Button></SectionMessage></div>}
             <div ref={listRef} aria-label="Mesaj geçmişi" className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden scroll-slim py-3 flex flex-col"
                 onScroll={event => {
                     const el = event.currentTarget;
@@ -73,7 +73,7 @@ const Messages = ({ searchTerm = '', onRequestDelete }) => {
                         const newDay = !prevDate || prevDate.toDateString() !== date.toDateString();
                         const showAvatar = newDay || prev?.senderId !== message.senderId || date - prevDate >= 5 * 60 * 1000;
                         return <div key={message._id}>
-                            {newDay && <div className="flex items-center gap-3 px-4 my-4">
+                            {newDay && <div className="flex items-center gap-3 chat-gutter my-4">
                                 <div className="flex-1 h-px bg-[color:var(--border-subtle)]" />
                                 <span className="text-[11px] px-2.5 py-1 rounded-full bg-[color:var(--bg-elevated)] text-[color:var(--text-muted)]">{dayLabel(date)}</span>
                                 <div className="flex-1 h-px bg-[color:var(--border-subtle)]" />
